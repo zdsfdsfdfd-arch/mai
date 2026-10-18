@@ -16,18 +16,20 @@
 
   /* ---------- хранение ---------- */
   function readCookie() {
-    var m = document.cookie.match(new RegExp("(?:^|; )" + NAME + "=([^;]*)"));
-    if (!m) return null;
-    try { return JSON.parse(decodeURIComponent(m[1])); } catch (e) { return null; }
+    try {
+      var m = document.cookie.match(new RegExp("(?:^|; )" + NAME + "=([^;]*)"));
+      if (!m) return null;
+      return JSON.parse(decodeURIComponent(m[1]));
+    } catch (e) { return null; } // приватный режим / sandbox: cookie недоступны
   }
   function writeCookie(obj) {
     var val = encodeURIComponent(JSON.stringify(obj));
     var secure = location.protocol === "https:" ? "; Secure" : "";
-    document.cookie = NAME + "=" + val + "; path=/; max-age=" + (DAYS * 86400) + "; SameSite=Lax" + secure;
+    try { document.cookie = NAME + "=" + val + "; path=/; max-age=" + (DAYS * 86400) + "; SameSite=Lax" + secure; } catch (e) { /* sandbox */ }
     try { localStorage.setItem(NAME, JSON.stringify(obj)); } catch (e) { /* приватный режим */ }
   }
   function clearCookie() {
-    document.cookie = NAME + "=; path=/; max-age=0; SameSite=Lax";
+    try { document.cookie = NAME + "=; path=/; max-age=0; SameSite=Lax"; } catch (e) { /* sandbox */ }
     try { localStorage.removeItem(NAME); } catch (e) { /* ignore */ }
   }
   function getConsent() {
