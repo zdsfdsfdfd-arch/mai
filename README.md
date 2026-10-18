@@ -27,7 +27,7 @@ assets/img/hero-throw.png     Вырезанное фото (бросок) дл�
 assets/img/hero-kick.png      Вырезанное фото (удар) для шапки раздела «Соревнования»
 assets/img/photos/            Исходные фото для карточек и галереи
 assets/img/og.png     Картинка для соцсетей (1200×630)
-assets/fonts/         Шрифты Oswald и Inter (самохостинг, без обращений к Google)
+assets/fonts/         Шрифты Sofia Sans Condensed и Inter (самохостинг, без обращений к Google)
 deploy/nginx.conf.example  Пример конфигурации nginx (HTTPS, кэш, CSP, красивые URL)
 ```
 
