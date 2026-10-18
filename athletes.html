@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спортсмены — ФБСР</title>
+<meta name="description" content="Рейтинг спортсменов ФБСР по боевому самбо: карточки, весовые категории, регионы, клубы и спортивные звания.">
+<meta name="theme-color" content="#0b0b0c">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="ФБСР — Цифровой портал">
+<meta property="og:title" content="Спортсмены — ФБСР">
+<meta property="og:description" content="Рейтинг спортсменов ФБСР по боевому самбо: карточки, весовые категории, регионы, клубы и спортивные звания.">
+<meta property="og:image" content="https://example.ru/assets/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="assets/fonts/oswald-700-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-400-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/main.css">
+<script>
+  // Настройки сайта. Укажите номер счётчика Яндекс.Метрики — он подключится только после согласия на cookie.
+  window.FBSR_CONFIG = { metrikaId: null, metrikaWebvisor: false };
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+<svg hidden xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.8-3.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="#fff"/></symbol>
+  <symbol id="i-sil" viewBox="0 0 200 220"><path d="M100 18a34 34 0 1 1 0 68 34 34 0 0 1 0-68zM42 220c0-58 18-92 58-104 40 12 58 46 58 104z" fill="rgba(255,255,255,.07)"/><path d="M100 86c-22 0-40 10-50 30 14-6 30-9 50-9s36 3 50 9c-10-20-28-30-50-30z" fill="rgba(227,36,43,.35)"/></symbol>
+  <symbol id="i-vk" viewBox="0 0 24 24"><path fill="currentColor" d="M12.8 18.5C6.4 18.5 2.7 14 2.5 6.6h3.2c.1 5.4 2.5 7.7 4.4 8.2V6.6h3v4.7c1.9-.2 3.9-2.3 4.5-4.7h3c-.5 2.9-2.6 5-4.1 5.9 1.5.7 3.9 2.6 4.8 6h-3.3c-.7-2.2-2.5-3.9-4.9-4.2v4.2h-.3z"/></symbol>
+  <symbol id="i-tg" viewBox="0 0 24 24"><path fill="currentColor" d="M21.5 4.6 18.6 19c-.2 1-.8 1.2-1.6.8l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.9.4l.3-4.6 8.4-7.6c.4-.3-.1-.5-.6-.2L7.1 13.2 2.6 11.8c-1-.3-1-1 .2-1.4l17.4-6.7c.8-.3 1.5.2 1.3.9z"/></symbol>
+  <symbol id="i-rt" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h10.5A5.5 5.5 0 0 1 20 9.5c0 2.3-1.4 4.2-3.4 5l3.6 5.5h-3.6l-3.3-5H7v5H4zm3 3v5h7.5a2.5 2.5 0 0 0 0-5z"/></symbol>
+</svg>
+<header class="header">
+  <div class="container header__inner">
+    <a class="brand" href="index.html" aria-label="ФБСР — на главную">
+      <span class="brand__mark"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="7" fill="#e3242b"/><circle cx="20" cy="20" r="12.5" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M20 10.5v19" stroke="#fff" stroke-width="3" stroke-linecap="round"/><ellipse cx="20" cy="19.6" rx="6.4" ry="4.8" fill="none" stroke="#fff" stroke-width="2.6"/></svg></span>
+      <span class="brand__name">ФБСР</span>
+      <span class="brand__tag">Цифровой<br>портал</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Основная навигация"><a href="index.html" class="nav__link">Главная</a><a href="competitions.html" class="nav__link">Соревнования</a><a href="athletes.html" class="nav__link is-active" aria-current="page">Спортсмены</a><a href="clubs.html" class="nav__link">Клубы</a><a href="teams.html" class="nav__link">Сборные</a><a href="federation.html" class="nav__link">Федерация</a><a href="media.html" class="nav__link">Медиа</a></nav>
+    <div class="header__actions">
+      <button class="icon-btn" type="button" data-search-open aria-label="Поиск по сайту"><svg><use href="#i-search"/></svg></button>
+      <button class="kbd" type="button" data-search-open aria-hidden="true" tabindex="-1">⌘ K</button>
+      <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Меню"><span></span></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="page-hero" data-word="Рейтинг">
+  <div class="container">
+    <ul class="breadcrumbs"><li><a href="index.html">Главная</a></li><li>Спортсмены</li></ul>
+    <span class="eyebrow">Рейтинг ФБСР</span>
+    <h1 class="h-xl">Спортсмены</h1>
+    <p class="lead">Единый реестр спортсменов федерации: рейтинг по итогам сезона, весовые категории, звания и клубы.</p>
+  </div>
+</section>
+
+<section class="section" id="list">
+  <div class="container">
+    <div class="section__head reveal">
+      <div><span class="eyebrow">Реестр</span><h2 class="h-l">Рейтинг сезона</h2></div>
+      <p class="demo-note">Показано: <b data-filter-count>0</b> · демо-данные</p>
+    </div>
+
+    <div class="toolbar reveal" data-filters-for="athletes">
+      <div class="chips" role="group" aria-label="Пол">
+        <button class="chip is-active" type="button" data-key="sex" data-value="*">Все</button>
+        <button class="chip" type="button" data-key="sex" data-value="m">Мужчины</button>
+        <button class="chip" type="button" data-key="sex" data-value="f">Женщины</button>
+      </div>
+      <select class="select" data-key="cat" aria-label="Весовая категория" style="max-width:200px">
+        <option value="*">Все категории</option>
+        <option value="58">до 58 кг</option><option value="64">до 64 кг</option><option value="71">до 71 кг</option><option value="79">до 79 кг</option><option value="88">до 88 кг</option><option value="98">до 98 кг</option><option value="98+">свыше 98 кг</option>
+        <option value="50">до 50 кг (ж)</option><option value="54">до 54 кг (ж)</option><option value="59">до 59 кг (ж)</option><option value="65">до 65 кг (ж)</option><option value="72">до 72 кг (ж)</option>
+      </select>
+      <select class="select" data-key="region" aria-label="Регион" style="max-width:240px">
+        <option value="*">Все регионы</option>
+        <option value="msk">Москва</option><option value="spb">Санкт-Петербург</option><option value="tat">Татарстан</option><option value="dag">Дагестан</option><option value="sverdl">Свердловская обл.</option><option value="bash">Башкортостан</option><option value="chel">Челябинская обл.</option><option value="perm">Пермский край</option><option value="krasnodar">Краснодарский край</option>
+      </select>
+      <input class="input" type="search" data-key="q" placeholder="Фамилия, клуб…" aria-label="Поиск спортсмена">
+    </div>
+
+    <div id="athletes" data-filterable class="grid grid--4 reveal">
+      <article class="card athlete" data-item data-sex="m" data-cat="71" data-region="msk" data-q="артём карпенко москва гладиатор">
+        <div class="athlete__photo"><span class="athlete__num">01</span><span class="badge badge--fill athlete__rank">МСМК</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Артём Карпенко</h3><div class="athlete__meta"><span>Мужчины, до 71 кг</span><span><b>Москва</b> · клуб «Гладиатор»</span><span>Чемпион России 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="m" data-cat="79" data-region="tat" data-q="тимур сафин татарстан батыр">
+        <div class="athlete__photo"><span class="athlete__num">02</span><span class="badge badge--fill athlete__rank">МСМК</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Тимур Сафин</h3><div class="athlete__meta"><span>Мужчины, до 79 кг</span><span><b>Татарстан</b> · СК «Батыр»</span><span>Обладатель Кубка ФБСР 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="f" data-cat="59" data-region="spb" data-q="алина громова санкт-петербург невский">
+        <div class="athlete__photo"><span class="athlete__num">03</span><span class="badge badge--fill athlete__rank">МС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Алина Громова</h3><div class="athlete__meta"><span>Женщины, до 59 кг</span><span><b>Санкт-Петербург</b> · СК «Невский»</span><span>Чемпионка России 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="m" data-cat="88" data-region="sverdl" data-q="егор лазарев свердловская урал">
+        <div class="athlete__photo"><span class="athlete__num">04</span><span class="badge badge--fill athlete__rank">МС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Егор Лазарев</h3><div class="athlete__meta"><span>Мужчины, до 88 кг</span><span><b>Свердловская обл.</b> · клуб «Урал»</span><span>Серебро ЧР 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="m" data-cat="71" data-region="bash" data-q="марат ахметов башкортостан салават">
+        <div class="athlete__photo"><span class="athlete__num">05</span><span class="badge badge--fill athlete__rank">МС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Марат Ахметов</h3><div class="athlete__meta"><span>Мужчины, до 71 кг</span><span><b>Башкортостан</b> · СК «Салават»</span><span>Серебро ЧР 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="m" data-cat="64" data-region="dag" data-q="ильяс магомедов дагестан махачкала">
+        <div class="athlete__photo"><span class="athlete__num">06</span><span class="badge badge--fill athlete__rank">МСМК</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Ильяс Магомедов</h3><div class="athlete__meta"><span>Мужчины, до 64 кг</span><span><b>Дагестан</b> · ШБС «Махачкала»</span><span>Призёр чемпионата мира</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="f" data-cat="59" data-region="perm" data-q="дарья кузнецова пермский край кама">
+        <div class="athlete__photo"><span class="athlete__num">07</span><span class="badge badge--fill athlete__rank">МС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Дарья Кузнецова</h3><div class="athlete__meta"><span>Женщины, до 59 кг</span><span><b>Пермский край</b> · клуб «Кама»</span><span>Серебро ЧР 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="f" data-cat="65" data-region="dag" data-q="камила исаева дагестан">
+        <div class="athlete__photo"><span class="athlete__num">08</span><span class="badge badge--fill athlete__rank">КМС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Камила Исаева</h3><div class="athlete__meta"><span>Женщины, до 65 кг</span><span><b>Дагестан</b> · СК «Каспий»</span><span>Бронза ЧР 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="m" data-cat="98" data-region="chel" data-q="никита власов челябинская">
+        <div class="athlete__photo"><span class="athlete__num">09</span><span class="badge badge--fill athlete__rank">МС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Никита Власов</h3><div class="athlete__meta"><span>Мужчины, до 98 кг</span><span><b>Челябинская обл.</b> · клуб «Метеор»</span><span>Бронза ЧР 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="m" data-cat="98+" data-region="krasnodar" data-q="роман беляев краснодарский край кубань">
+        <div class="athlete__photo"><span class="athlete__num">10</span><span class="badge badge--fill athlete__rank">МС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Роман Беляев</h3><div class="athlete__meta"><span>Мужчины, свыше 98 кг</span><span><b>Краснодарский край</b> · СК «Кубань»</span><span>Обладатель Кубка России 2025</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="f" data-cat="54" data-region="msk" data-q="анна соловьёва москва динамо">
+        <div class="athlete__photo"><span class="athlete__num">11</span><span class="badge badge--fill athlete__rank">МС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Анна Соловьёва</h3><div class="athlete__meta"><span>Женщины, до 54 кг</span><span><b>Москва</b> · «Динамо»</span><span>Чемпионка России 2026</span></div></div>
+      </article>
+      <article class="card athlete" data-item data-sex="m" data-cat="58" data-region="spb" data-q="иван мельник санкт-петербург">
+        <div class="athlete__photo"><span class="athlete__num">12</span><span class="badge badge--fill athlete__rank">КМС</span><svg aria-hidden="true"><use href="#i-sil"/></svg></div>
+        <div class="athlete__body"><h3 class="athlete__name">Иван Мельник</h3><div class="athlete__meta"><span>Мужчины, до 58 кг</span><span><b>Санкт-Петербург</b> · СК «Невский»</span><span>Победитель первенства России U21</span></div></div>
+      </article>
+    </div>
+    <div class="empty" hidden>Спортсмены по выбранным условиям не найдены.</div>
+  </div>
+</section>
+
+<section class="section section--alt" id="categories">
+  <div class="container">
+    <div class="section__head reveal">
+      <div><span class="eyebrow">Справочник</span><h2 class="h-l">Весовые категории</h2></div>
+    </div>
+    <div class="grid grid--3">
+      <div class="card reveal">
+        <span class="badge badge--red card__label">Мужчины</span>
+        <ul class="list-lines"><li>до 58 кг</li><li>до 64 кг</li><li>до 71 кг</li><li>до 79 кг</li><li>до 88 кг</li><li>до 98 кг</li><li>свыше 98 кг</li></ul>
+      </div>
+      <div class="card reveal">
+        <span class="badge badge--red card__label">Женщины</span>
+        <ul class="list-lines"><li>до 50 кг</li><li>до 54 кг</li><li>до 59 кг</li><li>до 65 кг</li><li>до 72 кг</li><li>до 80 кг</li><li>свыше 80 кг</li></ul>
+      </div>
+      <div class="card reveal">
+        <span class="badge badge--red card__label">Звания и разряды</span>
+        <p><b style="color:var(--text)">ЗМС</b> — заслуженный мастер спорта<br><b style="color:var(--text)">МСМК</b> — мастер спорта международного класса<br><b style="color:var(--text)">МС</b> — мастер спорта России<br><b style="color:var(--text)">КМС</b> — кандидат в мастера спорта</p>
+        <p class="demo-note">Присвоение званий — в соответствии с ЕВСК и положением Минспорта России.</p>
+        <a class="link-arrow" href="federation.html#documents">Нормативы ЕВСК</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="card reveal" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+      <div>
+        <span class="eyebrow">Лицензия спортсмена</span>
+        <h3 style="margin-top:12px">Нет в реестре? Оформите лицензию ФБСР</h3>
+        <p style="margin:0">Лицензия оформляется через региональную федерацию и даёт право участвовать в официальных соревнованиях.</p>
+      </div>
+      <a class="btn btn--primary" href="federation.html#regions">Региональные федерации</a>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <a class="brand" href="index.html" aria-label="ФБСР">
+          <span class="brand__mark"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="7" fill="#e3242b"/><circle cx="20" cy="20" r="12.5" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M20 10.5v19" stroke="#fff" stroke-width="3" stroke-linecap="round"/><ellipse cx="20" cy="19.6" rx="6.4" ry="4.8" fill="none" stroke="#fff" stroke-width="2.6"/></svg></span>
+          <span class="brand__name">ФБСР</span>
+        </a>
+        <p class="footer__text">Цифровой портал Федерации боевого самбо России: соревнования, спортсмены, клубы и сборные — в одном месте.</p>
+        <div style="display:flex;gap:8px;margin-top:20px">
+          <a class="icon-btn" href="#" aria-label="ВКонтакте" title="ВКонтакте"><svg><use href="#i-vk"/></svg></a>
+          <a class="icon-btn" href="#" aria-label="Telegram" title="Telegram"><svg><use href="#i-tg"/></svg></a>
+          <a class="icon-btn" href="#" aria-label="RuTube" title="RuTube"><svg><use href="#i-rt"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4>Разделы</h4>
+        <ul class="footer__links">
+          <li><a href="competitions.html">Соревнования</a></li>
+          <li><a href="athletes.html">Спортсмены</a></li>
+          <li><a href="clubs.html">Клубы</a></li>
+          <li><a href="teams.html">Сборные</a></li>
+          <li><a href="federation.html">Федерация</a></li>
+          <li><a href="media.html">Медиа</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Документы</h4>
+        <ul class="footer__links">
+          <li><a href="federation.html#documents">Устав федерации</a></li>
+          <li><a href="competitions.html#regulations">Правила соревнований</a></li>
+          <li><a href="federation.html#documents">Антидопинг</a></li>
+          <li><a href="privacy.html">Политика конфиденциальности</a></li>
+          <li><a href="cookies.html">Политика cookie</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Контакты</h4>
+        <ul class="footer__contacts">
+          <li><span class="placeholder">[Город, улица, дом, офис]</span></li>
+          <li><a href="tel:+70000000000"><span class="placeholder">+7 (000) 000-00-00</span></a></li>
+          <li><a href="mailto:info@example.ru"><span class="placeholder">info@example.ru</span></a></li>
+          <li>Пн–Пт, 10:00–18:00 (МСК)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div>© <span data-year>2026</span> ФБСР. Все права защищены. <span class="dim">Демо-версия: данные на сайте носят демонстрационный характер.</span></div>
+      <div class="footer__legal">
+        <a href="privacy.html">Конфиденциальность</a>
+        <a href="cookies.html">Cookie</a>
+        <a href="consent.html">Согласие на обработку ПД</a>
+        <a href="terms.html">Пользовательское соглашение</a>
+        <button type="button" data-cookie-open>Настройки cookie</button>
+      </div>
+    </div>
+  </div>
+</footer>
+<div class="cookie" id="cookie-banner" hidden role="dialog" aria-labelledby="cookie-title" aria-describedby="cookie-text">
+  <div>
+    <div class="cookie__title" id="cookie-title">Мы используем файлы cookie</div>
+    <p class="cookie__text" id="cookie-text">Необходимые cookie обеспечивают работу сайта. Аналитические cookie (Яндекс.Метрика) помогают улучшать портал и включаются только с вашего согласия. Продолжая пользоваться сайтом, вы можете выбрать настройки. Подробнее — в <a href="cookies.html">Политике использования cookie</a> и <a href="privacy.html">Политике конфиденциальности</a>.</p>
+  </div>
+  <div class="cookie__actions">
+    <button class="btn btn--primary btn--sm" type="button" data-cookie="accept-all">Принять все</button>
+    <button class="btn btn--ghost btn--sm" type="button" data-cookie="necessary">Только необходимые</button>
+    <button class="btn btn--dark btn--sm" type="button" data-cookie="settings">Настроить</button>
+  </div>
+  <div class="cookie__settings">
+    <label class="cookie__opt"><span><b>Необходимые</b><span>Работа сайта, сохранение вашего выбора по cookie. Отключить нельзя.</span></span><span class="switch"><input type="checkbox" checked disabled aria-label="Необходимые cookie (всегда включены)"><i></i></span></label>
+    <label class="cookie__opt"><span><b>Аналитические</b><span>Яндекс.Метрика: посещаемость и поведение на сайте в обезличенном виде. Помогает нам улучшать портал.</span></span><span class="switch"><input type="checkbox" id="cookie-analytics" aria-label="Аналитические cookie"><i></i></span></label>
+    <div><button class="btn btn--primary btn--sm" type="button" data-cookie="save">Сохранить выбор</button></div>
+  </div>
+</div>
+<div class="modal" id="search-modal" hidden role="dialog" aria-modal="true" aria-label="Поиск по сайту">
+  <div class="modal__backdrop" data-search-close></div>
+  <div class="modal__panel">
+    <div class="search__field">
+      <svg aria-hidden="true"><use href="#i-search"/></svg>
+      <input class="search__input" type="search" placeholder="Поиск: турнир, спортсмен, клуб, документ…" aria-label="Поисковый запрос" autocomplete="off">
+      <button class="kbd" type="button" data-search-close aria-label="Закрыть поиск">ESC</button>
+    </div>
+    <div class="search__results" aria-live="polite"></div>
+    <div class="search__hint"><span><span class="kbd">↑↓</span> навигация</span><span><span class="kbd">↵</span> открыть</span><span><span class="kbd">esc</span> закрыть</span></div>
+  </div>
+</div>
+<script src="assets/js/search-index.js" defer></script>
+<script src="assets/js/cookies.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

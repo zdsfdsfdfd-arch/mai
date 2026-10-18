@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Замените https://example.ru на домен сайта -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://example.ru/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://example.ru/competitions.html</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://example.ru/athletes.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.ru/clubs.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.ru/teams.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://example.ru/federation.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://example.ru/media.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://example.ru/privacy.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://example.ru/cookies.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://example.ru/consent.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://example.ru/terms.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+</urlset>
