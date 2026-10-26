@@ -1,0 +1,30 @@
+{
+  "name": "story-pipeline",
+  "version": "1.0.0",
+  "description": "Автосборка сюжетных роликов: сценарий JSON → TTS → Remotion → MP4",
+  "main": "index.js",
+  "scripts": {
+    "tts": "node scripts/tts.mjs",
+    "stills": "node scripts/stills.mjs",
+    "render": "remotion render src/index.ts Episode out/episode.mp4 --codec=h264",
+    "studio": "remotion studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@remotion/cli": "^4.0.539",
+    "msedge-tts": "^2.1.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.539"
+  },
+  "devDependencies": {
+    "@remotion/bundler": "^4.0.539",
+    "@remotion/renderer": "^4.0.539",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  },
+  "private": true
+}

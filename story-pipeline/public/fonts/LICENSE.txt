@@ -1,0 +1,3 @@
+Шрифты Sofia Sans Condensed (© Lettersoup) и Inter (© The Inter Project Authors)
+распространяются по лицензии SIL Open Font License 1.1 (https://openfontlicense.org).
+Файлы включены в проект для самостоятельного хостинга (без обращений к внешним CDN).
