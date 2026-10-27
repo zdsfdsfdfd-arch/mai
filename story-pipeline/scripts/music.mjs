@@ -92,14 +92,15 @@ const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296) * 
     ph2 += (TWO_PI * f * 1.004) / SR;
     ph3 += (TWO_PI * f * 0.5) / SR;
     ph4 += (TWO_PI * f * 1.5) / SR;
-    // пила через ряд гармоник, мягкая
-    const saw = (p) => ((p / TWO_PI) % 1) * 2 - 1;
-    const raw = 0.35 * saw(ph1) + 0.35 * saw(ph2) + 0.5 * Math.sin(ph3) + 0.18 * saw(ph4);
-    const lfo = 0.5 + 0.5 * Math.sin(TWO_PI * 0.045 * t);
-    const fc = 140 + 320 * lfo + 500 * ten;
-    const env = clamp(t / 6, 0, 1) * (0.55 + 0.45 * ten);
-    const a = lp1(raw, fc) * 0.22 * env * cfg.drone;
-    const b = lp2(raw, fc * 0.9) * 0.22 * env * cfg.drone;
+    // мягкий пад: синусы с расстройкой (хорус), суб-октава, квинта треугольником, чуть второй гармоники
+    const tri = (p) => 1 - 4 * Math.abs(((p / TWO_PI) % 1) - 0.5);
+    const raw = 0.45 * Math.sin(ph1) + 0.45 * Math.sin(ph2) + 0.6 * Math.sin(ph3) + 0.22 * tri(ph4) + 0.12 * Math.sin(ph1 * 2);
+    const lfo = 0.5 + 0.5 * Math.sin(TWO_PI * 0.03 * t);
+    const fc = 120 + 220 * lfo + 300 * ten;
+    const swell = 0.8 + 0.2 * Math.sin(TWO_PI * t / 11);
+    const env = clamp(t / 6, 0, 1) * (0.55 + 0.45 * ten) * swell;
+    const a = lp1(raw, fc) * 0.26 * env * cfg.drone;
+    const b = lp2(raw, fc * 0.9) * 0.26 * env * cfg.drone;
     L[i] += a;
     R[i] += b;
   }

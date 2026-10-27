@@ -12,7 +12,7 @@ import type { MusicConfig, SceneTimeline, Timeline } from "./types";
 const PunchIn: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const frame = useCurrentFrame();
   const scale = interpolate(frame, [0, 10], [1.06, 1], { extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 3) });
-  const flash = interpolate(frame, [0, 3], [0.22, 0], { extrapolateRight: "clamp" });
+  const flash = interpolate(frame, [0, 3], [0.1, 0], { extrapolateRight: "clamp" });
   return (
     <AbsoluteFill>
       <AbsoluteFill style={{ transform: `scale(${scale})`, transformOrigin: "50% 45%" }}>{children}</AbsoluteFill>

@@ -233,7 +233,8 @@
       "narration": "А в кабине оставалось !два процента!.",
       "props": {
         "setting": "cabin",
-        "light": "dim"
+        "light": "dim",
+        "batteryLabel": "2 %"
       },
       "character": {
         "pose": "sit"
