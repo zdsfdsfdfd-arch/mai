@@ -2,139 +2,340 @@
   "series": "СОСЕД СНИЗУ",
   "part": 1,
   "channel": "@ваш_канал",
-  "dayLabel": "ДЕНЬ 1 · 02:10",
+  "dayLabel": "ДЕНЬ 1 · 03:00",
   "palette": "night",
-  "music": { "enabled": true, "volume": 0.4, "duck": 0.6, "root": 65, "drone": 0.8, "shimmer": 0.5, "accents": 1, "risers": 0.6, "heartbeat": 0, "tick": 0.3, "sfx": 1 },
+  "music": {
+    "enabled": true,
+    "volume": 0.4,
+    "duck": 0.6,
+    "root": 65,
+    "drone": 0.8,
+    "shimmer": 0.5,
+    "accents": 1,
+    "risers": 0.6,
+    "heartbeat": 0,
+    "tick": 0.3,
+    "sfx": 1
+  },
   "scenes": [
     {
       "id": "s01",
       "type": "title_card",
-      "narration": "У каждого человека есть проблемы. У кого-то деньги. У кого-то работа. А у меня *сосед снизу*.",
-      "props": { "title": "СОСЕД СНИЗУ", "subtitle": "ДОМ · 9 ЭТАЖ · НОЧЬ" },
-      "character": { "pose": "stand" },
+      "narration": "У меня *проблема*. Не деньги. Не работа. !Сосед снизу!.",
+      "props": {
+        "title": "СОСЕД СНИЗУ",
+        "subtitle": "ДОМ · 9 ЭТАЖ · НОЧЬ"
+      },
+      "character": {
+        "pose": "stand"
+      },
       "tension": 0.3
     },
     {
       "id": "s02",
       "type": "building_cutaway",
-      "narration": "Я живу на девятом. Он на восьмом. Тихий человек. Одна странность: он !очень любит барашков!.",
-      "props": { "floors": 12, "cabinBetween": [8, 9], "highlight": [8, 9], "litWindows": [], "hud": { "label": "ЭТАЖ", "value": "9 / 8", "tone": "yellow" }, "noCabin": true },
-      "topPlaque": { "num": "", "text": "ДОМ · 12 ЭТАЖЕЙ" },
-      "tension": 0.35
+      "narration": "Я на девятом. Он на восьмом. Каждую ночь в три часа у него *гости*. И гости эти !блеют!.",
+      "props": {
+        "floors": 12,
+        "cabinBetween": [
+          8,
+          9
+        ],
+        "highlight": [
+          8,
+          9
+        ],
+        "litWindows": [],
+        "hud": {
+          "label": "ЭТАЖ",
+          "value": "9 / 8",
+          "tone": "yellow"
+        },
+        "noCabin": true
+      },
+      "topPlaque": {
+        "num": "",
+        "text": "ДОМ · 12 ЭТАЖЕЙ"
+      },
+      "tension": 0.35,
+      "status": "!ГОСТИ · 03:00"
     },
     {
       "id": "s03",
       "type": "sound_diagram",
-      "narration": "Каждую ночь снизу: *топот копыт*. *Блеяние*. И громкие разговоры с кем-то, кто отвечает только !бе-е-е!.",
-      "props": { "floors": [7, 8, 9, 10], "cabinBetween": [8, 9], "reach": [9, 10], "label": "02:10 · ТОПОТ · 02:40 · БЛЕЯНИЕ", "source": "floor" },
-      "topPlaque": { "num": "1", "text": "ЗВУКИ" },
+      "narration": "Проблема номер один. *Звуки*. Топот копыт. Блеяние. И его голос: !«тише, моя хорошая»!.",
+      "props": {
+        "floors": [
+          7,
+          8,
+          9,
+          10
+        ],
+        "cabinBetween": [
+          8,
+          9
+        ],
+        "reach": [
+          9,
+          10
+        ],
+        "label": "02:10 · ТОПОТ · 02:40 · БЛЕЯНИЕ",
+        "source": "floor"
+      },
+      "topPlaque": {
+        "num": "1",
+        "text": "ЗВУКИ"
+      },
       "tension": 0.45
     },
     {
       "id": "s04",
       "type": "stat_callouts",
-      "narration": "Я начал собирать улики. Улика один: *шерсть* в лифте. Улика два: мешок сена, который сосед нёс так, будто это ноутбук. Улика три: морковка у моей двери с запиской !«извините, этаж перепутали»!.",
+      "narration": "Проблема номер два. *Улики*. Шерсть в лифте. Мешок сена. И морковка у моей двери с запиской: !«это тебе, за понимание»!.",
       "props": {
         "heading": "УЛИКИ",
         "cards": [
-          { "label": "УЛИКА 1", "value": "ШЕРСТЬ", "at": 1.5 },
-          { "label": "УЛИКА 2", "value": "СЕНО", "at": 4.0, "tone": "yellow" },
-          { "label": "УЛИКА 3", "value": "МОРКОВКА", "at": 7.5, "tone": "red" }
+          {
+            "label": "УЛИКА 1",
+            "value": "ШЕРСТЬ",
+            "at": 1.5
+          },
+          {
+            "label": "УЛИКА 2",
+            "value": "СЕНО",
+            "at": 3.0,
+            "tone": "yellow"
+          },
+          {
+            "label": "УЛИКА 3",
+            "value": "МОРКОВКА",
+            "at": 4.5,
+            "tone": "red"
+          }
         ],
         "diagram": "lift"
       },
-      "topPlaque": { "num": "2", "text": "УЛИКИ" },
+      "topPlaque": {
+        "num": "2",
+        "text": "УЛИКИ"
+      },
       "tension": 0.5
     },
     {
       "id": "s05",
       "type": "character_scene",
-      "narration": "Я спустился и постучал. Слушай, у тебя там что, *ферма*? Нет-нет. Всего *один* барашек.",
-      "props": { "setting": "door", "light": "dim" },
-      "character": { "pose": "knock" },
+      "narration": "Я спустился и постучал. Слушай, у тебя там что, *ферма*? Он посмотрел мне в глаза. Нет. *Семья*.",
+      "props": {
+        "setting": "door",
+        "light": "dim"
+      },
+      "character": {
+        "pose": "knock"
+      },
       "status": "ДВЕРЬ · 8 ЭТАЖ",
       "tension": 0.5
     },
     {
       "id": "s06",
       "type": "character_scene",
-      "narration": "В этот момент из квартиры раздалось !бе-е-е!. И мимо двери пробежали *три* овцы.",
-      "props": { "setting": "door", "light": "dim", "sheep": [{ "at": 1.2, "color": "white" }, { "at": 1.6, "color": "white" }, { "at": 2.0, "color": "black" }] },
-      "character": { "pose": "stand" },
-      "status": "!ОДИН БАРАШЕК × 3",
+      "narration": "В этот момент из квартиры раздалось !бе-е-е!. И мимо двери пробежали *три* овцы. В *пижамах*.",
+      "props": {
+        "setting": "door",
+        "light": "dim",
+        "sheep": [
+          {
+            "at": 1.2,
+            "color": "white"
+          },
+          {
+            "at": 1.6,
+            "color": "white"
+          },
+          {
+            "at": 2.0,
+            "color": "black"
+          }
+        ]
+      },
+      "character": {
+        "pose": "stand"
+      },
+      "status": "!СЕМЬЯ × 3",
       "tension": 0.6
     },
     {
       "id": "s07",
       "type": "floor_plan",
-      "narration": "На следующее утро я проснулся от звука. Кто-то *жевал* мой фикус.",
-      "props": { "rooms": ["КОМНАТА", "КОРИДОР", "КУХНЯ"], "marks": [{ "text": "Я", "room": 0 }, { "text": "ФИКУС", "room": 0, "sheep": true }], "time": "06:40" },
-      "topPlaque": { "num": "", "text": "ДЕНЬ 2 · 06:40" },
+      "narration": "Проблема номер три. *Утро*. Кто-то жевал мой фикус.",
+      "props": {
+        "rooms": [
+          "КОМНАТА",
+          "КОРИДОР",
+          "КУХНЯ"
+        ],
+        "marks": [
+          {
+            "text": "Я",
+            "room": 0
+          },
+          {
+            "text": "ФИКУС",
+            "room": 0,
+            "sheep": true
+          }
+        ],
+        "time": "06:40"
+      },
+      "topPlaque": {
+        "num": "3",
+        "text": "УТРО · 06:40"
+      },
       "tension": 0.5
     },
     {
       "id": "s08",
       "type": "character_scene",
-      "narration": "Посреди комнаты стоял *барашек*. Спокойный. Как будто это его комната, а я тут временно.",
-      "props": { "setting": "room", "light": "day", "sheep": [{ "at": 0.3, "color": "white", "idle": true }] },
-      "character": { "pose": "sit" },
-      "status": "ГОСТЬ · БЕЛЫЙ",
+      "narration": "Посреди комнаты стоял *барашек*. Спокойный. С таким видом, будто он тут *прописан*.",
+      "props": {
+        "setting": "room",
+        "light": "day",
+        "sheep": [
+          {
+            "at": 0.3,
+            "color": "white",
+            "idle": true
+          }
+        ]
+      },
+      "character": {
+        "pose": "sit"
+      },
+      "status": "ГОСТЬ · ПРОПИСАН",
       "tension": 0.55
     },
     {
       "id": "s09",
       "type": "dialogue",
-      "narration": "Я позвонил соседу. !Твой баран у меня дома!. Какой? В смысле *какой*? Белый или *чёрный*?",
-      "props": { "callTo": "СОСЕД", "lines": [{ "side": "me", "text": "ТВОЙ БАРАН У МЕНЯ ДОМА!" }, { "side": "him", "text": "Какой?" }, { "side": "me", "text": "В СМЫСЛЕ КАКОЙ?!" }, { "side": "him", "text": "Белый или чёрный?" }] },
+      "narration": "Я позвонил соседу. !Твой баран у меня дома!. Какой? В смысле *какой*? Белый или *чёрный*? Серый дома, я проверил.",
+      "props": {
+        "callTo": "СОСЕД",
+        "lines": [
+          {
+            "side": "me",
+            "text": "ТВОЙ БАРАН У МЕНЯ ДОМА!"
+          },
+          {
+            "side": "him",
+            "text": "Какой?"
+          },
+          {
+            "side": "me",
+            "text": "В СМЫСЛЕ КАКОЙ?!"
+          },
+          {
+            "side": "him",
+            "text": "Белый или чёрный?"
+          }
+        ]
+      },
       "status": "ВЫЗОВ · СОСЕД",
       "tension": 0.7
     },
     {
       "id": "s10",
       "type": "character_scene",
-      "narration": "Я медленно повернулся к коридору. Из коридора вышел *второй*.",
-      "props": { "setting": "room", "light": "day", "sheep": [{ "at": 0.2, "color": "white", "idle": true }, { "at": 1.6, "color": "black", "fromLeft": true }] },
-      "character": { "pose": "sit" },
-      "status": "!БЕЛЫЙ И ЧЁРНЫЙ",
+      "narration": "Я медленно повернулся к коридору. Оттуда вышел *второй*. Чёрный. Сел рядом с белым. И они посмотрели на меня как на !третьего лишнего!.",
+      "props": {
+        "setting": "room",
+        "light": "day",
+        "sheep": [
+          {
+            "at": 0.2,
+            "color": "white",
+            "idle": true
+          },
+          {
+            "at": 1.6,
+            "color": "black",
+            "fromLeft": true
+          }
+        ]
+      },
+      "character": {
+        "pose": "sit"
+      },
+      "status": "!ТРЕТИЙ ЛИШНИЙ",
       "tension": 0.8
     },
     {
       "id": "s11",
       "type": "stat_callouts",
-      "narration": "Я принял единственное взрослое решение. *Переехать*. Два чемодана. Лифт. Первый этаж.",
+      "narration": "Проблема номер четыре. *Я*. Единственное взрослое решение: переехать. Два чемодана. Лифт. Первый этаж.",
       "props": {
         "heading": "ПЛАН",
         "cards": [
-          { "label": "ВЕЩИ", "value": "2 ЧЕМ.", "at": 1.2 },
-          { "label": "ЛИФТ", "value": "9 → 1", "at": 2.4, "tone": "yellow" },
-          { "label": "ПЛАН", "value": "УЕХАТЬ", "at": 3.6, "tone": "green" }
+          {
+            "label": "ВЕЩИ",
+            "value": "2 ЧЕМ.",
+            "at": 1.2
+          },
+          {
+            "label": "ЛИФТ",
+            "value": "9 → 1",
+            "at": 2.4,
+            "tone": "yellow"
+          },
+          {
+            "label": "ПЛАН",
+            "value": "УЕХАТЬ",
+            "at": 3.6,
+            "tone": "green"
+          }
         ],
         "diagram": "lift"
       },
-      "topPlaque": { "num": "3", "text": "ПЕРЕЕЗД" },
+      "topPlaque": {
+        "num": "4",
+        "text": "Я"
+      },
       "tension": 0.6
     },
     {
       "id": "s12",
       "type": "character_scene",
       "narration": "У подъезда меня встретил сосед. Хорошая новость, я *ферму* купил. !Поздравляю!. Где?",
-      "props": { "setting": "entrance", "light": "day", "neighbor": true },
-      "character": { "pose": "stand" },
+      "props": {
+        "setting": "entrance",
+        "light": "day",
+        "neighbor": true
+      },
+      "character": {
+        "pose": "stand"
+      },
       "status": "ПОДЪЕЗД · 1 ЭТАЖ",
       "tension": 0.7
     },
     {
       "id": "s13",
       "type": "roof",
-      "narration": "Сосед показал пальцем *наверх*.",
-      "props": { "floors": 12, "sheepCount": 40, "label": "КРЫША · 40 БАРАШКОВ" },
+      "narration": "Он показал пальцем *наверх*.",
+      "props": {
+        "floors": 12,
+        "sheepCount": 40,
+        "label": "КРЫША · 40 БАРАШКОВ"
+      },
       "tension": 0.9
     },
     {
       "id": "s14",
       "type": "end_card",
-      "narration": "Раньше моей проблемой был сосед *снизу*. Теперь проблема !сверху!.",
-      "props": { "title": "ЧАСТЬ 2", "subtitle": "ФЕРМА НА КРЫШЕ · ЗАВТРА", "blackout": true, "stinger": "bleat" },
+      "narration": "Раньше у меня была проблема *снизу*. Теперь проблема !сверху!. И судя по звукам, там все *счастливы*.",
+      "props": {
+        "title": "ЧАСТЬ 2",
+        "subtitle": "ФЕРМА НА КРЫШЕ · ЗАВТРА",
+        "blackout": true,
+        "stinger": "bleat"
+      },
       "tension": 1.0
     }
   ]
