@@ -382,6 +382,11 @@ function buildFromFiles(script) {
       chunks.push(silence(MIN_SCENE - duration));
       duration = MIN_SCENE;
     }
+    if (scene.hold) {
+      // удержание сцены после озвучки (например, чёрная заставка в финале)
+      chunks.push(silence(scene.hold));
+      duration += scene.hold;
+    }
     writeWav(path.join(AUDIO_DIR, `${scene.id}.wav`), Buffer.concat(chunks));
     const frames = Math.ceil(duration * FPS);
     scenesOut.push({
@@ -481,8 +486,12 @@ async function main() {
     }
     chunks.push(silence(TAIL));
     t += TAIL;
-    const duration = Math.max(t, MIN_SCENE);
+    let duration = Math.max(t, MIN_SCENE);
     if (duration > t) chunks.push(silence(duration - t));
+    if (scene.hold) {
+      chunks.push(silence(scene.hold));
+      duration += scene.hold;
+    }
 
     const audioRel = `audio/${scene.id}.wav`;
     writeWav(path.join(AUDIO_DIR, `${scene.id}.wav`), Buffer.concat(chunks));

@@ -9,6 +9,8 @@ import { colors } from "../theme";
 
 export type Pose = "stand" | "point" | "sit" | "knock" | "walk";
 
+export type Outfit = "jacket" | "robe" | "suit";
+
 type Props = {
   pose: Pose;
   frame: number;
@@ -20,13 +22,18 @@ type Props = {
   x?: number;
   y?: number;
   flip?: boolean;
+  outfit?: Outfit; // куртка (герой), халат или костюм (сосед)
+  mustache?: boolean;
+  opacity?: number;
 };
 
-const Arm: React.FC<{ sx: number; sy: number; upper: number; fore: number }> = ({ sx, sy, upper, fore }) => (
+const outfitColor = (o: Outfit) => (o === "robe" ? "#7a2d3a" : o === "suit" ? "#141622" : colors.jacket);
+
+const Arm: React.FC<{ sx: number; sy: number; upper: number; fore: number; fill: string }> = ({ sx, sy, upper, fore, fill }) => (
   <g transform={`translate(${sx} ${sy}) rotate(${upper})`}>
-    <rect x={-16} y={-16} width={32} height={100} rx={16} fill={colors.jacket} />
+    <rect x={-16} y={-16} width={32} height={100} rx={16} fill={fill} />
     <g transform={`translate(0 84) rotate(${fore})`}>
-      <rect x={-14} y={-14} width={28} height={92} rx={14} fill={colors.jacket} />
+      <rect x={-14} y={-14} width={28} height={92} rx={14} fill={fill} />
       <circle cx={0} cy={82} r={17} fill={colors.skin} />
     </g>
   </g>
@@ -34,7 +41,8 @@ const Arm: React.FC<{ sx: number; sy: number; upper: number; fore: number }> = (
 
 const smooth = (k: number) => k * k * (3 - 2 * k);
 
-export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], talkAt = [], sitAt, scale = 1, x = 0, y = 0, flip = false }) => {
+export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], talkAt = [], sitAt, scale = 1, x = 0, y = 0, flip = false, outfit = "jacket", mustache = false, opacity = 1 }) => {
+  const cloth = outfitColor(outfit);
   const t = frame / fps;
   const breathe = Math.sin(t * 2.2) * 3;
 
@@ -88,11 +96,11 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
       width={300 * scale}
       height={560 * scale}
       viewBox="0 0 300 560"
-      style={{ position: "absolute", left: x, top: y, transform: flip ? "scaleX(-1)" : undefined, overflow: "visible" }}
+      style={{ position: "absolute", left: x, top: y, transform: flip ? "scaleX(-1)" : undefined, overflow: "visible", opacity }}
     >
       <g transform={`translate(0 ${breathe + bodyY})`}>
         {/* задняя рука */}
-        <Arm sx={118} sy={250} upper={back.upper} fore={back.fore} />
+        <Arm sx={118} sy={250} upper={back.upper} fore={back.fore} fill={cloth} />
         {/* ноги: стоя / сидя (интерполяция положения) */}
         {sitting ? (
           <g>
@@ -114,19 +122,33 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
             </g>
           </g>
         )}
-        {/* тело: куртка */}
-        <rect x={100} y={230} width={130} height={190} rx={40} fill={colors.jacket} />
-        {/* воротник */}
-        <polygon points="150,232 215,232 190,275" fill={colors.collar} />
+        {/* тело: куртка, халат или костюм */}
+        <rect x={100} y={230} width={130} height={190} rx={40} fill={cloth} />
+        {outfit === "robe" && (
+          <g>
+            <polygon points="140,232 215,232 175,330" fill="#e8d8c0" />
+            <rect x={100} y={330} width={130} height={14} fill="#5a1f2a" />
+            <rect x={98} y={420} width={134} height={30} rx={10} fill={cloth} />
+          </g>
+        )}
+        {outfit === "suit" && (
+          <g>
+            <polygon points="150,232 215,232 183,300" fill={colors.white} />
+            <polygon points="176,246 190,246 183,300" fill={colors.red} />
+            <circle cx={183} cy={244} r={7} fill={colors.red} />
+          </g>
+        )}
+        {outfit === "jacket" && <polygon points="150,232 215,232 190,275" fill={colors.collar} />}
         {/* голова: профиль вправо */}
         <g transform={`rotate(${headTilt} 160 200)`}>
           <ellipse cx={160} cy={160} rx={88} ry={92} fill={colors.skin} />
           <path d="M72 150 C70 70, 170 50, 240 95 C250 100, 240 120, 228 115 C205 100, 140 90, 110 150 Z" fill={colors.hair} />
           <polygon points="244,165 262,178 244,186" fill={colors.skin} />
           {blink ? <rect x={212} y={149} width={16} height={3} rx={1.5} fill={colors.hair} /> : <circle cx={220} cy={150} r={7} fill={colors.hair} />}
+          {mustache && <path d="M214 196 C226 186, 244 188, 250 198 C240 196, 226 198, 214 196 Z" fill={colors.hair} />}
         </g>
         {/* передняя рука */}
-        <Arm sx={200} sy={250} upper={front.upper} fore={front.fore} />
+        <Arm sx={200} sy={250} upper={front.upper} fore={front.fore} fill={cloth} />
       </g>
     </svg>
   );

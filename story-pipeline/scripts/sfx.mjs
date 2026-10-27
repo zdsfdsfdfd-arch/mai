@@ -139,6 +139,83 @@ sfx.chime = () => {
   return o;
 };
 
+// блеяние: жужжащий тон с вибрато и дрожью «э-э-э»
+function bleatInto(o, f0, start, len = 0.7, amp = 0.9) {
+  const lp = onePole(2500);
+  let ph = 0;
+  const s0 = Math.floor(start * SR);
+  const n = Math.floor(len * SR);
+  for (let k = 0; k < n && s0 + k < o.length; k++) {
+    const tt = k / SR;
+    const x = k / n;
+    const f = f0 * (1 - 0.12 * x) * (1 + 0.05 * Math.sin(TWO_PI * 9 * tt));
+    ph += (TWO_PI * f) / SR;
+    let v = 0;
+    for (let h = 1; h <= 6; h++) v += Math.sin(ph * h) / h;
+    const trem = 0.55 + 0.45 * Math.sin(TWO_PI * 22 * tt);
+    const env = Math.min(1, tt / 0.04) * (x > 0.8 ? (1 - x) / 0.2 : 1);
+    o[s0 + k] += lp(v) * trem * env * amp * 0.35;
+  }
+}
+
+sfx.bleat = () => {
+  const o = buf(0.8);
+  bleatInto(o, 230, 0);
+  return o;
+};
+
+sfx.bleats = () => {
+  const o = buf(1.4);
+  bleatInto(o, 200, 0, 0.8, 0.8);
+  bleatInto(o, 265, 0.25, 0.7, 0.7);
+  bleatInto(o, 305, 0.5, 0.8, 0.6);
+  return o;
+};
+
+sfx.trot = () => {
+  const o = buf(1.1);
+  for (let k = 0; k < 6; k++) {
+    tone(o, 85, 48, 0.03, 0.06, 0.8, k * 0.16);
+    noise(o, 0.03, (x) => 1 - x, () => 50, () => 700, 0.5, k * 0.16);
+  }
+  return o;
+};
+
+sfx.crunch = () => {
+  const o = buf(0.6);
+  for (let k = 0; k < 3; k++) noise(o, 0.07, (x) => Math.pow(1 - x, 1.5) * (0.6 + 0.4 * Math.sin(x * 40)), () => 1500, () => 6000, 0.9, k * 0.18);
+  return o;
+};
+
+sfx.creak = () => {
+  const o = buf(0.7);
+  const lp = onePole(1200);
+  let ph = 0;
+  for (let i = 0; i < o.length; i++) {
+    const tt = i / SR;
+    const x = i / o.length;
+    const f = 380 - 140 * x + 20 * Math.sin(TWO_PI * 15 * tt);
+    ph += (TWO_PI * f) / SR;
+    const v = (Math.sin(ph) * 0.6 + Math.sin(ph * 2.01) * 0.3) * (0.7 + 0.3 * Math.sin(TWO_PI * 13 * tt));
+    o[i] += lp(v + rnd() * 0.2) * Math.sin(Math.PI * x) * 0.6;
+  }
+  return o;
+};
+
+sfx.stamp = () => {
+  const o = buf(0.3);
+  tone(o, 130, 55, 0.03, 0.08, 1.0);
+  noise(o, 0.025, (x) => 1 - x, () => 200, () => 2500, 0.8);
+  return o;
+};
+
+sfx.heart = () => {
+  const o = buf(0.4);
+  tone(o, 420, 210, 0.04, 0.06, 0.8);
+  tone(o, 360, 180, 0.04, 0.07, 0.6, 0.14);
+  return o;
+};
+
 function writeWav(file, data) {
   let peak = 0;
   for (const v of data) peak = Math.max(peak, Math.abs(v));

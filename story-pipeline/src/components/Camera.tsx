@@ -42,6 +42,9 @@ export const Camera: React.FC<{ keys: CamKey[]; origin?: string; children: React
   );
 };
 
+// Ключ камеры, при котором точка контента (px, py) оказывается в центре кадра (540, 800) при масштабе s.
+export const focusKey = (t: number, px: number, py: number, s: number): CamKey => ({ t, x: (px - 540) * s, y: (py - 800) * s, scale: s });
+
 // Удобный доступ к моментам фраз сцены: beat(i) = секунда начала i-й фразы (или запасное значение).
 export const phraseStarts = (phrases: Array<{ start: number }>, fallbackStep = 2) =>
   (i: number) => phrases[i]?.start ?? (phrases.length ? phrases[phrases.length - 1].start + fallbackStep * (i - phrases.length + 1) : i * fallbackStep);

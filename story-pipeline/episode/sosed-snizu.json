@@ -24,7 +24,8 @@
       "narration": "У меня проблема. Сосед снизу *влюбился*. И проблема не в этом. Проблема в том, !в кого!.",
       "props": {
         "title": "СОСЕД СНИЗУ",
-        "subtitle": "ДОМ · 9 ЭТАЖ · НОЧЬ"
+        "subtitle": "ДОМ · 9 ЭТАЖ · НОЧЬ",
+        "hook": "neighbor"
       },
       "character": {
         "pose": "stand"
@@ -48,10 +49,11 @@
         "litWindows": [],
         "hud": {
           "label": "ЭТАЖ",
-          "value": "9 / 8",
-          "tone": "yellow"
+          "value": "8",
+          "tone": "red"
         },
-        "noCabin": true
+        "noCabin": true,
+        "mode": "neighbor"
       },
       "topPlaque": {
         "num": "",
@@ -79,7 +81,7 @@
           9,
           10
         ],
-        "label": "02:10 · ТОПОТ · 02:40 · БЛЕЯНИЕ",
+        "label": "03:00 · ТОПОТ · БЛЕЯНИЕ",
         "source": "floor"
       },
       "topPlaque": {
@@ -113,7 +115,12 @@
             "tone": "red"
           }
         ],
-        "diagram": "lift"
+        "diagram": "lift",
+        "cardPhrases": [
+          2,
+          3,
+          4
+        ]
       },
       "topPlaque": {
         "num": "2",
@@ -275,25 +282,15 @@
         "heading": "ПЛАН",
         "cards": [
           {
-            "label": "ПОД ДВЕРЬЮ",
-            "value": "СВАДЬБА",
-            "at": 1.0,
-            "tone": "red"
-          },
-          {
-            "label": "НЕВЕСТА",
-            "value": "ЗИНА",
-            "at": 2.4,
-            "tone": "yellow"
-          },
-          {
             "label": "РЕШЕНИЕ",
             "value": "УЕХАТЬ",
-            "at": 4.0,
             "tone": "green"
           }
         ],
-        "diagram": "lift"
+        "diagram": "invite",
+        "cardPhrases": [
+          8
+        ]
       },
       "topPlaque": {
         "num": "4",
@@ -337,7 +334,8 @@
         "blackout": true,
         "stinger": "bleat"
       },
-      "tension": 1.0
+      "tension": 1.0,
+      "hold": 2.8
     }
   ]
 }

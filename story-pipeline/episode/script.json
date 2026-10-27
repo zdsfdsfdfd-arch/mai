@@ -1,256 +1,341 @@
 {
-  "series": "ЛИФТ",
+  "series": "СОСЕД СНИЗУ",
   "part": 1,
   "channel": "@ваш_канал",
-  "dayLabel": "ДЕНЬ 1 · 01:30",
+  "dayLabel": "ДЕНЬ 1 · 03:00",
   "palette": "night",
   "music": {
     "enabled": true,
     "volume": 0.4,
     "duck": 0.6,
-    "root": 55,
-    "drone": 1,
-    "shimmer": 0.3,
+    "root": 65,
+    "drone": 0.8,
+    "shimmer": 0.5,
     "accents": 1,
-    "risers": 1,
+    "risers": 0.6,
     "heartbeat": 0,
-    "tick": 0
+    "tick": 0.3,
+    "sfx": 1
   },
   "scenes": [
     {
       "id": "s01",
       "type": "title_card",
-      "narration": "Лифт встал между *двенадцатым* и *тринадцатым*. Свет погас. На телефоне !восемь процентов!.",
+      "narration": "У меня проблема. Сосед снизу *влюбился*. И проблема не в этом. Проблема в том, !в кого!.",
       "props": {
-        "title": "ЛИФТ",
-        "subtitle": "24 ЭТАЖА · НОЧЬ · 8 %"
+        "title": "СОСЕД СНИЗУ",
+        "subtitle": "ДОМ · 9 ЭТАЖ · НОЧЬ",
+        "hook": "neighbor"
       },
       "character": {
         "pose": "stand"
       },
-      "tension": 0.5
+      "tension": 0.3
     },
     {
       "id": "s02",
       "type": "building_cutaway",
-      "narration": "В доме *двадцать четыре* этажа. Ночь, половина второго. Электричества нет во всём районе.",
+      "narration": "Я на девятом. Он на восьмом. Каждую ночь в *три часа* у него начинается личная жизнь. И она !блеет!.",
       "props": {
-        "floors": 24,
+        "floors": 12,
         "cabinBetween": [
-          12,
-          13
+          8,
+          9
         ],
         "highlight": [
-          12,
-          13
+          8,
+          9
         ],
         "litWindows": [],
         "hud": {
-          "label": "СВЕТ",
-          "value": "НЕТ",
+          "label": "ЭТАЖ",
+          "value": "8",
           "tone": "red"
-        }
+        },
+        "noCabin": true,
+        "mode": "neighbor"
       },
       "topPlaque": {
         "num": "",
-        "text": "ДОМ · 24 ЭТАЖА"
+        "text": "ДОМ · 12 ЭТАЖЕЙ"
       },
-      "tension": 0.35
+      "tension": 0.35,
+      "status": "!03:00 · ЛИЧНАЯ ЖИЗНЬ"
     },
     {
       "id": "s03",
-      "type": "phone_screen",
-      "narration": "Связи нет. Диспетчерская *не отвечает*. Батарея тает по проценту в минуту.",
+      "type": "sound_diagram",
+      "narration": "Проблема номер один. *Звуки*. Топот копыт. Блеяние. И его голос: !«Зиночка, ну не упрямься»!.",
       "props": {
-        "time": "01:34",
-        "battery": 8,
-        "signal": false,
-        "callTo": "ДИСПЕТЧЕР",
-        "callStatus": "НЕ ОТВЕЧАЕТ"
+        "floors": [
+          7,
+          8,
+          9,
+          10
+        ],
+        "cabinBetween": [
+          8,
+          9
+        ],
+        "reach": [
+          9,
+          10
+        ],
+        "label": "03:00 · ТОПОТ · БЛЕЯНИЕ",
+        "source": "floor"
       },
-      "status": "!БАТАРЕЯ 8 %",
+      "topPlaque": {
+        "num": "1",
+        "text": "ЗВУКИ"
+      },
       "tension": 0.45
     },
     {
       "id": "s04",
       "type": "stat_callouts",
-      "narration": "Проблема номер один. *Воздух*. Кабина два на полтора метра. На одного хватит на часы, но паника съедает кислород !втрое быстрее!.",
+      "narration": "Проблема номер два. *Улики*. В лифте шерсть и запах духов. В мусорке два билета в кино. И морковка у моей двери с запиской: !«извини за вчерашнее, было громко»!.",
       "props": {
-        "heading": "ПРОБЛЕМА №1 · ВОЗДУХ",
+        "heading": "УЛИКИ",
         "cards": [
           {
-            "label": "КАБИНА",
-            "value": "2 × 1,5 М",
-            "at": 1.6
+            "label": "УЛИКА 1",
+            "value": "ШЕРСТЬ + ДУХИ",
+            "at": 1.5
           },
           {
-            "label": "СПОКОЙНО",
-            "value": "ЧАСЫ",
-            "at": 4.2,
-            "tone": "green"
+            "label": "УЛИКА 2",
+            "value": "2 БИЛЕТА",
+            "at": 3.5,
+            "tone": "yellow"
           },
           {
-            "label": "ПАНИКА",
-            "value": "×3",
-            "at": 6.0,
+            "label": "УЛИКА 3",
+            "value": "МОРКОВКА",
+            "at": 5.5,
             "tone": "red"
           }
+        ],
+        "diagram": "lift",
+        "cardPhrases": [
+          2,
+          3,
+          4
         ]
       },
       "topPlaque": {
-        "num": "1",
-        "text": "ВОЗДУХ"
+        "num": "2",
+        "text": "УЛИКИ"
       },
       "tension": 0.5
     },
     {
       "id": "s05",
       "type": "character_scene",
-      "narration": "Первое правило. *Сесть*. Выключить фонарик. Дышать *медленно*.",
+      "narration": "Я спустился и постучал. Слушай, у тебя там что, *ферма*? Он поправил халат и сказал: нет. Это *Зина*. Мы вместе *полгода*.",
       "props": {
-        "setting": "cabin",
-        "light": "phone",
-        "lightOffAt": 2.2
+        "setting": "door",
+        "light": "dim"
       },
       "character": {
-        "pose": "sit"
+        "pose": "knock"
       },
-      "status": "ПРАВИЛО 1 · СЕСТЬ",
-      "tension": 0.3
+      "tension": 0.5,
+      "status": "ЗИНА · ПОЛГОДА"
     },
     {
       "id": "s06",
-      "type": "cabin_diagram",
-      "narration": "Проблема номер два. *Выход*. Люк наверху закрыт снаружи. Двери открывать !нельзя!: внизу шахта на двенадцать этажей.",
+      "type": "character_scene",
+      "narration": "За его спиной стояла овца. В *бантике*. Она посмотрела на меня так, как смотрят на !свекровь!.",
       "props": {
-        "hatchLabel": "ЛЮК · ЗАКРЫТ СНАРУЖИ",
-        "doorsLabel": "ДВЕРИ · НЕЛЬЗЯ",
-        "shaftLabel": "ШАХТА · 12 ЭТАЖЕЙ ВНИЗ",
-        "hatchAt": 1.8,
-        "doorsAt": 3.6,
-        "shaftAt": 5.2
+        "setting": "door",
+        "light": "dim",
+        "sheep": [
+          {
+            "at": 1.2,
+            "color": "white"
+          },
+          {
+            "at": 1.6,
+            "color": "white"
+          },
+          {
+            "at": 2.0,
+            "color": "black"
+          }
+        ]
       },
-      "topPlaque": {
-        "num": "2",
-        "text": "ВЫХОД"
+      "character": {
+        "pose": "stand"
       },
-      "tension": 0.55
+      "tension": 0.6,
+      "status": "!ВЗГЛЯД · СВЕКРОВЬ"
     },
     {
       "id": "s07",
-      "type": "sound_diagram",
-      "narration": "Но у шахты есть свойство. Звук идёт по ней *вверх*, как по трубе. Стук по направляющей слышно на !три этажа!.",
+      "type": "floor_plan",
+      "narration": "Проблема номер три. *Утро*. Кто-то жевал мой фикус.",
       "props": {
-        "floors": [
-          11,
-          12,
-          13,
-          14,
-          15
+        "rooms": [
+          "КОМНАТА",
+          "КОРИДОР",
+          "КУХНЯ"
         ],
-        "cabinBetween": [
-          12,
-          13
+        "marks": [
+          {
+            "text": "Я",
+            "room": 0
+          },
+          {
+            "text": "ФИКУС",
+            "room": 0,
+            "sheep": true
+          }
         ],
-        "reach": [
-          13,
-          14,
-          15
-        ],
-        "label": "СЛЫШНО НА 3 ЭТАЖА",
-        "wavesAt": 1.5
+        "time": "06:40"
       },
       "topPlaque": {
         "num": "3",
-        "text": "ЗВУК"
+        "text": "УТРО · 06:40"
       },
       "tension": 0.5
     },
     {
       "id": "s08",
       "type": "character_scene",
-      "narration": "Три удара. Пауза. Три удара. Так стучат не сумасшедшие, а те, кто *зовёт на помощь*.",
+      "narration": "Посреди комнаты стояла овца. В бантике. С таким видом, будто она тут *прописана*. И фикус теперь *общий*.",
       "props": {
-        "setting": "cabin",
-        "light": "dim",
-        "knockAt": [
-          0.3,
-          0.75,
-          1.2,
-          2.4,
-          2.85,
-          3.3
+        "setting": "room",
+        "light": "day",
+        "sheep": [
+          {
+            "at": 0.3,
+            "color": "white",
+            "idle": true
+          }
         ]
-      },
-      "character": {
-        "pose": "knock"
-      },
-      "status": "3 УДАРА · ПАУЗА · 3 УДАРА",
-      "tension": 0.7
-    },
-    {
-      "id": "s09",
-      "type": "building_cutaway",
-      "narration": "Через сорок минут на *четырнадцатом* загорелось окно.",
-      "props": {
-        "floors": 24,
-        "cabinBetween": [
-          12,
-          13
-        ],
-        "highlight": [
-          14
-        ],
-        "litWindows": [
-          14
-        ],
-        "litAt": 1.4,
-        "hud": {
-          "label": "ВРЕМЯ",
-          "value": "02:14",
-          "tone": "red"
-        }
-      },
-      "topPlaque": {
-        "num": "",
-        "text": "ДЕНЬ 1 · 02:14"
-      },
-      "tension": 0.6
-    },
-    {
-      "id": "s10",
-      "type": "city_night",
-      "narration": "Один жилец вышел на лестницу. Он *услышал*. Но его телефон тоже был !на нуле!.",
-      "props": {
-        "litFloor": 14,
-        "label": "ОДИН ИЗ 96 КВАРТИР"
-      },
-      "tension": 0.65
-    },
-    {
-      "id": "s11",
-      "type": "character_scene",
-      "narration": "А в кабине оставалось !два процента!.",
-      "props": {
-        "setting": "cabin",
-        "light": "dim",
-        "batteryLabel": "2 %"
       },
       "character": {
         "pose": "sit"
       },
-      "status": "!БАТАРЕЯ 2 %",
-      "tension": 0.85
+      "tension": 0.55,
+      "status": "ЗИНА · ПРОПИСАНА"
+    },
+    {
+      "id": "s09",
+      "type": "dialogue",
+      "narration": "Я позвонил соседу. !Твоя Зина у меня дома!. Какая? В смысле *какая*? Зина или *Клава*?",
+      "props": {
+        "callTo": "СОСЕД",
+        "lines": [
+          {
+            "side": "me",
+            "text": "ТВОЙ БАРАН У МЕНЯ ДОМА!"
+          },
+          {
+            "side": "him",
+            "text": "Какой?"
+          },
+          {
+            "side": "me",
+            "text": "В СМЫСЛЕ КАКОЙ?!"
+          },
+          {
+            "side": "him",
+            "text": "Белый или чёрный?"
+          }
+        ]
+      },
+      "tension": 0.7,
+      "status": "ВЫЗОВ · СОСЕД"
+    },
+    {
+      "id": "s10",
+      "type": "character_scene",
+      "narration": "Я медленно повернулся к коридору. Оттуда вышла *вторая*. Они переглянулись. Так переглядываются подруги, которые уже !всё обсудили!.",
+      "props": {
+        "setting": "room",
+        "light": "day",
+        "sheep": [
+          {
+            "at": 0.2,
+            "color": "white",
+            "idle": true
+          },
+          {
+            "at": 1.6,
+            "color": "black",
+            "fromLeft": true
+          }
+        ]
+      },
+      "character": {
+        "pose": "sit"
+      },
+      "tension": 0.8,
+      "status": "!ЗИНА И КЛАВА"
+    },
+    {
+      "id": "s11",
+      "type": "stat_callouts",
+      "narration": "Проблема номер четыре. Под дверью приглашение. *Свадьба*. Невеста: Зина. Свидетельница: Клава. Я принял единственное взрослое решение: !переехать!.",
+      "props": {
+        "heading": "ПЛАН",
+        "cards": [
+          {
+            "label": "РЕШЕНИЕ",
+            "value": "УЕХАТЬ",
+            "tone": "green"
+          }
+        ],
+        "diagram": "invite",
+        "cardPhrases": [
+          8
+        ]
+      },
+      "topPlaque": {
+        "num": "4",
+        "text": "СВАДЬБА"
+      },
+      "tension": 0.6
     },
     {
       "id": "s12",
-      "type": "end_card",
-      "narration": "Что он сделал дальше, во *второй части*.",
+      "type": "character_scene",
+      "narration": "У подъезда меня встретил сосед. В костюме. Хорошая новость, мы *расширяемся*. !Поздравляю!. Куда?",
       "props": {
-        "title": "ЧАСТЬ 2",
-        "subtitle": "ЗАВТРА В 19:00"
+        "setting": "entrance",
+        "light": "day",
+        "neighbor": true
+      },
+      "character": {
+        "pose": "stand"
+      },
+      "tension": 0.7,
+      "status": "ПОДЪЕЗД · КОСТЮМ"
+    },
+    {
+      "id": "s13",
+      "type": "roof",
+      "narration": "Он показал пальцем *наверх*. На крыше стояло сорок овец. У каждой бантик. Это была не ферма. Это был !гарем!.",
+      "props": {
+        "floors": 12,
+        "sheepCount": 40,
+        "label": "КРЫША · 40 НЕВЕСТ"
       },
       "tension": 0.9
+    },
+    {
+      "id": "s14",
+      "type": "end_card",
+      "narration": "Раньше у меня была проблема *снизу*. Теперь проблема !сверху!. И судя по звукам, у них !медовый месяц!.",
+      "props": {
+        "title": "ЧАСТЬ 2",
+        "subtitle": "МЕДОВЫЙ МЕСЯЦ · ЗАВТРА",
+        "blackout": true,
+        "stinger": "bleat"
+      },
+      "tension": 1.0,
+      "hold": 2.8
     }
   ]
 }
