@@ -4,27 +4,70 @@
   "channel": "@ваш_канал",
   "dayLabel": "ДЕНЬ 1 · 01:30",
   "palette": "night",
+  "music": {
+    "enabled": true,
+    "bpm": 76,
+    "volume": 0.5,
+    "duck": 0.5,
+    "heartbeat": 1,
+    "tick": 0.6,
+    "shimmer": 0.5,
+    "risers": 1
+  },
   "scenes": [
     {
       "id": "s01",
       "type": "title_card",
       "narration": "Лифт встал между *двенадцатым* и *тринадцатым*. Свет погас. На телефоне !восемь процентов!.",
-      "props": { "title": "ЛИФТ", "subtitle": "24 ЭТАЖА · НОЧЬ · 8 %" },
-      "character": { "pose": "stand" }
+      "props": {
+        "title": "ЛИФТ",
+        "subtitle": "24 ЭТАЖА · НОЧЬ · 8 %"
+      },
+      "character": {
+        "pose": "stand"
+      },
+      "tension": 0.5
     },
     {
       "id": "s02",
       "type": "building_cutaway",
       "narration": "В доме *двадцать четыре* этажа. Ночь, половина второго. Электричества нет во всём районе.",
-      "props": { "floors": 24, "cabinBetween": [12, 13], "highlight": [12, 13], "litWindows": [], "hud": { "label": "СВЕТ", "value": "НЕТ", "tone": "red" } },
-      "topPlaque": { "num": "", "text": "ДОМ · 24 ЭТАЖА" }
+      "props": {
+        "floors": 24,
+        "cabinBetween": [
+          12,
+          13
+        ],
+        "highlight": [
+          12,
+          13
+        ],
+        "litWindows": [],
+        "hud": {
+          "label": "СВЕТ",
+          "value": "НЕТ",
+          "tone": "red"
+        }
+      },
+      "topPlaque": {
+        "num": "",
+        "text": "ДОМ · 24 ЭТАЖА"
+      },
+      "tension": 0.35
     },
     {
       "id": "s03",
       "type": "phone_screen",
       "narration": "Связи нет. Диспетчерская *не отвечает*. Батарея тает по проценту в минуту.",
-      "props": { "time": "01:34", "battery": 8, "signal": false, "callTo": "ДИСПЕТЧЕР", "callStatus": "НЕ ОТВЕЧАЕТ" },
-      "status": "!БАТАРЕЯ 8 %"
+      "props": {
+        "time": "01:34",
+        "battery": 8,
+        "signal": false,
+        "callTo": "ДИСПЕТЧЕР",
+        "callStatus": "НЕ ОТВЕЧАЕТ"
+      },
+      "status": "!БАТАРЕЯ 8 %",
+      "tension": 0.45
     },
     {
       "id": "s04",
@@ -33,69 +76,178 @@
       "props": {
         "heading": "ПРОБЛЕМА №1 · ВОЗДУХ",
         "cards": [
-          { "label": "КАБИНА", "value": "2 × 1,5 М", "at": 1.6 },
-          { "label": "СПОКОЙНО", "value": "ЧАСЫ", "at": 4.2, "tone": "green" },
-          { "label": "ПАНИКА", "value": "×3", "at": 6.0, "tone": "red" }
+          {
+            "label": "КАБИНА",
+            "value": "2 × 1,5 М",
+            "at": 1.6
+          },
+          {
+            "label": "СПОКОЙНО",
+            "value": "ЧАСЫ",
+            "at": 4.2,
+            "tone": "green"
+          },
+          {
+            "label": "ПАНИКА",
+            "value": "×3",
+            "at": 6.0,
+            "tone": "red"
+          }
         ]
       },
-      "topPlaque": { "num": "1", "text": "ВОЗДУХ" }
+      "topPlaque": {
+        "num": "1",
+        "text": "ВОЗДУХ"
+      },
+      "tension": 0.5
     },
     {
       "id": "s05",
       "type": "character_scene",
       "narration": "Первое правило. *Сесть*. Выключить фонарик. Дышать *медленно*.",
-      "props": { "setting": "cabin", "light": "phone", "lightOffAt": 2.2 },
-      "character": { "pose": "sit" },
-      "status": "ПРАВИЛО 1 · СЕСТЬ"
+      "props": {
+        "setting": "cabin",
+        "light": "phone",
+        "lightOffAt": 2.2
+      },
+      "character": {
+        "pose": "sit"
+      },
+      "status": "ПРАВИЛО 1 · СЕСТЬ",
+      "tension": 0.3
     },
     {
       "id": "s06",
       "type": "cabin_diagram",
       "narration": "Проблема номер два. *Выход*. Люк наверху закрыт снаружи. Двери открывать !нельзя!: внизу шахта на двенадцать этажей.",
-      "props": { "hatchLabel": "ЛЮК · ЗАКРЫТ СНАРУЖИ", "doorsLabel": "ДВЕРИ · НЕЛЬЗЯ", "shaftLabel": "ШАХТА · 12 ЭТАЖЕЙ ВНИЗ", "hatchAt": 1.8, "doorsAt": 3.6, "shaftAt": 5.2 },
-      "topPlaque": { "num": "2", "text": "ВЫХОД" }
+      "props": {
+        "hatchLabel": "ЛЮК · ЗАКРЫТ СНАРУЖИ",
+        "doorsLabel": "ДВЕРИ · НЕЛЬЗЯ",
+        "shaftLabel": "ШАХТА · 12 ЭТАЖЕЙ ВНИЗ",
+        "hatchAt": 1.8,
+        "doorsAt": 3.6,
+        "shaftAt": 5.2
+      },
+      "topPlaque": {
+        "num": "2",
+        "text": "ВЫХОД"
+      },
+      "tension": 0.55
     },
     {
       "id": "s07",
       "type": "sound_diagram",
       "narration": "Но у шахты есть свойство. Звук идёт по ней *вверх*, как по трубе. Стук по направляющей слышно на !три этажа!.",
-      "props": { "floors": [11, 12, 13, 14, 15], "cabinBetween": [12, 13], "reach": [13, 14, 15], "label": "СЛЫШНО НА 3 ЭТАЖА", "wavesAt": 1.5 },
-      "topPlaque": { "num": "3", "text": "ЗВУК" }
+      "props": {
+        "floors": [
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "cabinBetween": [
+          12,
+          13
+        ],
+        "reach": [
+          13,
+          14,
+          15
+        ],
+        "label": "СЛЫШНО НА 3 ЭТАЖА",
+        "wavesAt": 1.5
+      },
+      "topPlaque": {
+        "num": "3",
+        "text": "ЗВУК"
+      },
+      "tension": 0.5
     },
     {
       "id": "s08",
       "type": "character_scene",
       "narration": "Три удара. Пауза. Три удара. Так стучат не сумасшедшие, а те, кто *зовёт на помощь*.",
-      "props": { "setting": "cabin", "light": "dim", "knockAt": [0.3, 0.75, 1.2, 2.4, 2.85, 3.3] },
-      "character": { "pose": "knock" },
-      "status": "3 УДАРА · ПАУЗА · 3 УДАРА"
+      "props": {
+        "setting": "cabin",
+        "light": "dim",
+        "knockAt": [
+          0.3,
+          0.75,
+          1.2,
+          2.4,
+          2.85,
+          3.3
+        ]
+      },
+      "character": {
+        "pose": "knock"
+      },
+      "status": "3 УДАРА · ПАУЗА · 3 УДАРА",
+      "tension": 0.7
     },
     {
       "id": "s09",
       "type": "building_cutaway",
       "narration": "Через сорок минут на *четырнадцатом* загорелось окно.",
-      "props": { "floors": 24, "cabinBetween": [12, 13], "highlight": [14], "litWindows": [14], "litAt": 1.4, "hud": { "label": "ВРЕМЯ", "value": "02:14", "tone": "red" } },
-      "topPlaque": { "num": "", "text": "ДЕНЬ 1 · 02:14" }
+      "props": {
+        "floors": 24,
+        "cabinBetween": [
+          12,
+          13
+        ],
+        "highlight": [
+          14
+        ],
+        "litWindows": [
+          14
+        ],
+        "litAt": 1.4,
+        "hud": {
+          "label": "ВРЕМЯ",
+          "value": "02:14",
+          "tone": "red"
+        }
+      },
+      "topPlaque": {
+        "num": "",
+        "text": "ДЕНЬ 1 · 02:14"
+      },
+      "tension": 0.6
     },
     {
       "id": "s10",
       "type": "city_night",
       "narration": "Один жилец вышел на лестницу. Он *услышал*. Но его телефон тоже был !на нуле!.",
-      "props": { "litFloor": 14, "label": "ОДИН ИЗ 96 КВАРТИР" }
+      "props": {
+        "litFloor": 14,
+        "label": "ОДИН ИЗ 96 КВАРТИР"
+      },
+      "tension": 0.65
     },
     {
       "id": "s11",
       "type": "character_scene",
       "narration": "А в кабине оставалось !два процента!.",
-      "props": { "setting": "cabin", "light": "dim" },
-      "character": { "pose": "sit" },
-      "status": "!БАТАРЕЯ 2 %"
+      "props": {
+        "setting": "cabin",
+        "light": "dim"
+      },
+      "character": {
+        "pose": "sit"
+      },
+      "status": "!БАТАРЕЯ 2 %",
+      "tension": 0.85
     },
     {
       "id": "s12",
       "type": "end_card",
       "narration": "Что он сделал дальше, во *второй части*.",
-      "props": { "title": "ЧАСТЬ 2", "subtitle": "ЗАВТРА В 19:00" }
+      "props": {
+        "title": "ЧАСТЬ 2",
+        "subtitle": "ЗАВТРА В 19:00"
+      },
+      "tension": 0.9
     }
   ]
 }

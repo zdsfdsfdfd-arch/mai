@@ -23,6 +23,13 @@ export type SceneTimeline = {
   status?: string;
 };
 
+export type MusicConfig = {
+  enabled?: boolean; // по умолчанию true; файл public/audio/music.wav создаёт scripts/music.mjs
+  volume?: number; // базовая громкость музыки в паузах, 0..1 (по умолчанию 0.22)
+  duck?: number; // доля громкости под голосом, 0..1 (по умолчанию 0.35)
+  bpm?: number;
+};
+
 export type Timeline = {
   fps: number;
   width: number;
