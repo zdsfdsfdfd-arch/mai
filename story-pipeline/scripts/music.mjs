@@ -15,14 +15,17 @@ const timeline = JSON.parse(fs.readFileSync(path.join(ROOT, "episode", "timeline
 const script = JSON.parse(fs.readFileSync(path.join(ROOT, "episode", "script.json"), "utf8"));
 const OUT = path.join(ROOT, "public", "audio", "music.wav");
 
+// Значения по умолчанию подобраны под референс: тёмный тональный гул без ритма, суб-бас и нижняя
+// середина, верх срезан, редкие нерегулярные акценты, рост напряжения к финалу.
 const cfg = {
-  bpm: 76,
+  bpm: 76, // темп нужен только для сердцебиения и тиканья, если они включены
   root: 55, // A1
-  heartbeat: 1, // 0..1
-  tick: 0.6,
+  heartbeat: 0, // 0..1, ритмичные удары (в референсе их нет)
+  tick: 0, // тиканье на слабые доли
   drone: 1,
-  shimmer: 0.5,
+  shimmer: 0.3,
   risers: 1,
+  accents: 1, // низкие акценты на стыках сцен
   ...(script.music || {}),
   ...(process.env.MUSIC_JSON ? JSON.parse(process.env.MUSIC_JSON) : {}),
 };
@@ -143,20 +146,47 @@ if (cfg.tick > 0) {
   }
 }
 
-// ---------- холодный верхний пад ----------
+// ---------- холодный пад нижней середины (октавы выше гула, медленное дыхание) ----------
 if (cfg.shimmer > 0) {
-  let ph = 0, ph2 = 0;
+  let ph = 0, ph2 = 0, ph3 = 0;
+  const lp = onePole(900);
   for (let i = 0; i < N; i++) {
     const t = i / SR;
     const ten = tensionAt(t);
     const chord = chordRatios[Math.floor(t / chordLen) % chordRatios.length];
-    const f = cfg.root * chord * 8;
+    const f = cfg.root * chord * 4;
     ph += (TWO_PI * f) / SR;
     ph2 += (TWO_PI * f * 1.5) / SR;
-    const trem = 0.6 + 0.4 * Math.sin(TWO_PI * 0.3 * t);
-    const v = (Math.sin(ph) * 0.6 + Math.sin(ph2) * 0.3) * 0.035 * trem * (0.4 + 0.6 * ten) * cfg.shimmer * clamp(t / 10, 0, 1);
+    ph3 += (TWO_PI * f * 1.003) / SR;
+    const trem = 0.6 + 0.4 * Math.sin(TWO_PI * 0.11 * t);
+    const raw = Math.sin(ph) * 0.5 + Math.sin(ph3) * 0.5 + Math.sin(ph2) * 0.3;
+    const v = lp(raw, 500 + 400 * ten) * 0.05 * trem * (0.4 + 0.6 * ten) * cfg.shimmer * clamp(t / 10, 0, 1);
     L[i] += v * (0.5 + 0.5 * Math.sin(TWO_PI * 0.07 * t));
     R[i] += v * (0.5 + 0.5 * Math.cos(TWO_PI * 0.07 * t));
+  }
+}
+
+// ---------- низкие акценты на стыках сцен (нерегулярные, как звуковые эффекты) ----------
+if (cfg.accents > 0) {
+  const lp = onePole(250);
+  for (let i = 1; i < scenes.length; i++) {
+    const ten = scenes[i].tension;
+    const t0 = scenes[i].start;
+    const s0 = Math.floor(t0 * SR);
+    const len = Math.floor(2.8 * SR);
+    let ph = 0;
+    const amp = (0.18 + 0.3 * ten) * cfg.accents;
+    for (let k = 0; k < len && s0 + k < N; k++) {
+      const tt = k / SR;
+      const env = Math.min(1, tt / 0.25) * Math.exp(-tt * 1.6);
+      const f = 36 + 14 * Math.exp(-tt * 3);
+      ph += (TWO_PI * f) / SR;
+      const boom = Math.sin(ph) * 0.9 + Math.sin(ph * 2) * 0.15;
+      const air = lp(rnd(), 120 + 200 * ten) * 0.35 * Math.exp(-tt * 4);
+      const v = (boom + air) * env * amp;
+      L[s0 + k] += v;
+      R[s0 + k] += v;
+    }
   }
 }
 

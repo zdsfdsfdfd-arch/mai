@@ -6,13 +6,15 @@
   "palette": "night",
   "music": {
     "enabled": true,
-    "bpm": 76,
-    "volume": 0.5,
-    "duck": 0.5,
-    "heartbeat": 1,
-    "tick": 0.6,
-    "shimmer": 0.5,
-    "risers": 1
+    "volume": 0.4,
+    "duck": 0.6,
+    "root": 55,
+    "drone": 1,
+    "shimmer": 0.3,
+    "accents": 1,
+    "risers": 1,
+    "heartbeat": 0,
+    "tick": 0
   },
   "scenes": [
     {
