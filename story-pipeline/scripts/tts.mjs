@@ -245,10 +245,190 @@ function alignWords(words, wordTimes, start, end) {
   return words.map((w, i) => ({ text: w.text, start: +(start + wt[i].start).toFixed(3), end: +(start + wt[i].end).toFixed(3), accent: w.accent }));
 }
 
+// ---------- готовые файлы озвучки (ElevenLabs из веб-интерфейса и т. п.) ----------
+// ENGINE=files, VOICE_DIR=episode/voice. Либо по файлу на сцену (s01.mp3 … s12.mp3),
+// либо один файл all.mp3, где сцены разделены паузами не короче 0,9 с.
+// Границы фраз внутри сцены находятся по паузам (silencedetect), слова распределяются пропорционально.
+const VOICE_DIR = path.resolve(ROOT, process.env.VOICE_DIR || "episode/voice");
+
+function detectSilences(file, noiseDb, minDur) {
+  const r = spawnSync(FFMPEG, ["-i", file, "-af", `silencedetect=noise=${noiseDb}dB:d=${minDur}`, "-f", "null", "-"], { encoding: "utf8", maxBuffer: 1 << 26 });
+  const out = [];
+  let start = null;
+  for (const m of (r.stderr || "").matchAll(/silence_(start|end): ([\d.]+)/g)) {
+    if (m[1] === "start") start = parseFloat(m[2]);
+    else if (start !== null) {
+      out.push([start, parseFloat(m[2])]);
+      start = null;
+    }
+  }
+  if (start !== null) out.push([start, Infinity]);
+  return out;
+}
+
+function findVoiceFile(base) {
+  for (const ext of ["wav", "mp3", "m4a", "ogg", "flac", "aac"]) {
+    const p = path.join(VOICE_DIR, `${base}.${ext}`);
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
+
+// Выбирает из найденных пауз те n−1, при которых длительности фраз ближе всего
+// к пропорции длин их текста (перебор сочетаний, пауз обычно меньше 15).
+function bestBoundaries(phrasesSrc, inner, a, b) {
+  const need = phrasesSrc.length - 1;
+  if (need === 0) return [];
+  let cand = inner;
+  if (cand.length > 14) cand = cand.slice().sort((x, y) => y[1] - y[0] - (x[1] - x[0])).slice(0, 14).sort((x, y) => x[0] - y[0]);
+  if (cand.length < need) return null;
+  const lens = phrasesSrc.map((p) => Math.max(1, lettersOnly(p).length));
+  const totalLen = lens.reduce((x, y) => x + y, 0);
+  let best = null;
+  let bestCost = Infinity;
+  const pick = [];
+  const rec = (from, k) => {
+    if (k === need) {
+      let cur = a;
+      let cost = 0;
+      for (let i = 0; i < phrasesSrc.length; i++) {
+        const end = i < need ? pick[i][0] : b;
+        const expected = ((b - a) * lens[i]) / totalLen;
+        cost += Math.pow((end - cur - expected) / (b - a), 2);
+        if (i < need) cur = pick[i][1];
+      }
+      if (cost < bestCost) {
+        bestCost = cost;
+        best = pick.slice();
+      }
+      return;
+    }
+    for (let j = from; j <= cand.length - (need - k); j++) {
+      pick.push(cand[j]);
+      rec(j + 1, k + 1);
+      pick.pop();
+    }
+  };
+  rec(0, 0);
+  return best;
+}
+
+// Разбивает отрезок [a, b] записи на фразы по паузам внутри него.
+function phrasesFromSegment(phrasesSrc, silences, a, b) {
+  const inner = silences.filter(([s, e]) => s > a + 0.05 && e < b - 0.05);
+  const need = phrasesSrc.length - 1;
+  const bounds = bestBoundaries(phrasesSrc, inner, a, b) || [];
+  const phrases = [];
+  let cur = a;
+  for (let i = 0; i < phrasesSrc.length; i++) {
+    const { words, clean } = parseWords(phrasesSrc[i]);
+    let end;
+    if (bounds.length === need) end = i < need ? bounds[i][0] : b;
+    else {
+      // пауз не хватило: делим пропорционально длине текста
+      const total = phrasesSrc.reduce((s, p) => s + p.length, 0);
+      end = i < phrasesSrc.length - 1 ? cur + ((b - a) * phrasesSrc[i].length) / total : b;
+    }
+    phrases.push({ text: clean, start: cur, end, words });
+    cur = bounds.length === need && i < need ? bounds[i][1] : end;
+  }
+  return phrases;
+}
+
+function buildFromFiles(script) {
+  const all = findVoiceFile("all");
+  const scenesOut = [];
+  let cursor = 0;
+  const pushScene = (scene, pcmFile, silences, a, b, phrasesSrc) => {
+    // a, b — границы речи сцены в секундах внутри pcmFile (без тишины по краям)
+    const full = fileToPcm(pcmFile);
+    const s0 = Math.max(0, Math.floor((a - 0.08) * SAMPLE_RATE)) * 2;
+    const s1 = Math.min(full.length / 2, Math.ceil((b + 0.12) * SAMPLE_RATE)) * 2;
+    const voice = full.subarray(s0, s1);
+    // позиция в исходном файле → позиция в WAV сцены (речь начинается после LEAD_IN)
+    const offset = LEAD_IN - s0 / 2 / SAMPLE_RATE;
+    const phrases = phrasesFromSegment(phrasesSrc, silences, a, b).map((p) => ({
+      text: p.text,
+      start: +(p.start + offset).toFixed(3),
+      end: +(p.end + offset).toFixed(3),
+      words: proportional(p.words, p.start + offset, p.end + offset),
+    }));
+    const chunks = [silence(LEAD_IN), voice, silence(TAIL)];
+    let duration = LEAD_IN + voice.length / 2 / SAMPLE_RATE + TAIL;
+    if (duration < MIN_SCENE) {
+      chunks.push(silence(MIN_SCENE - duration));
+      duration = MIN_SCENE;
+    }
+    writeWav(path.join(AUDIO_DIR, `${scene.id}.wav`), Buffer.concat(chunks));
+    const frames = Math.ceil(duration * FPS);
+    scenesOut.push({
+      id: scene.id,
+      type: scene.type,
+      startFrame: cursor,
+      durationFrames: frames,
+      audio: `audio/${scene.id}.wav`,
+      audioDuration: +duration.toFixed(3),
+      phrases,
+      props: scene.props || {},
+      character: scene.character,
+      topPlaque: scene.topPlaque,
+      status: scene.status,
+    });
+    cursor += frames;
+    console.log(`${scene.id.padStart(4)} ${scene.type.padEnd(18)} ${duration.toFixed(2).padStart(6)} с  ${phrases.length} фраз  (${path.basename(pcmFile)} ${a.toFixed(2)}–${b.toFixed(2)} с)`);
+  };
+
+  if (all) {
+    const silences = detectSilences(all, -38, 0.22);
+    const dur = fileToPcm(all).length / 2 / SAMPLE_RATE;
+    const long = silences.filter(([s, e]) => e - s >= 0.9 && s > 0.3 && e < dur - 0.3);
+    if (long.length !== script.scenes.length - 1) {
+      throw new Error(`В ${path.basename(all)} найдено ${long.length} длинных пауз (≥0,9 с), а нужно ${script.scenes.length - 1}: по одной между сценами`);
+    }
+    let a = silences.length && silences[0][0] < 0.05 ? silences[0][1] : 0;
+    const last = silences[silences.length - 1];
+    const fileEnd = last && (last[1] === Infinity || last[1] > dur - 0.05) ? last[0] : dur;
+    script.scenes.forEach((scene, i) => {
+      const b = i < long.length ? long[i][0] : fileEnd;
+      pushScene(scene, all, silences, a, b, splitPhrases(scene.narration));
+      if (i < long.length) a = long[i][1];
+    });
+  } else {
+    for (const scene of script.scenes) {
+      const f = findVoiceFile(scene.id);
+      if (!f) throw new Error(`Нет файла озвучки для сцены ${scene.id} в ${VOICE_DIR} (ожидался ${scene.id}.mp3 или .wav, либо all.mp3)`);
+      const silences = detectSilences(f, -38, 0.22);
+      const dur = fileToPcm(f).length / 2 / SAMPLE_RATE;
+      const a = silences.length && silences[0][0] < 0.05 ? silences[0][1] : 0;
+      const last = silences[silences.length - 1];
+      const b = last && (last[1] === Infinity || last[1] > dur - 0.05) ? last[0] : dur;
+      pushScene(scene, f, silences, a, b, splitPhrases(scene.narration));
+    }
+  }
+  return { scenesOut, cursor };
+}
+
 // ---------- сборка ----------
 async function main() {
   const script = JSON.parse(fs.readFileSync(SCRIPT, "utf8"));
   fs.mkdirSync(AUDIO_DIR, { recursive: true });
+  if (ENGINE === "files") {
+    const { scenesOut, cursor } = buildFromFiles(script);
+    const timeline = {
+      fps: FPS,
+      width: 1080,
+      height: 1920,
+      totalFrames: cursor,
+      series: script.series,
+      part: script.part,
+      channel: script.channel || "",
+      dayLabel: script.dayLabel || "",
+      scenes: scenesOut,
+    };
+    fs.writeFileSync(TIMELINE, JSON.stringify(timeline, null, 1), "utf8");
+    console.log(`итого ${(cursor / FPS).toFixed(1)} с, ${cursor} кадров, движок files (${VOICE_DIR}) → ${TIMELINE}`);
+    return;
+  }
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tts-"));
   const scenes = [];
   let cursor = 0;

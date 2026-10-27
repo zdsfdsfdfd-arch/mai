@@ -45,6 +45,7 @@ npm run studio
 | `edge` (по умолчанию) | интернет, ffmpeg | точные | `EDGE_VOICE=ru-RU-DmitryNeural` или `ru-RU-SvetlanaNeural`, темп `EDGE_RATE=+8%` |
 | `elevenlabs` | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, ffmpeg | точные | любой голос ElevenLabs, модель `ELEVENLABS_MODEL` |
 | `sapi` | Windows, ffmpeg | пропорциональные | `SAPI_VOICE="IVONA 2 Maxim OEM"` и другие голоса Windows |
+| `files` | готовые записи в `episode/voice` (из веб-интерфейса ElevenLabs и т. п.), ffmpeg | по паузам между фразами | либо файл на сцену `s01.mp3 … s12.mp3`, либо один `all.mp3` с паузами ≥ 0,9 с между сценами |
 
 `FFMPEG_BIN` задаёт путь к ffmpeg, если его нет в PATH. Пример для PowerShell:
 
