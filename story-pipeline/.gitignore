@@ -3,3 +3,6 @@ out/
 .remotion/
 public/audio/
 episode/timeline.json
+.tts-cache/
+run-tts.cmd
+*.log

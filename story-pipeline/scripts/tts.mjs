@@ -10,6 +10,7 @@
 // Нужен ffmpeg (FFMPEG_BIN, по умолчанию «ffmpeg» из PATH) для перекодирования в PCM 24 кГц.
 
 import { execFileSync, spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -101,11 +102,15 @@ function writeWav(file, pcm) {
 }
 
 // ---------- движки: возвращают { pcm, wordTimes | null } ----------
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const EDGE_BACKOFF_S = [3, 6, 12, 20, 20, 20, 20, 20, 20, 20, 20];
+
 let edge = null;
 async function synthEdge(text, tmpDir) {
-  // Сервис иногда обрывает WebSocket до конца синтеза: до 3 попыток с новым соединением.
+  // Сервис Edge рвёт WebSocket сериями (похоже на троттлинг): до 12 попыток с нарастающей паузой
+  // и короткая пауза после каждого успешного запроса.
   let lastErr = null;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 12; attempt++) {
     try {
       if (!edge) {
         const { MsEdgeTTS, OUTPUT_FORMAT } = await import("msedge-tts");
@@ -124,18 +129,38 @@ async function synthEdge(text, tmpDir) {
           .filter((m) => m.Type === "WordBoundary")
           .map((m) => ({ text: m.Data.text.Text, start: m.Data.Offset / 1e7, end: (m.Data.Offset + m.Data.Duration) / 1e7 }));
       }
+      await sleep(500);
       return { pcm, wordTimes };
     } catch (e) {
       lastErr = e;
-      console.warn(`  edge: попытка ${attempt} не удалась (${e.message}), повтор`);
+      const wait = EDGE_BACKOFF_S[Math.min(attempt - 1, EDGE_BACKOFF_S.length - 1)];
+      console.warn(`  edge: попытка ${attempt} не удалась (${e.message}), пауза ${wait} с`);
       try {
         edge?.close();
       } catch {}
       edge = null;
-      await new Promise((r) => setTimeout(r, 800 * attempt));
+      await sleep(wait * 1000);
     }
   }
   throw lastErr;
+}
+
+// Кэш озвученных фраз: повторный запуск не переозвучивает готовое (ключ = движок, голос, текст).
+const CACHE_DIR = path.join(ROOT, ".tts-cache");
+function cacheKey(text) {
+  const voice = ENGINE === "edge" ? EDGE_VOICE : ENGINE === "elevenlabs" ? `${EL_VOICE}:${EL_MODEL}` : SAPI_VOICE;
+  return createHash("sha1").update(`${ENGINE}|${voice}|${EDGE_RATE}|${text}`).digest("hex");
+}
+async function synthCached(text, tmpDir) {
+  fs.mkdirSync(CACHE_DIR, { recursive: true });
+  const base = path.join(CACHE_DIR, cacheKey(text));
+  if (fs.existsSync(`${base}.pcm`) && fs.existsSync(`${base}.json`)) {
+    return { pcm: fs.readFileSync(`${base}.pcm`), wordTimes: JSON.parse(fs.readFileSync(`${base}.json`, "utf8")) };
+  }
+  const r = await synth(text, tmpDir);
+  fs.writeFileSync(`${base}.pcm`, r.pcm);
+  fs.writeFileSync(`${base}.json`, JSON.stringify(r.wordTimes));
+  return r;
 }
 
 async function synthElevenLabs(text, tmpDir) {
@@ -237,7 +262,7 @@ async function main() {
     const phrases = [];
     for (let i = 0; i < phrasesSrc.length; i++) {
       const { words, clean } = parseWords(phrasesSrc[i]);
-      const { pcm, wordTimes } = await synth(clean, tmpDir);
+      const { pcm, wordTimes } = await synthCached(clean, tmpDir);
       const dur = pcm.length / 2 / SAMPLE_RATE;
       chunks.push(pcm);
       const aligned = alignWords(words, wordTimes, t, t + dur);
