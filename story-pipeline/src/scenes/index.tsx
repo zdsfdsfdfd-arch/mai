@@ -5,6 +5,14 @@ import { BuildingNeighbor } from "./BuildingNeighbor";
 import { CabinDiagram } from "./CabinDiagram";
 import { CharacterScene } from "./CharacterScene";
 import { CityNight } from "./CityNight";
+import { Checklist } from "./Checklist";
+import { Classroom } from "./Classroom";
+import { Countdown } from "./Countdown";
+import { DecayChart } from "./DecayChart";
+import { FactCards } from "./FactCards";
+import { FalloutTimer } from "./FalloutTimer";
+import { ShelterCutaway } from "./ShelterCutaway";
+import { ThumbMyth } from "./ThumbMyth";
 import { Dialogue } from "./Dialogue";
 import { DoorScene } from "./DoorScene";
 import { EndCard } from "./EndCard";
@@ -50,6 +58,22 @@ export const SceneView: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
       return <CityNight scene={scene} />;
     case "floor_plan":
       return <FloorPlan scene={scene} />;
+    case "classroom":
+      return <Classroom scene={scene} />;
+    case "thumb_myth":
+      return <ThumbMyth scene={scene} />;
+    case "fact_cards":
+      return <FactCards scene={scene} />;
+    case "countdown":
+      return <Countdown scene={scene} />;
+    case "fallout_timer":
+      return <FalloutTimer scene={scene} />;
+    case "shelter":
+      return <ShelterCutaway scene={scene} />;
+    case "decay_chart":
+      return <DecayChart scene={scene} />;
+    case "checklist":
+      return <Checklist scene={scene} />;
     case "dialogue":
       return <Dialogue scene={scene} />;
     case "roof":

@@ -68,3 +68,18 @@ $env:ENGINE="edge"; $env:EDGE_VOICE="ru-RU-DmitryNeural"; $env:FFMPEG_BIN="C:\..
 3. **Рендер.** Тот же `remotion render` на сервере или на ПК с GPU; 11‑минутная серия ≈ 20 000 кадров.
 4. **Постинг.** Готовый MP4 уходит в сервис постинга (upload‑post, Postiz) или в TikTok / YouTube API.
 5. **Новые типы сцен** добавляются одним React‑компонентом в `src/scenes` и строкой в `index.tsx`.
+
+## Готовые сценарии
+
+| Файл | Серия | Сцены |
+|---|---|---|
+| `episode/lift.json` | «Лифт» (первый прототип) | title_card, building_cutaway, phone_screen, stat_callouts, cabin_diagram, sound_diagram, city_night, end_card |
+| `episode/sosed-snizu.json` | «Сосед снизу» (абсурдная комедия) | + dialogue, floor_plan, roof, character_scene (door / room / entrance) |
+| `episode/vspyshka.json` | «Вспышка» (научпоп: что делать при ядерном взрыве) | + classroom, thumb_myth, fact_cards, countdown, fallout_timer, shelter, decay_chart, checklist |
+
+Чтобы собрать серию, скопировать нужный файл в `episode/script.json`, положить запись голоса в `episode/voice/all.mp3`
+и запустить `ENGINE=files npm run episode`. События анимации (`src/beats*.ts`) привязаны к началам фраз из
+`timeline.json`, поэтому картинка и звуковые эффекты сходятся с любой записью.
+
+Персонаж (`src/components/Character.tsx`) — рэгдолл из капсул с видимыми суставами: позы stand, point, sit,
+knock, walk, run, cover, fall, lie; одежда jacket / robe / suit / shirt; мимика по `mood`, рот открывается по `talkAt`.

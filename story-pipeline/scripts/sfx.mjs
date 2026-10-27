@@ -216,6 +216,53 @@ sfx.heart = () => {
   return o;
 };
 
+sfx.flash = () => {
+  const o = buf(0.9);
+  tone(o, 2400, 180, 0.12, 0.25, 0.7);
+  noise(o, 0.35, (x) => Math.exp(-x * 4), () => 300, () => 9000, 0.8);
+  tone(o, 70, 40, 0.1, 0.5, 0.9, 0.05);
+  return o;
+};
+
+sfx.shatter = () => {
+  const o = buf(1.0);
+  for (let k = 0; k < 14; k++) {
+    const st = k * 0.045 + (k % 3) * 0.01;
+    noise(o, 0.05, (x) => Math.pow(1 - x, 2), () => 2500, () => 12000, 0.7, st);
+    tone(o, 3200 + ((k * 731) % 2500), 3000 + ((k * 731) % 2500), 0.0001, 0.08, 0.25, st);
+  }
+  tone(o, 90, 50, 0.05, 0.12, 0.6);
+  return o;
+};
+
+sfx.geiger = () => {
+  const o = buf(1.3);
+  let tpos = 0.02;
+  let k = 0;
+  while (tpos < 1.25) {
+    noise(o, 0.004, (x) => 1 - x, () => 1500, () => 9000, 0.9, tpos);
+    const gap = 0.16 - 0.11 * (tpos / 1.25);
+    tpos += gap * (0.6 + 0.8 * Math.abs(Math.sin(k * 12.9898)));
+    k++;
+  }
+  return o;
+};
+
+sfx.static = () => {
+  const o = buf(0.9);
+  noise(o, 0.7, (x) => (0.5 + 0.5 * Math.sin(x * 60)) * Math.sin(Math.PI * x), () => 900, () => 3500, 0.6);
+  tone(o, 1000, 1000, 0.0001, 0.06, 0.5, 0.55);
+  tone(o, 1000, 1000, 0.0001, 0.06, 0.5, 0.7);
+  return o;
+};
+
+sfx.check = () => {
+  const o = buf(0.35);
+  tone(o, 660, 660, 0.0001, 0.07, 0.6);
+  tone(o, 880, 880, 0.0001, 0.12, 0.6, 0.1);
+  return o;
+};
+
 function writeWav(file, data) {
   let peak = 0;
   for (const v of data) peak = Math.max(peak, Math.abs(v));

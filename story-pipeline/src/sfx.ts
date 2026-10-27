@@ -1,7 +1,94 @@
 import { sec } from "./anim";
 import * as B from "./beats";
 import * as N from "./beats2";
+import * as F from "./beats3";
 import type { SceneTimeline } from "./types";
+
+// Реплики для серии «Вспышка».
+function flashCues(scene: SceneTimeline, fps: number, add: (f: number, n: string, v: number) => void): boolean {
+  const s = (x: number) => sec(x, fps);
+  const p = scene.props ?? {};
+  switch (scene.type) {
+    case "classroom":
+      if (p.mode === "flash") {
+        add(s(F.flashAt(scene)), "flash", 0.9);
+        add(s(F.flashAt(scene)) + 4, "boom", 0.6);
+        add(s(F.titleAt(scene)), "boom", 0.6);
+        add(s(F.titleAt(scene)) + 12, "pop", 0.4);
+      } else {
+        add(s(F.dropAt(scene)), "whoosh", 0.5);
+        add(s(F.dropAt(scene)) + 12, "stamp", 0.5);
+        add(s(F.shatterAt(scene)), "shatter", 0.9);
+        add(s(F.shatterAt(scene)), "boom", 0.6);
+      }
+      return true;
+    case "thumb_myth":
+      add(s(F.thumbUpAt(scene)), "whoosh", 0.5);
+      add(s(F.outlineAt(scene)), "pop", 0.45);
+      add(s(F.outlineAt(scene)) + 6, "pop", 0.3);
+      add(s(F.mythAt(scene)), "stamp", 0.8);
+      add(s(F.crossAt(scene)), "boom", 0.5);
+      add(s(F.crossAt(scene)) + 8, "pop", 0.4);
+      return true;
+    case "fact_cards": {
+      const times = N.cardPhraseTimes(scene);
+      times.forEach((t) => add(s(t), "pop", 0.5));
+      if (p.icon === "decon") add(s(times[0] ?? 1.5), "whoosh", 0.5);
+      if (p.icon === "iodine") add(s(times[2] ?? 5), "stamp", 0.6);
+      if (p.icon === "radio") {
+        add(s(times[0] ?? 0.5), "callfail", 0.35);
+        add(s(times[1] ?? 2), "static", 0.6);
+        add(s(times[2] ?? 4), "check", 0.4);
+      }
+      if (p.icon === "eye") add(s(times[0] ?? 1.5) + 2, "switch", 0.4);
+      return true;
+    }
+    case "countdown":
+      add(s(F.lightAt(scene)), "flash", 0.6);
+      add(s(F.soundAt(scene)), "rise", 0.5);
+      for (let i = 0; i < 9; i++) add(s(F.countAt(scene)) + i * fps, "click", 0.45);
+      add(s(F.formulaAt(scene)), "pop", 0.5);
+      add(s(F.yourTimeAt(scene)), "chime", 0.5);
+      return true;
+    case "fallout_timer":
+      add(s(F.timerStartAt(scene)), "pop", 0.45);
+      for (let i = 0; i < 8; i++) add(s(F.timerStartAt(scene)) + i * 6, "click", 0.25);
+      add(s(F.dustAt(scene)), "geiger", 0.7);
+      add(s(F.dustAt(scene)) + 6, "pop", 0.4);
+      add(s(F.dangerAt(scene)), "stamp", 0.7);
+      return true;
+    case "shelter":
+      add(s(F.carAt(scene)), "boom", 0.5);
+      add(s(F.carAt(scene)) + 2, "pop", 0.4);
+      add(s(F.buildingAt(scene)), "whoosh", 0.4);
+      add(s(F.buildingAt(scene)) + 4, "trot", 0.3);
+      [0, 9, 18].forEach((d) => add(s(F.floorsAt(scene)) + d, "pop", 0.4));
+      add(s(F.basementAt(scene)), "whoosh", 0.4);
+      add(s(F.basementAt(scene)) + 9, "chime", 0.5);
+      return true;
+    case "decay_chart":
+      add(s(F.sitAt3(scene)), "whoosh", 0.3);
+      add(s(F.chartAt(scene)), "pop", 0.45);
+      add(s(F.sevenAt(scene)), "click", 0.5);
+      add(s(F.twoDaysAt(scene)), "click", 0.5);
+      add(s(F.dayAt(scene)), "chime", 0.5);
+      return true;
+    case "checklist":
+      F.checkTimes(scene, (p.items ?? []).length).forEach((t) => add(s(t), "check", 0.5));
+      return true;
+    case "end_card":
+      if (p.thumb) {
+        add(0, "whoosh", 0.4);
+        add(10, "pop", 0.5);
+        add(s(F.endOfSpeech(scene)) + 2, "boom", 0.6);
+        add(s(F.endOfSpeech(scene)) + 6, "pop", 0.4);
+        return true;
+      }
+      return false;
+    default:
+      return false;
+  }
+}
 
 // Реплики для сцен серии «Сосед снизу» (варианты сцен по props).
 function neighborCues(scene: SceneTimeline, fps: number, add: (f: number, n: string, v: number) => void): boolean {
@@ -139,6 +226,7 @@ export function cuesForScene(scene: SceneTimeline, fps: number, isFirst: boolean
   for (const ph of scene.phrases) add(s(ph.start), "click", 0.12);
 
   if (neighborCues(scene, fps, add)) return cues;
+  if (flashCues(scene, fps, add)) return cues;
 
   switch (scene.type) {
     case "title_card":
