@@ -274,80 +274,103 @@ function findVoiceFile(base) {
   return null;
 }
 
-// Выбирает из найденных пауз те n−1, при которых длительности фраз ближе всего
-// к пропорции длин их текста (перебор сочетаний, пауз обычно меньше 15).
-function bestBoundaries(phrasesSrc, inner, a, b) {
-  const need = phrasesSrc.length - 1;
-  if (need === 0) return [];
-  let cand = inner;
-  if (cand.length > 14) cand = cand.slice().sort((x, y) => y[1] - y[0] - (x[1] - x[0])).slice(0, 14).sort((x, y) => x[0] - y[0]);
-  if (cand.length < need) return null;
+// Динамическое программирование: выбирает n−1 пауз из найденных так, чтобы длительности фраз
+// были ближе всего к пропорции длин их текста. Возвращает [start, end] для каждой фразы.
+function alignPhrases(phrasesSrc, silences, a, b) {
+  const n = phrasesSrc.length;
+  const cand = silences.filter(([s, e]) => s > a + 0.05 && e < b - 0.05);
   const lens = phrasesSrc.map((p) => Math.max(1, lettersOnly(p).length));
   const totalLen = lens.reduce((x, y) => x + y, 0);
-  let best = null;
-  let bestCost = Infinity;
-  const pick = [];
-  const rec = (from, k) => {
-    if (k === need) {
-      let cur = a;
-      let cost = 0;
-      for (let i = 0; i < phrasesSrc.length; i++) {
-        const end = i < need ? pick[i][0] : b;
-        const expected = ((b - a) * lens[i]) / totalLen;
-        cost += Math.pow((end - cur - expected) / (b - a), 2);
-        if (i < need) cur = pick[i][1];
-      }
-      if (cost < bestCost) {
-        bestCost = cost;
-        best = pick.slice();
-      }
-      return;
+  const T = b - a;
+  const exp = lens.map((l) => (T * l) / totalLen);
+  if (n === 1) return [[a, b]];
+  if (cand.length < n - 1) {
+    const out = [];
+    let cur = a;
+    for (let i = 0; i < n; i++) {
+      const end = i < n - 1 ? cur + exp[i] : b;
+      out.push([cur, end]);
+      cur = end;
     }
-    for (let j = from; j <= cand.length - (need - k); j++) {
-      pick.push(cand[j]);
-      rec(j + 1, k + 1);
-      pick.pop();
+    return out;
+  }
+  const m = cand.length;
+  const INF = Infinity;
+  const cost = (dur, i) => Math.pow((dur - exp[i]) / T, 2);
+  const dp = Array.from({ length: n - 1 }, () => new Float64Array(m).fill(INF));
+  const prev = Array.from({ length: n - 1 }, () => new Int32Array(m).fill(-1));
+  for (let j = 0; j < m; j++) dp[0][j] = cost(cand[j][0] - a, 0);
+  for (let i = 1; i < n - 1; i++) {
+    for (let j = i; j < m; j++) {
+      let best = INF;
+      let bk = -1;
+      for (let k = i - 1; k < j; k++) {
+        if (dp[i - 1][k] === INF) continue;
+        const c = dp[i - 1][k] + cost(cand[j][0] - cand[k][1], i);
+        if (c < best) {
+          best = c;
+          bk = k;
+        }
+      }
+      dp[i][j] = best;
+      prev[i][j] = bk;
     }
-  };
-  rec(0, 0);
-  return best;
+  }
+  let best = INF;
+  let bj = -1;
+  for (let j = n - 2; j < m; j++) {
+    if (dp[n - 2][j] === INF) continue;
+    const c = dp[n - 2][j] + cost(b - cand[j][1], n - 1);
+    if (c < best) {
+      best = c;
+      bj = j;
+    }
+  }
+  const picks = new Array(n - 1);
+  for (let i = n - 2, j = bj; i >= 0; i--) {
+    picks[i] = cand[j];
+    j = prev[i][j];
+  }
+  const out = [];
+  let cur = a;
+  for (let i = 0; i < n; i++) {
+    const end = i < n - 1 ? picks[i][0] : b;
+    out.push([cur, end]);
+    if (i < n - 1) cur = picks[i][1];
+  }
+  return out;
 }
 
 // Разбивает отрезок [a, b] записи на фразы по паузам внутри него.
 function phrasesFromSegment(phrasesSrc, silences, a, b) {
-  const inner = silences.filter(([s, e]) => s > a + 0.05 && e < b - 0.05);
-  const need = phrasesSrc.length - 1;
-  const bounds = bestBoundaries(phrasesSrc, inner, a, b) || [];
-  const phrases = [];
-  let cur = a;
-  for (let i = 0; i < phrasesSrc.length; i++) {
-    const { words, clean } = parseWords(phrasesSrc[i]);
-    let end;
-    if (bounds.length === need) end = i < need ? bounds[i][0] : b;
-    else {
-      // пауз не хватило: делим пропорционально длине текста
-      const total = phrasesSrc.reduce((s, p) => s + p.length, 0);
-      end = i < phrasesSrc.length - 1 ? cur + ((b - a) * phrasesSrc[i].length) / total : b;
-    }
-    phrases.push({ text: clean, start: cur, end, words });
-    cur = bounds.length === need && i < need ? bounds[i][1] : end;
-  }
-  return phrases;
+  const spans = alignPhrases(phrasesSrc, silences, a, b);
+  return phrasesSrc.map((p, i) => {
+    const { words, clean } = parseWords(p);
+    return { text: clean, start: spans[i][0], end: spans[i][1], words };
+  });
 }
 
 function buildFromFiles(script) {
   const all = findVoiceFile("all");
   const scenesOut = [];
   let cursor = 0;
-  const pushScene = (scene, pcmFile, silences, a, b, phrasesSrc) => {
+  const pcmCache = new Map();
+  const pushScene = (scene, pcmFile, silences, a, b, phrasesSrc, spans = null) => {
     // a, b — границы речи сцены в секундах внутри pcmFile (без тишины по краям)
-    const full = fileToPcm(pcmFile);
+    if (!pcmCache.has(pcmFile)) pcmCache.set(pcmFile, fileToPcm(pcmFile));
+    const full = pcmCache.get(pcmFile);
     const s0 = Math.max(0, Math.floor((a - 0.08) * SAMPLE_RATE)) * 2;
     const s1 = Math.min(full.length / 2, Math.ceil((b + 0.12) * SAMPLE_RATE)) * 2;
     const voice = full.subarray(s0, s1);
     // позиция в исходном файле → позиция в WAV сцены (речь начинается после LEAD_IN)
     const offset = LEAD_IN - s0 / 2 / SAMPLE_RATE;
-    const phrases = phrasesFromSegment(phrasesSrc, silences, a, b).map((p) => ({
+    const raw = spans
+      ? phrasesSrc.map((p, i) => {
+          const { words, clean } = parseWords(p);
+          return { text: clean, start: spans[i][0], end: spans[i][1], words };
+        })
+      : phrasesFromSegment(phrasesSrc, silences, a, b);
+    const phrases = raw.map((p) => ({
       text: p.text,
       start: +(p.start + offset).toFixed(3),
       end: +(p.end + offset).toFixed(3),
@@ -379,25 +402,26 @@ function buildFromFiles(script) {
   };
 
   if (all) {
-    const silences = detectSilences(all, -38, 0.22);
+    // Один файл на всю серию: одно выравнивание всех фраз по паузам, потом группировка по сценам.
+    const silences = detectSilences(all, -36, 0.12);
     const dur = fileToPcm(all).length / 2 / SAMPLE_RATE;
-    const long = silences.filter(([s, e]) => e - s >= 0.9 && s > 0.3 && e < dur - 0.3);
-    if (long.length !== script.scenes.length - 1) {
-      throw new Error(`В ${path.basename(all)} найдено ${long.length} длинных пауз (≥0,9 с), а нужно ${script.scenes.length - 1}: по одной между сценами`);
-    }
-    let a = silences.length && silences[0][0] < 0.05 ? silences[0][1] : 0;
+    const a0 = silences.length && silences[0][0] < 0.05 ? silences[0][1] : 0;
     const last = silences[silences.length - 1];
-    const fileEnd = last && (last[1] === Infinity || last[1] > dur - 0.05) ? last[0] : dur;
-    script.scenes.forEach((scene, i) => {
-      const b = i < long.length ? long[i][0] : fileEnd;
-      pushScene(scene, all, silences, a, b, splitPhrases(scene.narration));
-      if (i < long.length) a = long[i][1];
+    const b0 = last && (last[1] === Infinity || last[1] > dur - 0.05) ? last[0] : dur;
+    const flat = [];
+    script.scenes.forEach((scene, si) => splitPhrases(scene.narration).forEach((p) => flat.push({ si, p })));
+    const spans = alignPhrases(flat.map((f) => f.p), silences, a0, b0);
+    script.scenes.forEach((scene, si) => {
+      const idx = flat.map((f, i) => (f.si === si ? i : -1)).filter((i) => i >= 0);
+      const a = spans[idx[0]][0];
+      const b = spans[idx[idx.length - 1]][1];
+      pushScene(scene, all, silences, a, b, idx.map((i) => flat[i].p), idx.map((i) => spans[i]));
     });
   } else {
     for (const scene of script.scenes) {
       const f = findVoiceFile(scene.id);
       if (!f) throw new Error(`Нет файла озвучки для сцены ${scene.id} в ${VOICE_DIR} (ожидался ${scene.id}.mp3 или .wav, либо all.mp3)`);
-      const silences = detectSilences(f, -38, 0.22);
+      const silences = detectSilences(f, -36, 0.12);
       const dur = fileToPcm(f).length / 2 / SAMPLE_RATE;
       const a = silences.length && silences[0][0] < 0.05 ? silences[0][1] : 0;
       const last = silences[silences.length - 1];

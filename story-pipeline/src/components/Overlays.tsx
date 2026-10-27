@@ -13,7 +13,7 @@ export const TopPlaque: React.FC<{ part: number; dayLabel: string; spec?: TopPla
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const { opacity, scale } = pop(frame, fps, delay);
+  const { opacity, scale, y } = pop(frame, fps, delay);
   const numbered = spec && spec.num;
   return (
     <div
@@ -25,7 +25,7 @@ export const TopPlaque: React.FC<{ part: number; dayLabel: string; spec?: TopPla
         display: "flex",
         justifyContent: "center",
         opacity,
-        transform: `scale(${scale})`,
+        transform: `translateY(${-y}px) scale(${scale})`,
       }}
     >
       <div
@@ -66,9 +66,9 @@ export const StatusPlaque: React.FC<{ text: string; delay?: number }> = ({ text,
   const { fps } = useVideoConfig();
   const red = text.startsWith("!");
   const label = red ? text.slice(1) : text;
-  const { opacity, scale } = pop(frame, fps, delay);
+  const { opacity, scale, y } = pop(frame, fps, delay);
   return (
-    <div style={{ position: "absolute", top: 1180, left: 0, right: 0, display: "flex", justifyContent: "center", opacity, transform: `scale(${scale})` }}>
+    <div style={{ position: "absolute", top: 1180, left: 0, right: 0, display: "flex", justifyContent: "center", opacity, transform: `translateY(${y}px) scale(${scale})` }}>
       <div
         style={{
           background: red ? colors.red : colors.panelLight,
@@ -161,7 +161,7 @@ export const Label: React.FC<{ text: string; x: number; y: number; delay?: numbe
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const { opacity, scale } = pop(frame, fps, delay);
+  const { opacity, scale, y: dy } = pop(frame, fps, delay);
   const bg = tone === "red" ? colors.red : tone === "green" ? colors.green : tone === "beige" ? colors.beige : colors.panelLight;
   const fg = tone === "beige" ? colors.beigeInk : colors.white;
   return (
@@ -170,7 +170,7 @@ export const Label: React.FC<{ text: string; x: number; y: number; delay?: numbe
         position: "absolute",
         left: x,
         top: y,
-        transform: `translate(-50%, -50%) scale(${scale})`,
+        transform: `translate(-50%, calc(-50% + ${dy}px)) scale(${scale})`,
         opacity,
         background: bg,
         color: fg,

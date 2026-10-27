@@ -30,10 +30,13 @@ public/fonts, public/audio  шрифты (самохостинг) и озвуч�
 npm install
 # 1. озвучка + таймлайн (Node, движок по умолчанию edge = нейроголоса Microsoft, бесплатно)
 npm run tts
-# 2. контрольные кадры, по одному на сцену
+# 2. фоновая музыка под длину серии и звуковые эффекты (вжухи, попы, удары, переходы)
+npm run music && npm run sfx       # public/audio/music.wav, public/sfx/*.wav
+# 3. контрольные кадры, по одному на сцену
 npm run stills                     # out/stills/*.png
-# 3. полный рендер
+# 4. полный рендер
 npm run render                     # out/episode.mp4
+# всё сразу: npm run episode
 # предпросмотр в браузере
 npm run studio
 ```

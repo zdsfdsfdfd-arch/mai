@@ -1,8 +1,9 @@
+*.log
+.remotion/
+.tts-cache/
+episode/timeline.json
 node_modules/
 out/
-.remotion/
 public/audio/
-episode/timeline.json
-.tts-cache/
+public/sfx/
 run-tts.cmd
-*.log

@@ -9,7 +9,8 @@
     "render": "remotion render src/index.ts Episode out/episode.mp4 --codec=h264",
     "studio": "remotion studio",
     "music": "node scripts/music.mjs",
-    "episode": "npm run tts && npm run music && npm run render"
+    "episode": "npm run tts && npm run music && npm run sfx && npm run render",
+    "sfx": "node scripts/sfx.mjs"
   },
   "keywords": [],
   "author": "",

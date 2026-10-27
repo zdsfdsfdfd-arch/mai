@@ -3,9 +3,9 @@ import { interpolate, spring } from "remotion";
 // «Pop» как в референсе: элемент появляется целиком, с лёгким масштабом и прозрачностью.
 export const pop = (frame: number, fps: number, startFrame: number) => {
   const f = frame - startFrame;
-  if (f < 0) return { opacity: 0, scale: 0.85 };
-  const s = spring({ frame: f, fps, config: { damping: 14, stiffness: 220, mass: 0.6 } });
-  return { opacity: interpolate(f, [0, 4], [0, 1], { extrapolateRight: "clamp" }), scale: 0.85 + 0.15 * s };
+  if (f < 0) return { opacity: 0, scale: 0.85, y: 22 };
+  const s = spring({ frame: f, fps, config: { damping: 11, stiffness: 240, mass: 0.6 } });
+  return { opacity: interpolate(f, [0, 4], [0, 1], { extrapolateRight: "clamp" }), scale: 0.85 + 0.15 * s, y: 22 * (1 - s) };
 };
 
 export const fade = (frame: number, startFrame: number, len = 8) =>
