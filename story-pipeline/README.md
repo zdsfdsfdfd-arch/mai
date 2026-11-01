@@ -81,8 +81,8 @@ $env:ENGINE="edge"; $env:EDGE_VOICE="ru-RU-DmitryNeural"; $env:FFMPEG_BIN="C:\..
 и запустить `ENGINE=files npm run episode`. События анимации (`src/beats*.ts`) привязаны к началам фраз из
 `timeline.json`, поэтому картинка и звуковые эффекты сходятся с любой записью.
 
-Персонаж (`src/components/Character.tsx`) — «стикер» с гибкими резиновыми конечностями (плавные трубки через локоть
-и колено): позы stand, point, sit, knock, walk, run, cover, fall, lie; одежда jacket / robe / suit / shirt; мимика по `mood`,
+Персонаж (`src/components/Character.tsx`) — ретро-мультяшный: крупная голова с чубом и большими глазами, худи,
+джинсы, кроссовки; гибкие резиновые конечности (плавные трубки через локоть и колено): позы stand, point, sit, knock, walk, run, cover, fall, lie; одежда jacket / robe / suit / shirt; мимика по `mood`,
 рот по `talkAt`, вздрагивание по `flinchAt`, взгляд `lookAt`, присед `squash`.
 
 ## Стиль и движение

@@ -113,9 +113,12 @@ export const ShelterCutaway: React.FC<{ scene: SceneTimeline }> = ({ scene }) =>
           {/* герой бежит к дому */}
           <Puff x={heroX + 60} y={ground - 6} k={stepPuff} r={26} color="#8a7a66" />
           <Character pose={runK > 0 && runK < 1 ? "run" : "stand"} frame={frame} fps={fps} x={heroX} y={ground - 540 * 0.62 + 10} scale={0.62} mood={runK < 1 ? "scared" : "neutral"} opacity={outsideOp} />
-          {/* герой в подвале */}
+          {/* герой внутри: идёт по первому этажу к лестнице, потом сидит в подвале */}
+          {t >= bAt + 1.7 && baseK < 1 && (
+            <Character pose={t < baseAt - 0.2 ? "walk" : "stand"} frame={frame} fps={fps} x={440 + 180 * interpolate(t, [bAt + 1.7, baseAt - 0.2], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })} y={ground - 0.99 * 560 * 0.16} scale={0.16} opacity={1 - baseK} shadow={false} />
+          )}
           {baseK > 0 && <Glow x={670} y={ground + 80} r={180} color={colors.yellow} opacity={0.45 * baseK} />}
-          {baseK > 0 && <Character pose="sit" frame={frame} fps={fps} x={470} y={ground + 160 - 0.9 * 560 * 0.42} scale={0.42} mood="tired" opacity={baseK} />}
+          {baseK > 0 && <Character pose="sit" frame={frame} fps={fps} x={500} y={ground + 162 - 0.9 * 560 * 0.3} scale={0.3} mood="tired" opacity={baseK} />}
           <div style={{ position: "absolute", inset: 0, opacity: carLblOp, pointerEvents: "none" }}>{lbl("МАШИНА · ПОЧТИ 0", 400, 870, carAt, "red")}</div>
           {lbl("ВЕРХ · ОКНА ÷2", 670, top + fh * 0.5, fAt + 0.3, "red")}
           {lbl("СЕРЕДИНА ÷10", 670, top + fh * (p.floors / 2), fAt + 0.6, "beige")}

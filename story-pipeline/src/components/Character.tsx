@@ -90,8 +90,10 @@ const Limb: React.FC<{ ox: number; oy: number; a1: number; a2: number; l1: numbe
         <circle cx={hx} cy={hy} r={21} fill={skin} stroke={ink} strokeWidth={SW} />
       ) : (
         <g transform={`translate(${hx} ${hy}) rotate(${a1 + a2})`}>
-          <path d="M-22 -6 L44 -6 Q58 -4 56 10 L56 14 Q56 22 48 22 L-16 22 Q-24 22 -24 14 Z" fill="#15161f" stroke={ink} strokeWidth={SW} strokeLinejoin="round" />
-          <path d="M-14 6 L40 6" stroke={colors.white} strokeWidth={3} opacity={0.4} />
+          <path d="M-24 -8 L42 -8 Q60 -4 58 12 L58 16 Q58 24 50 24 L-18 24 Q-26 24 -26 16 Z" fill={colors.white} stroke={ink} strokeWidth={SW} strokeLinejoin="round" />
+          <path d="M-24 6 L56 6" stroke={colors.red} strokeWidth={5} />
+          <path d="M-24 16 L56 16" stroke={ink} strokeWidth={3} opacity={0.6} />
+          <path d="M-2 -8 Q8 4 20 -8" fill="none" stroke={ink} strokeWidth={3} opacity={0.6} />
         </g>
       )}
     </g>
@@ -100,10 +102,11 @@ const Limb: React.FC<{ ox: number; oy: number; a1: number; a2: number; l1: numbe
 
 export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], talkAt = [], flinchAt = [], lookAt, sitAt, fallK = 0, squash = 0, scale = 1, x = 0, y = 0, flip = false, outfit = "jacket", mustache = false, glasses = false, mood = "neutral", opacity = 1, shadow = true }) => {
   const t = frame / fps;
-  const c = cloth(outfit);
-  const cd = clothDark(outfit);
+  const hoodie = outfit === "jacket";
+  const c = hoodie ? "#2bb39a" : cloth(outfit);
+  const cd = hoodie ? "#1b8673" : clothDark(outfit);
   const limbFill = outfit === "shirt" ? colors.skin : c;
-  const pants = "#232a44";
+  const jeans = "#2f3b5c";
 
   let hit = 0;
   for (const k of knockAt) {
@@ -130,7 +133,6 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
     const m = (key: keyof Angles) => lerp(st[key], s[key], k);
     a = { fu: m("fu"), fl: m("fl"), bu: m("bu"), bl: m("bl"), ft: m("ft"), fs: m("fs"), bt: m("bt"), bs: m("bs"), torso: m("torso"), head: m("head"), bodyY: m("bodyY"), lean: 0 };
   }
-  // вторичное движение: дыхание, покачивание свободных рук с запаздыванием, вздрагивание
   const idle = Math.sin(t * 1.7) * 3;
   const breathe = Math.sin(t * 2.2) * 2;
   const headBob = Math.sin(t * 2.2 + 0.6) * 1.5 + Math.sin(t * 0.9) * 1;
@@ -140,125 +142,146 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
   const bu = a.bu + idle * 0.5 - 110 * flinch;
   const bl = a.bl + idle * 0.4 - 20 * flinch;
   const torso = a.torso - 14 * flinch;
-  const head = a.head - 8 * flinch;
+  const head = a.head - 8 * flinch + Math.sin(t * 0.7) * 1.5;
   const bodyY = a.bodyY + breathe * 0.5 - 12 * flinch;
   const sq = Math.max(0, Math.min(1, squash)) + flinch * 0.15;
   const skin = colors.skin;
   const skinDark = "#d3a984";
-  const hair = "#1b1722";
+  const hair = "#2b1d14";
+  const hairHi = "#5a3d2a";
   const scared = mood === "scared" || flinch > 0.5;
   const smile = mood === "smile";
   const tired = mood === "tired";
   const grounded = pose !== "fall" && pose !== "lie";
   const look = lookAt ?? [Math.sin(t * 0.5) * 0.4, Math.sin(t * 0.33) * 0.2];
-  const px = look[0] * 4.5;
-  const py = look[1] * 3;
-  const eyeR = 12 + 3 * flinch;
+  const px = look[0] * 5;
+  const py = look[1] * 4;
+  const pupilR = 8 - 2 * flinch;
+  const mouthOpen = scared ? 1 : talk;
 
   return (
     <svg width={300 * scale} height={560 * scale} viewBox="0 0 300 560" style={{ position: "absolute", left: x, top: y, transform: flip ? "scaleX(-1)" : undefined, overflow: "visible", opacity }}>
-      {shadow && <ellipse cx={150} cy={554} rx={(grounded ? 78 : 120) * (1 + sq * 0.3)} ry={10} fill={ink} opacity={0.3} />}
-      <g transform={`translate(150 ${340 + bodyY}) translate(0 212) scale(${1 + sq * 0.22} ${1 - sq * 0.22}) translate(0 -212) rotate(${torso})`}>
+      {shadow && <ellipse cx={150} cy={554} rx={(grounded ? 76 : 120) * (1 + sq * 0.3)} ry={10} fill={ink} opacity={0.3} />}
+      <g transform={`translate(150 ${354 + bodyY}) translate(0 200) scale(${1 + sq * 0.22} ${1 - sq * 0.22}) translate(0 -200) rotate(${torso})`}>
         {/* задняя нога и рука */}
-        <Limb ox={-22} oy={0} a1={a.bt} a2={a.bs} l1={100} l2={92} w={40} fill={pants} end="shoe" skin={skin} />
-        <Limb ox={-32} oy={-150} a1={bu} a2={bl} l1={92} l2={80} w={34} fill={limbFill} end="hand" skin={skin} />
+        <Limb ox={-22} oy={0} a1={a.bt} a2={a.bs} l1={92} l2={86} w={40} fill={jeans} end="shoe" skin={skin} />
+        <Limb ox={-34} oy={-140} a1={bu} a2={bl} l1={88} l2={78} w={36} fill={limbFill} end="hand" skin={skin} />
+        {/* капюшон за шеей */}
+        {hoodie && <path d="M-60 -150 Q-74 -196 -34 -206 L34 -206 Q74 -196 60 -150 Q0 -132 -60 -150 Z" fill={cd} stroke={ink} strokeWidth={SW} strokeLinejoin="round" />}
         {/* туловище */}
-        <path d="M-50 -176 L50 -176 Q58 -176 58 -166 L54 -14 Q52 6 32 6 L-32 6 Q-52 6 -54 -14 L-58 -166 Q-58 -176 -50 -176 Z" fill={c} stroke={ink} strokeWidth={SW} strokeLinejoin="round" />
-        <path d="M22 -170 Q54 -150 54 -90 L52 -20 Q52 2 30 4 L44 4 Q55 -10 55 -40 L57 -120 Q57 -160 22 -170 Z" fill={cd} opacity={0.6} />
-        {outfit === "jacket" && (
+        <path d="M-46 -162 L46 -162 Q60 -162 60 -148 L54 -16 Q52 8 30 8 L-30 8 Q-52 8 -54 -16 L-60 -148 Q-60 -162 -46 -162 Z" fill={c} stroke={ink} strokeWidth={SW} strokeLinejoin="round" />
+        <path d="M24 -158 Q56 -140 56 -90 L52 -20 Q52 4 30 6 L44 6 Q55 -10 55 -40 L58 -120 Q58 -150 24 -158 Z" fill={cd} opacity={0.55} />
+        {hoodie && (
           <g>
-            <polygon points="-2,-174 44,-174 22,-128" fill="#e3dfd4" stroke={ink} strokeWidth={4} strokeLinejoin="round" />
-            <line x1={10} y1={-126} x2={8} y2={-10} stroke={ink} strokeWidth={3} opacity={0.6} />
-            <rect x={-44} y={-60} width={30} height={22} rx={6} fill="none" stroke={ink} strokeWidth={3} opacity={0.5} />
+            <path d="M-40 -162 Q0 -130 40 -162 Q0 -142 -40 -162 Z" fill={cd} stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+            <path d="M-10 -142 L-14 -92" stroke={ink} strokeWidth={4} strokeLinecap="round" opacity={0.7} />
+            <path d="M10 -142 L14 -92" stroke={ink} strokeWidth={4} strokeLinecap="round" opacity={0.7} />
+            <circle cx={-14} cy={-90} r={4} fill={ink} opacity={0.7} />
+            <circle cx={14} cy={-90} r={4} fill={ink} opacity={0.7} />
+            <path d="M-38 -56 L38 -56 L32 -14 L-32 -14 Z" fill="none" stroke={ink} strokeWidth={4} strokeLinejoin="round" opacity={0.45} />
           </g>
         )}
         {outfit === "robe" && (
           <g>
-            <polygon points="-10,-174 52,-174 20,-60" fill="#e8d8c0" stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+            <polygon points="-10,-162 52,-162 20,-60" fill="#e8d8c0" stroke={ink} strokeWidth={4} strokeLinejoin="round" />
             <rect x={-55} y={-72} width={110} height={14} fill="#5a1f2a" stroke={ink} strokeWidth={3} />
           </g>
         )}
         {outfit === "suit" && (
           <g>
-            <polygon points="-6,-174 48,-174 20,-95" fill={colors.white} stroke={ink} strokeWidth={4} strokeLinejoin="round" />
-            <polygon points="16,-164 30,-164 23,-95" fill={colors.red} stroke={ink} strokeWidth={3} strokeLinejoin="round" />
+            <polygon points="-6,-162 48,-162 20,-95" fill={colors.white} stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+            <polygon points="16,-152 30,-152 23,-95" fill={colors.red} stroke={ink} strokeWidth={3} strokeLinejoin="round" />
           </g>
         )}
         {outfit === "shirt" && (
           <g>
-            <path d="M-6 -174 L22 -150 L46 -174" fill="none" stroke={ink} strokeWidth={4} strokeLinejoin="round" />
-            <line x1={22} y1={-150} x2={22} y2={-40} stroke={ink} strokeWidth={3} opacity={0.5} />
+            <path d="M-14 -162 Q0 -146 14 -162" fill="none" stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+            <rect x={-18} y={-110} width={36} height={30} rx={6} fill={colors.yellow} stroke={ink} strokeWidth={3} opacity={0.9} />
           </g>
         )}
         {/* бёдра и ремень */}
-        <rect x={-54} y={-22} width={108} height={42} rx={18} fill={pants} stroke={ink} strokeWidth={SW} />
-        <rect x={-50} y={-16} width={100} height={10} rx={4} fill={ink} opacity={0.7} />
+        <rect x={-54} y={-20} width={108} height={40} rx={18} fill={jeans} stroke={ink} strokeWidth={SW} />
+        <rect x={-50} y={-14} width={100} height={9} rx={4} fill={ink} opacity={0.6} />
         {/* передняя нога */}
-        <Limb ox={22} oy={0} a1={a.ft} a2={a.fs} l1={100} l2={92} w={40} fill={pants} end="shoe" skin={skin} />
+        <Limb ox={22} oy={0} a1={a.ft} a2={a.fs} l1={92} l2={86} w={40} fill={jeans} end="shoe" skin={skin} />
         {/* шея и голова */}
-        <g transform={`translate(0 ${-174 + headBob}) rotate(${head})`}>
-          <rect x={-16} y={-30} width={32} height={36} rx={12} fill={skin} stroke={ink} strokeWidth={SW} />
-          <g transform="translate(2 -82)">
-            <circle cx={-58} cy={2} r={13} fill={skin} stroke={ink} strokeWidth={SW} />
-            <path d="M-62 -2 Q-56 2 -60 8" fill="none" stroke={ink} strokeWidth={3} />
-            <circle cx={0} cy={0} r={66} fill={skin} stroke={ink} strokeWidth={SW} />
-            <path d="M-30 40 Q0 70 40 40 Q10 56 -30 40 Z" fill={skinDark} opacity={0.5} />
-            <g transform={`scale(1.18) translate(${Math.sin(t * 2.2 + 1) * 1.2} 0)`}>
-              <path d="M-57 2 C-58 -58, 30 -80, 58 -28 C60 -16, 56 -10, 54 -14 C40 -44, 8 -52, -16 -36 C-34 -24, -46 -10, -50 8 C-54 8, -57 6, -57 2 Z" fill={hair} stroke={ink} strokeWidth={5} strokeLinejoin="round" />
-              <path d="M-20 -48 C-4 -62, 24 -60, 40 -44" fill="none" stroke="#3a3346" strokeWidth={4} strokeLinecap="round" />
+        <g transform={`translate(0 ${-164 + headBob}) rotate(${head})`}>
+          <rect x={-15} y={-34} width={30} height={40} rx={12} fill={skin} stroke={ink} strokeWidth={SW} />
+          <g transform="translate(4 -82)">
+            <circle cx={-60} cy={6} r={13} fill={skin} stroke={ink} strokeWidth={SW} />
+            <path d="M-64 2 Q-58 6 -62 12" fill="none" stroke={ink} strokeWidth={3} />
+            {/* голова */}
+            <path d="M-64 -14 C-64 -92, 64 -92, 64 -14 C64 36, 44 72, 0 72 C-44 72, -64 36, -64 -14 Z" fill={skin} stroke={ink} strokeWidth={SW} strokeLinejoin="round" />
+            <path d="M-34 44 Q0 72 36 44 Q6 58 -34 44 Z" fill={skinDark} opacity={0.45} />
+            {/* волосы: большой чуб */}
+            <g transform={`translate(${Math.sin(t * 2.2 + 1) * 1.5} 0)`}>
+              <path d="M-66 -30 C-62 -84, -20 -104, 10 -100 C44 -100, 72 -100, 88 -62 C94 -48, 76 -44, 60 -52 C44 -60, 26 -50, 8 -52 C-14 -54, -36 -46, -50 -28 Z" fill={hair} stroke={ink} strokeWidth={5} strokeLinejoin="round" />
+              <path d="M-40 -72 C-10 -94, 30 -92, 60 -74" fill="none" stroke={hairHi} strokeWidth={6} strokeLinecap="round" />
+              <rect x={-64} y={-34} width={10} height={26} rx={4} fill={hair} />
             </g>
-            <circle cx={2} cy={16} r={9} fill="#e58a8a" opacity={0.3} />
-            <circle cx={50} cy={16} r={9} fill="#e58a8a" opacity={0.3} />
+            {/* щёки */}
+            <circle cx={-4} cy={26} r={10} fill="#e58a8a" opacity={0.25} />
+            <circle cx={54} cy={22} r={10} fill="#e58a8a" opacity={0.25} />
+            {/* глаза */}
             {!blink ? (
               <>
-                <circle cx={12} cy={-4} r={eyeR} fill={colors.white} stroke={ink} strokeWidth={3} />
-                <circle cx={41} cy={-4} r={eyeR} fill={colors.white} stroke={ink} strokeWidth={3} />
-                <circle cx={15 + px} cy={-3 + py} r={5.5 - 1.5 * flinch} fill={ink} />
-                <circle cx={44 + px} cy={-3 + py} r={5.5 - 1.5 * flinch} fill={ink} />
-                <circle cx={13.5 + px} cy={-5.5 + py} r={2} fill={colors.white} />
-                <circle cx={42.5 + px} cy={-5.5 + py} r={2} fill={colors.white} />
+                <ellipse cx={8} cy={-4} rx={15} ry={19 + 3 * flinch} fill={colors.white} stroke={ink} strokeWidth={4} />
+                <ellipse cx={46} cy={-6} rx={15} ry={19 + 3 * flinch} fill={colors.white} stroke={ink} strokeWidth={4} />
+                <circle cx={12 + px} cy={-1 + py} r={pupilR} fill="#3a2a1e" />
+                <circle cx={50 + px} cy={-3 + py} r={pupilR} fill="#3a2a1e" />
+                <circle cx={12 + px} cy={-1 + py} r={pupilR * 0.55} fill={ink} />
+                <circle cx={50 + px} cy={-3 + py} r={pupilR * 0.55} fill={ink} />
+                <circle cx={9 + px} cy={-6 + py} r={3} fill={colors.white} />
+                <circle cx={47 + px} cy={-8 + py} r={3} fill={colors.white} />
                 {tired && (
                   <>
-                    <path d="M0 -10 Q12 -4 24 -10 L24 -16 L0 -16 Z" fill={skin} />
-                    <path d="M29 -10 Q41 -4 53 -10 L53 -16 L29 -16 Z" fill={skin} />
-                    <path d="M1 -9 Q12 -3 23 -9" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
-                    <path d="M30 -9 Q41 -3 52 -9" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
+                    <path d="M-7 -8 Q8 0 23 -8 L23 -24 L-7 -24 Z" fill={skin} />
+                    <path d="M31 -10 Q46 -2 61 -10 L61 -26 L31 -26 Z" fill={skin} />
+                    <path d="M-6 -7 Q8 1 22 -7" fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" />
+                    <path d="M32 -9 Q46 -1 60 -9" fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" />
                   </>
                 )}
               </>
             ) : (
               <>
-                <path d="M2 -4 Q12 2 22 -4" fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" />
-                <path d="M31 -4 Q41 2 51 -4" fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" />
+                <path d="M-6 -2 Q8 6 22 -2" fill="none" stroke={ink} strokeWidth={5} strokeLinecap="round" />
+                <path d="M32 -4 Q46 4 60 -4" fill="none" stroke={ink} strokeWidth={5} strokeLinecap="round" />
               </>
             )}
-            <path d={scared ? "M0 -32 L22 -26" : tired ? "M2 -20 L22 -24" : "M2 -24 L22 -24"} stroke={ink} strokeWidth={5} strokeLinecap="round" />
-            <path d={scared ? "M32 -28 L52 -34" : tired ? "M32 -24 L52 -20" : "M32 -24 L52 -24"} stroke={ink} strokeWidth={5} strokeLinecap="round" />
-            <path d="M30 4 Q36 12 28 15" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
-            {scared ? (
-              <ellipse cx={28} cy={30} rx={9} ry={12} fill="#3a1f1f" stroke={ink} strokeWidth={3} />
-            ) : talk > 0.1 ? (
-              <ellipse cx={28} cy={28} rx={8 + 4 * talk} ry={2 + 9 * talk} fill="#3a1f1f" stroke={ink} strokeWidth={3} />
+            {/* брови */}
+            <path d={scared ? "M-8 -38 Q8 -50 24 -36" : tired ? "M-6 -26 Q8 -30 24 -34" : "M-8 -30 Q8 -40 24 -30"} fill="none" stroke={ink} strokeWidth={7} strokeLinecap="round" />
+            <path d={scared ? "M30 -40 Q46 -52 62 -36" : tired ? "M30 -34 Q46 -32 62 -26" : "M30 -32 Q46 -42 62 -30"} fill="none" stroke={ink} strokeWidth={7} strokeLinecap="round" />
+            {/* нос */}
+            <path d="M36 10 Q46 20 34 26" fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" />
+            {/* рот */}
+            {mouthOpen > 0.1 ? (
+              <g>
+                <ellipse cx={30} cy={44} rx={10 + 6 * mouthOpen} ry={4 + 14 * mouthOpen} fill="#5a2222" stroke={ink} strokeWidth={4} />
+                <ellipse cx={30} cy={48 + 8 * mouthOpen} rx={6} ry={4 * mouthOpen} fill="#e07a8a" />
+              </g>
             ) : smile ? (
-              <path d="M12 24 Q28 40 44 24" stroke={ink} strokeWidth={4} fill="#3a1f1f" strokeLinecap="round" />
+              <g>
+                <path d="M2 34 Q30 66 58 32 Q30 46 2 34 Z" fill={colors.white} stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+                <path d="M6 36 Q30 46 54 34" fill="none" stroke={ink} strokeWidth={2} opacity={0.6} />
+              </g>
             ) : tired ? (
-              <path d="M16 30 L40 30" stroke={ink} strokeWidth={4} strokeLinecap="round" />
+              <path d="M12 44 L46 44" stroke={ink} strokeWidth={5} strokeLinecap="round" />
             ) : (
-              <path d="M16 28 Q28 34 40 28" stroke={ink} strokeWidth={4} fill="none" strokeLinecap="round" />
+              <path d="M10 40 Q30 52 52 38" stroke={ink} strokeWidth={5} fill="none" strokeLinecap="round" />
             )}
-            {mustache && <path d="M8 18 C18 8, 40 10, 48 20 C40 16, 18 18, 8 18 Z" fill={hair} stroke={ink} strokeWidth={3} />}
+            {mustache && <path d="M6 30 C18 18, 44 20, 54 32 C44 26, 18 28, 6 30 Z" fill={hair} stroke={ink} strokeWidth={3} />}
             {glasses && (
               <g fill="none" stroke={ink} strokeWidth={4}>
-                <circle cx={12} cy={-4} r={17} />
-                <circle cx={41} cy={-4} r={17} />
-                <line x1={29} y1={-4} x2={24} y2={-4} />
+                <ellipse cx={8} cy={-4} rx={20} ry={21} />
+                <ellipse cx={46} cy={-6} rx={20} ry={21} />
+                <line x1={28} y1={-5} x2={26} y2={-5} />
               </g>
             )}
-            {scared && <path d="M62 -40 Q70 -28 62 -20 Q54 -28 62 -40 Z" fill="#7cc4ff" stroke={ink} strokeWidth={3} />}
+            {scared && <path d="M70 -44 Q80 -30 70 -20 Q60 -30 70 -44 Z" fill="#7cc4ff" stroke={ink} strokeWidth={3} />}
           </g>
         </g>
         {/* передняя рука */}
-        <Limb ox={32} oy={-150} a1={fu} a2={fl} l1={92} l2={80} w={34} fill={limbFill} end="hand" skin={skin} />
+        <Limb ox={34} oy={-140} a1={fu} a2={fl} l1={88} l2={78} w={36} fill={limbFill} end="hand" skin={skin} />
       </g>
     </svg>
   );
