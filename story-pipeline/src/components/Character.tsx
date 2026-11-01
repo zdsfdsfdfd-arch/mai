@@ -6,7 +6,7 @@ import { colors, ink } from "../theme";
 // и колено (без шарниров), крупная голова, живое лицо: моргает, смотрит, дышит, вздрагивает, говорит.
 // Рамка 300×560, ступни у низа (y≈554), тень на полу. API совместим со всеми сценами.
 
-export type Pose = "stand" | "point" | "sit" | "knock" | "walk" | "run" | "cover" | "fall" | "lie";
+export type Pose = "stand" | "point" | "thumb" | "sit" | "knock" | "walk" | "run" | "cover" | "fall" | "lie";
 export type Outfit = "jacket" | "robe" | "suit" | "shirt";
 export type Mood = "neutral" | "scared" | "smile" | "tired";
 
@@ -19,6 +19,8 @@ type Props = {
   flinchAt?: number[];
   lookAt?: [number, number];
   sitAt?: number;
+  blend?: { from: Pose; to: Pose; at: number; dur?: number };
+  wink?: boolean;
   fallK?: number;
   squash?: number;
   scale?: number;
@@ -60,6 +62,8 @@ const poseAngles = (pose: Pose, t: number, extra: { hit: number; gesture: number
       return { ...base, fu: -92, fl: -62 + 56 * extra.hit, bu: -4, bl: 6, torso: 3 };
     case "point":
       return { ...base, fu: -152, fl: -12, bu: -6, bl: 8, torso: -4, head: -8 };
+    case "thumb":
+      return { ...base, fu: -128, fl: -6, bu: -8, bl: 10, torso: -5, head: -12 };
     case "fall": {
       const k = extra.fallK;
       const flail = Math.sin(t * 18) * 40 * (1 - k);
@@ -73,7 +77,7 @@ const poseAngles = (pose: Pose, t: number, extra: { hit: number; gesture: number
 };
 
 // Гибкая конечность: плавная кривая через локоть/колено, обводка, блик.
-const Limb: React.FC<{ ox: number; oy: number; a1: number; a2: number; l1: number; l2: number; w: number; fill: string; end: "hand" | "shoe"; skin: string }> = ({ ox, oy, a1, a2, l1, l2, w, fill, end, skin }) => {
+const Limb: React.FC<{ ox: number; oy: number; a1: number; a2: number; l1: number; l2: number; w: number; fill: string; end: "hand" | "shoe" | "thumb"; skin: string }> = ({ ox, oy, a1, a2, l1, l2, w, fill, end, skin }) => {
   const ex = ox - l1 * Math.sin(rad(a1));
   const ey = oy + l1 * Math.cos(rad(a1));
   const hx = ex - l2 * Math.sin(rad(a1 + a2));
@@ -88,6 +92,14 @@ const Limb: React.FC<{ ox: number; oy: number; a1: number; a2: number; l1: numbe
       <path d={d} fill="none" stroke={colors.white} strokeWidth={w * 0.22} strokeLinecap="round" opacity={0.16} transform="translate(-4 -3)" />
       {end === "hand" ? (
         <circle cx={hx} cy={hy} r={21} fill={skin} stroke={ink} strokeWidth={SW} />
+      ) : end === "thumb" ? (
+        <g transform={`translate(${hx} ${hy}) rotate(${a1 + a2})`}>
+          <rect x={12} y={-9} width={40} height={18} rx={9} fill={skin} stroke={ink} strokeWidth={SW} />
+          <circle cx={0} cy={2} r={23} fill={skin} stroke={ink} strokeWidth={SW} />
+          <path d="M-14 -4 Q-6 -14 4 -6" fill="none" stroke={ink} strokeWidth={3} opacity={0.45} />
+          <path d="M-12 8 Q-4 0 6 6" fill="none" stroke={ink} strokeWidth={3} opacity={0.45} />
+          <ellipse cx={42} cy={0} rx={7} ry={5} fill="#f3dcc4" stroke={ink} strokeWidth={2.5} />
+        </g>
       ) : (
         <g transform={`translate(${hx} ${hy}) rotate(${a1 + a2})`}>
           <path d="M-24 -8 L42 -8 Q60 -4 58 12 L58 16 Q58 24 50 24 L-18 24 Q-26 24 -26 16 Z" fill={colors.white} stroke={ink} strokeWidth={SW} strokeLinejoin="round" />
@@ -100,7 +112,7 @@ const Limb: React.FC<{ ox: number; oy: number; a1: number; a2: number; l1: numbe
   );
 };
 
-export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], talkAt = [], flinchAt = [], lookAt, sitAt, fallK = 0, squash = 0, scale = 1, x = 0, y = 0, flip = false, outfit = "jacket", mustache = false, glasses = false, mood = "neutral", opacity = 1, shadow = true }) => {
+export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], talkAt = [], flinchAt = [], lookAt, sitAt, blend, wink = false, fallK = 0, squash = 0, scale = 1, x = 0, y = 0, flip = false, outfit = "jacket", mustache = false, glasses = false, mood = "neutral", opacity = 1, shadow = true }) => {
   const t = frame / fps;
   const hoodie = outfit === "jacket";
   const c = hoodie ? "#2bb39a" : cloth(outfit);
@@ -126,10 +138,11 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
     if (d >= 0 && d <= 0.7) flinch = Math.max(flinch, d < 0.12 ? d / 0.12 : 1 - (d - 0.12) / 0.58);
   }
   let a = poseAngles(pose, t, { hit, gesture, fallK });
-  if (sitAt !== undefined) {
-    const k = smooth(interpolate(t, [sitAt, sitAt + 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
-    const s = poseAngles("sit", t, { hit, gesture, fallK });
-    const st = poseAngles("stand", t, { hit, gesture, fallK });
+  const bl0 = blend ?? (sitAt !== undefined ? { from: "stand" as Pose, to: "sit" as Pose, at: sitAt, dur: 0.6 } : undefined);
+  if (bl0) {
+    const k = smooth(interpolate(t, [bl0.at, bl0.at + (bl0.dur ?? 0.6)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
+    const s = poseAngles(bl0.to, t, { hit, gesture, fallK });
+    const st = poseAngles(bl0.from, t, { hit, gesture, fallK });
     const m = (key: keyof Angles) => lerp(st[key], s[key], k);
     a = { fu: m("fu"), fl: m("fl"), bu: m("bu"), bl: m("bl"), ft: m("ft"), fs: m("fs"), bt: m("bt"), bs: m("bs"), torso: m("torso"), head: m("head"), bodyY: m("bodyY"), lean: 0 };
   }
@@ -223,15 +236,16 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
             <circle cx={-4} cy={26} r={10} fill="#e58a8a" opacity={0.25} />
             <circle cx={54} cy={22} r={10} fill="#e58a8a" opacity={0.25} />
             {/* глаза */}
+            {wink && <path d="M-8 -4 Q8 6 24 -4" fill="none" stroke={ink} strokeWidth={5} strokeLinecap="round" />}
             {!blink ? (
               <>
-                <ellipse cx={8} cy={-4} rx={15} ry={19 + 3 * flinch} fill={colors.white} stroke={ink} strokeWidth={4} />
+                {!wink && <ellipse cx={8} cy={-4} rx={15} ry={19 + 3 * flinch} fill={colors.white} stroke={ink} strokeWidth={4} />}
                 <ellipse cx={46} cy={-6} rx={15} ry={19 + 3 * flinch} fill={colors.white} stroke={ink} strokeWidth={4} />
-                <circle cx={12 + px} cy={-1 + py} r={pupilR} fill="#3a2a1e" />
+                {!wink && <circle cx={12 + px} cy={-1 + py} r={pupilR} fill="#3a2a1e" />}
                 <circle cx={50 + px} cy={-3 + py} r={pupilR} fill="#3a2a1e" />
-                <circle cx={12 + px} cy={-1 + py} r={pupilR * 0.55} fill={ink} />
+                {!wink && <circle cx={12 + px} cy={-1 + py} r={pupilR * 0.55} fill={ink} />}
                 <circle cx={50 + px} cy={-3 + py} r={pupilR * 0.55} fill={ink} />
-                <circle cx={9 + px} cy={-6 + py} r={3} fill={colors.white} />
+                {!wink && <circle cx={9 + px} cy={-6 + py} r={3} fill={colors.white} />}
                 <circle cx={47 + px} cy={-8 + py} r={3} fill={colors.white} />
                 {tired && (
                   <>
@@ -281,7 +295,7 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
           </g>
         </g>
         {/* передняя рука */}
-        <Limb ox={34} oy={-140} a1={fu} a2={fl} l1={88} l2={78} w={36} fill={limbFill} end="hand" skin={skin} />
+        <Limb ox={34} oy={-140} a1={fu} a2={fl} l1={88} l2={78} w={36} fill={limbFill} end={pose === "thumb" || blend?.to === "thumb" ? "thumb" : "hand"} skin={skin} />
       </g>
     </svg>
   );

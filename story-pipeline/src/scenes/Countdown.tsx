@@ -3,6 +3,7 @@ import { interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { pop, sec } from "../anim";
 import * as B from "../beats3";
 import { Camera, focusKey } from "../components/Camera";
+import { Character } from "../components/Character";
 import { Backdrop, Burst, Card, Glow, Puff, Shake } from "../components/Fx";
 import { DrawPath, Enter } from "../components/Motion";
 import { Hud, Label } from "../components/Overlays";
@@ -39,8 +40,19 @@ export const Countdown: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
           <Glow x={x0} y={560} r={300} opacity={0.6 + 0.4 * light.opacity} />
           <Burst x={x0} y={560} k={lightBurst} n={16} r0={90} r1={620} color="#fff8e6" width={9} />
           <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
-            {/* земля и шкала */}
+            {/* земля, дорога, деревья */}
             <rect x={-100} y={700} width={1280} height={700} fill="#0d1226" />
+            <rect x={-100} y={790} width={1280} height={70} fill="#151b33" stroke={ink} strokeWidth={4} />
+            {Array.from({ length: 12 }, (_, i) => (
+              <rect key={i} x={-80 + i * 110} y={822} width={50} height={6} rx={3} fill={colors.dim} opacity={0.6} />
+            ))}
+            {[330, 470, 620, 760].map((tx, i) => (
+              <g key={i} transform={`translate(${tx} 700) rotate(${Math.sin(t * 1.1 + i) * 2} 0 0)`}>
+                <rect x={-4} y={-34} width={8} height={34} fill="#4a3220" stroke={ink} strokeWidth={3} />
+                <circle cx={0} cy={-50} r={20 + (i % 2) * 4} fill="#2a6a4a" {...stroke} strokeWidth={4} />
+                <circle cx={-6} cy={-56} r={8} fill="#3ec66d" opacity={0.35} />
+              </g>
+            ))}
             <DrawPath d={`M${x0 - 40} 700 L${x1 + 60} 700`} at={0.15} dur={0.6} stroke={colors.white} width={5} outline />
             {[0, 1, 2, 3].map((k) => {
               const x = x0 + ((x1 - x0) * k) / 3;
@@ -94,6 +106,8 @@ export const Countdown: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
               </g>
             )}
           </svg>
+          {/* герой у школы смотрит на вспышку и считает */}
+          <Character pose="stand" frame={frame} fps={fps} x={720} y={700 - 554 * 0.42} scale={0.42} flip lookAt={[-1, -0.3]} mood={t >= countAt ? "scared" : "neutral"} flinchAt={[lightAt]} talkAt={t >= countAt ? [countAt, countAt + 1, countAt + 2] : []} />
           {/* счётчик секунд */}
           {seconds > 0 && (
             <div style={{ position: "absolute", left: 0, right: 0, top: 846, textAlign: "center", fontFamily: fonts.mono, fontSize: 230, fontWeight: 700, color: t >= timeAt ? colors.yellow : colors.white, lineHeight: 1, WebkitTextStroke: `6px ${ink}`, paintOrder: "stroke fill", textShadow: `10px 10px 0 ${ink}`, transform: `scale(${1 + 0.12 * Math.max(0, 1 - tick * 5)})` }}>

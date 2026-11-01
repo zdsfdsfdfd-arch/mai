@@ -36,6 +36,7 @@ export const FalloutTimer: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
       <Camera keys={keys}>
         <Shake at={dustAt + 0.2} amp={9} dur={0.4}>
           <Glow x={820} y={560} r={300} color="#ff9a4a" opacity={0.35} />
+          <Glow x={755} y={710} r={110} color={colors.yellow} opacity={Math.sin(t * 17) > 0.3 ? 0.5 : 0.05} />
           <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
             {/* далёкий гриб */}
             <g transform="translate(820 520) scale(0.6)" opacity={0.8}>
@@ -63,8 +64,21 @@ export const FalloutTimer: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
               <rect x={250} y={540} width={164} height={44} rx={8} fill={colors.beige} {...stroke} strokeWidth={5} />
               <text x={332} y={572} textAnchor="middle" fontFamily={fonts.mono} fontSize={26} fontWeight={700} fill={ink} letterSpacing={4}>ШКОЛА</text>
             </g>
+            {/* столбы дыма над городом */}
+            {[700, 860, 1000].map((sx, i) =>
+              [0, 1, 2, 3].map((k) => {
+                const ph = ((t * 0.25 + k / 4 + i * 0.13) % 1);
+                return <circle key={`${i}${k}`} cx={sx + Math.sin(ph * 6 + i) * 24} cy={900 - ph * 420} r={22 + ph * 34} fill="#3a3038" stroke={ink} strokeWidth={4} opacity={0.75 * (1 - ph)} />;
+              }),
+            )}
             <rect x={-100} y={964} width={1280} height={500} fill="#2b2b33" />
             <line x1={-100} y1={964} x2={1180} y2={964} stroke={ink} strokeWidth={8} />
+            <path d="M200 1000 L260 1040 L240 1090 M300 1120 L380 1100 L420 1150" fill="none" stroke={ink} strokeWidth={5} strokeLinecap="round" opacity={0.6} />
+            {/* погнутый фонарь с мигающей лампой */}
+            <path d="M640 964 L646 760 Q650 700 700 690 L740 686" fill="none" stroke={ink} strokeWidth={22} strokeLinecap="round" />
+            <path d="M640 964 L646 760 Q650 700 700 690 L740 686" fill="none" stroke="#5a5a66" strokeWidth={12} strokeLinecap="round" />
+            <rect x={730} y={676} width={50} height={26} rx={8} fill="#4a4a55" stroke={ink} strokeWidth={5} />
+            <ellipse cx={755} cy={706} rx={18} ry={9} fill={colors.yellow} opacity={Math.sin(t * 17) > 0.3 ? 0.9 : 0.15} />
             {/* обломки */}
             <polygon points="620,964 680,920 740,964" fill="#4a4a55" {...stroke} strokeWidth={5} />
             <polygon points="780,964 830,940 900,964" fill="#3f3f4a" {...stroke} strokeWidth={5} />

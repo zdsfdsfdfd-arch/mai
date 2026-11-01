@@ -27,6 +27,17 @@ export const Checklist: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
   return (
     <Backdrop variant="navy" spot={{ x: 540, y: 760, color: "#3ec66d", opacity: 0.2 }}>
       <Camera keys={keys}>
+        <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
+          <g transform="rotate(-2 400 760)">
+            <rect x={40} y={300} width={720} height={900} rx={18} fill="#4a3220" stroke={ink} strokeWidth={7} />
+            <rect x={70} y={350} width={660} height={820} rx={8} fill="#e9dcc2" stroke={ink} strokeWidth={5} />
+            <rect x={300} y={282} width={200} height={70} rx={14} fill="#8c91a6" stroke={ink} strokeWidth={6} />
+            <rect x={330} y={300} width={140} height={30} rx={8} fill="#5c6a92" stroke={ink} strokeWidth={4} />
+            {Array.from({ length: 14 }, (_, i) => (
+              <line key={i} x1={100} y1={420 + i * 52} x2={700} y2={420 + i * 52} stroke="#b8a98a" strokeWidth={2} opacity={0.6} />
+            ))}
+          </g>
+        </svg>
         <Character pose="stand" frame={frame} fps={fps} x={760} y={560} scale={0.92} mood={done === p.items.length ? "smile" : "neutral"} talkAt={times} />
         {p.items.map((item, i) => {
           const s = slide(frame, fps, sec(times[i], fps), -1, 260);

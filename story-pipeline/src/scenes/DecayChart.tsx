@@ -54,6 +54,20 @@ export const DecayChart: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
           <polygon points="500,420 580,420 820,1190 260,1190" fill="#ffe9a8" opacity={0.07 * flicker} />
           <rect x={-100} y={1190} width={1280} height={300} fill="#0f1326" />
           <line x1={-100} y1={1190} x2={1180} y2={1190} stroke={ink} strokeWidth={8} />
+          {/* полки с банками и рюкзак */}
+          {[520, 660].map((sy, r) => (
+            <g key={r}>
+              <rect x={40} y={sy} width={300} height={14} rx={4} fill="#4a3220" {...stroke} strokeWidth={4} />
+              {Array.from({ length: 5 }, (_, i) => (
+                <g key={i}>
+                  <rect x={56 + i * 56} y={sy - 56 - (i % 2) * 10} width={40} height={56 + (i % 2) * 10} rx={8} fill={["#c9a24a", "#8a4a3a", "#4a7a5a", "#c9a24a", "#6a5a8a"][i]} stroke={ink} strokeWidth={3} />
+                  <rect x={60 + i * 56} y={sy - 62 - (i % 2) * 10} width={32} height={10} rx={3} fill="#2a2a33" stroke={ink} strokeWidth={2} />
+                </g>
+              ))}
+            </g>
+          ))}
+          <path d="M300 1100 Q300 1040 350 1040 L400 1040 Q440 1040 440 1090 L436 1190 L300 1190 Z" fill="#3a4a78" {...stroke} strokeWidth={5} />
+          <path d="M320 1100 L420 1100 L418 1150 L322 1150 Z" fill="#2a3458" stroke={ink} strokeWidth={3} />
           {/* ящик */}
           <rect x={90} y={1070} width={190} height={120} rx={8} fill="#6b4420" {...stroke} />
           <line x1={90} y1={1130} x2={280} y2={1130} stroke={ink} strokeWidth={4} opacity={0.6} />

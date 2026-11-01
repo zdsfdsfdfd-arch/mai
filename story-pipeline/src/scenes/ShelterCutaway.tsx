@@ -55,6 +55,20 @@ export const ShelterCutaway: React.FC<{ scene: SceneTimeline }> = ({ scene }) =>
             {[0, 1].map((i) => (
               <ellipse key={i} cx={300 + i * 500} cy={900 + i * 40} rx={420} ry={50} fill="#c9a07a" opacity={0.12} />
             ))}
+            {/* далёкий гриб и дым, соседние дома */}
+            <g transform="translate(150 520) scale(0.42)" opacity={0.75}>
+              <path d="M-40 320 C-40 140, -60 60, -34 -10 L34 -10 C60 60, 40 140, 40 320 Z" fill="#5a4648" {...stroke} />
+              <ellipse cx={0} cy={-30} rx={210} ry={110} fill="#6f5c5c" {...stroke} />
+              <ellipse cx={-70} cy={-80} rx={120} ry={80} fill="#86716f" {...stroke} />
+              <ellipse cx={0} cy={-120} rx={150} ry={70} fill="#9a8484" {...stroke} />
+            </g>
+            <rect x={960} y={520} width={200} height={600} fill="#2a2a3c" {...stroke} strokeWidth={5} />
+            {[0, 1, 2, 3, 4, 5].map((r) => (
+              <rect key={r} x={990} y={550 + r * 90} width={40} height={50} fill="#0f1428" stroke={ink} strokeWidth={3} />
+            ))}
+            {Array.from({ length: 30 }, (_, i) => (
+              <circle key={i} cx={(i * 157) % 1080} cy={(((i * 211) % 900) + t * 40 * (1 + (i % 3))) % 900 + 300} r={2 + (i % 3)} fill="#d9cfb8" opacity={0.4} />
+            ))}
             <rect x={-200} y={ground} width={1480} height={500} fill="#2b2b33" />
             <line x1={-200} y1={ground} x2={1280} y2={ground} stroke={ink} strokeWidth={8} />
             {/* подвал */}

@@ -40,7 +40,10 @@ export const EndCard: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
       <Camera keys={[{ t: 0, scale: 1 }, { t: dur, scale: 1.08 }]} origin="540px 900px">
         <Glow x={540} y={1020} r={260} color={colors.yellow} opacity={0.35 * th.opacity} />
         {p.thumb ? (
-          <ThumbIcon x={390} y={860} opacity={th.opacity} scale={th.scale * (1 + 0.03 * Math.sin(t * 3))} rotate={-6 + 6 * Math.sin(t * 2)} />
+          <>
+            <ThumbIcon x={390} y={860} opacity={th.opacity} scale={th.scale * (1 + 0.03 * Math.sin(t * 3))} rotate={-6 + 6 * Math.sin(t * 2)} />
+            <Character pose="thumb" blend={{ from: "stand", to: "thumb", at: 0.5, dur: 0.5 }} frame={frame} fps={fps} x={60} y={1200 - 554 * 0.72} scale={0.72} mood="smile" wink={t > 1.1} lookAt={[0.8, -0.3]} />
+          </>
         ) : (
           <Character pose={walking ? "walk" : "stand"} frame={frame} fps={fps} x={charX} y={820} scale={0.72} />
         )}

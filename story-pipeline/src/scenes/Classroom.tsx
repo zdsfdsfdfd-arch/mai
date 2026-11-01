@@ -99,11 +99,23 @@ export const Classroom: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
                 <rect x={wx - 8} y={392} width={196} height={436} rx={8} fill="#3a4668" {...stroke} />
                 <rect x={wx} y={400} width={180} height={420} fill={shatterK > 0.05 ? "#05070d" : "url(#skyG)"} stroke={ink} strokeWidth={4} />
                 {shatterK <= 0.05 && (
-                  <g>
-                    <ellipse cx={wx + 50 + wi * 60} cy={470} rx={38} ry={16} fill={colors.white} opacity={0.8 - 0.8 * lit} />
-                    <ellipse cx={wx + 72 + wi * 60} cy={462} rx={28} ry={18} fill={colors.white} opacity={0.8 - 0.8 * lit} />
-                    <rect x={wx + 20 + wi * 30} y={660} width={60} height={160} fill="#5f79b8" opacity={0.7 - 0.7 * lit} />
-                    <rect x={wx + 100 - wi * 20} y={700} width={46} height={120} fill="#4f67a0" opacity={0.7 - 0.7 * lit} />
+                  <g clipPath={`url(#win${wi})`}>
+                    <defs>
+                      <clipPath id={`win${wi}`}>
+                        <rect x={wx} y={400} width={180} height={420} />
+                      </clipPath>
+                    </defs>
+                    <g transform={`translate(${((t * 9 + wi * 70) % 420) - 200} 0)`}>
+                      <ellipse cx={wx + 60} cy={470} rx={44} ry={18} fill={colors.white} opacity={0.85 - 0.85 * lit} />
+                      <ellipse cx={wx + 90} cy={460} rx={32} ry={20} fill={colors.white} opacity={0.85 - 0.85 * lit} />
+                      <ellipse cx={wx + 240} cy={520} rx={40} ry={14} fill={colors.white} opacity={0.6 - 0.6 * lit} />
+                    </g>
+                    <rect x={wx - 40 + wi * 30} y={600} width={90} height={220} fill="#4f67a0" opacity={0.8 - 0.8 * lit} />
+                    <rect x={wx + 70 - wi * 20} y={650} width={60} height={170} fill="#5f79b8" opacity={0.8 - 0.8 * lit} />
+                    <rect x={wx + 140} y={620} width={70} height={200} fill="#44598c" opacity={0.8 - 0.8 * lit} />
+                    {[0, 1, 2, 3, 4, 5].map((k) => (
+                      <rect key={k} x={wx - 30 + wi * 30 + (k % 2) * 30} y={620 + Math.floor(k / 2) * 50} width={14} height={18} fill={colors.yellow} opacity={(0.4 + 0.4 * Math.abs(Math.sin(t + k))) * (1 - lit)} />
+                    ))}
                   </g>
                 )}
                 {shatterK > 0.05 && (
@@ -117,13 +129,10 @@ export const Classroom: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
                 <rect x={wx - 16} y={826} width={212} height={16} rx={4} fill="#4a567a" {...stroke} strokeWidth={4} />
               </g>
             ))}
-            {/* задние парты */}
-            {[0, 1].map((i) => (
-              <g key={i}>
-                <rect x={650 + i * 70} y={905 + i * 55} width={300} height={28} rx={8} fill="#9a6230" {...stroke} strokeWidth={5} />
-                <rect x={670 + i * 70} y={933 + i * 55} width={16} height={120} fill="#5a3a1a" stroke={ink} strokeWidth={4} />
-                <rect x={914 + i * 70} y={933 + i * 55} width={16} height={120} fill="#5a3a1a" stroke={ink} strokeWidth={4} />
-              </g>
+            {/* батарея под окнами и цветок слева */}
+            <rect x={680} y={860} width={360} height={110} rx={10} fill="#4a567a" {...stroke} strokeWidth={5} />
+            {Array.from({ length: 9 }, (_, i) => (
+              <rect key={i} x={694 + i * 38} y={870} width={22} height={90} rx={6} fill="#5c6a92" stroke={ink} strokeWidth={3} />
             ))}
             {/* пылинки в свете из окон */}
             {Array.from({ length: 24 }, (_, i) => (
@@ -137,6 +146,20 @@ export const Classroom: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
               </g>
             )}
           </svg>
+          {/* одноклассники за задними партами */}
+          <Character pose="sit" frame={frame + 7} fps={fps} x={690} y={683} scale={0.55} outfit="shirt" mood={flash ? "neutral" : "scared"} flinchAt={flash ? [fAt + 0.05] : [dAt]} lookAt={flash && t >= fAt ? [1, -0.4] : [-0.6, 0.2]} shadow={false} />
+          <Character pose="sit" frame={frame + 19} fps={fps} x={770} y={743} scale={0.55} outfit="suit" mood={flash ? "neutral" : "scared"} flinchAt={flash ? [fAt + 0.1] : [dAt + 0.05]} lookAt={flash && t >= fAt ? [1, -0.4] : [-0.6, 0.2]} shadow={false} />
+          <svg width={1080} height={1920} style={{ position: "absolute" }}>
+            {[0, 1].map((i) => (
+              <g key={i}>
+                <rect x={650 + i * 70} y={905 + i * 55} width={300} height={28} rx={8} fill="#9a6230" {...stroke} strokeWidth={5} />
+                <rect x={670 + i * 70} y={933 + i * 55} width={16} height={120} fill="#5a3a1a" stroke={ink} strokeWidth={4} />
+                <rect x={914 + i * 70} y={933 + i * 55} width={16} height={120} fill="#5a3a1a" stroke={ink} strokeWidth={4} />
+              </g>
+            ))}
+          </svg>
+          {/* учитель у доски */}
+          <Character pose="point" blend={flash ? undefined : { from: "point", to: "cover", at: dAt + 0.15, dur: 0.4 }} frame={frame + 3} fps={fps} x={-60} y={1150 - 554 * 0.8} scale={0.8} outfit="suit" glasses mustache talkAt={flash ? talkAt.map((x) => x + 0.2) : []} flinchAt={flash ? [fAt] : []} mood={flash ? "neutral" : "scared"} />
           {/* стул и герой */}
           <svg width={1080} height={1920} style={{ position: "absolute" }}>
             <rect x={240} y={930} width={130} height={30} rx={8} fill="#3a4668" {...stroke} strokeWidth={5} />

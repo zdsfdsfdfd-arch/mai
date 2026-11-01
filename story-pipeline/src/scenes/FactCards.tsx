@@ -39,6 +39,12 @@ export const FactCards: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
         const burst = interpolate(t, [first - 0.3, first + 0.3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
         return (
           <>
+            <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
+              {[180, 260, 340].map((r, i) => (
+                <circle key={i} cx={700} cy={620} r={r} fill="none" stroke={colors.yellow} strokeWidth={2} strokeDasharray="10 14" opacity={0.18} transform={`rotate(${t * (6 + i * 4) * (i % 2 ? -1 : 1)} 700 620)`} />
+              ))}
+              <text x={395} y={690} textAnchor="middle" fontFamily={fonts.mono} fontSize={24} fontWeight={700} fill={colors.dim} letterSpacing={4}>10+ КМ</text>
+            </svg>
             <Glow x={200} y={620} r={260} opacity={0.9} />
             <Burst x={200} y={620} k={burst} n={14} r0={70} r1={420} color="#fff8e6" width={8} />
             <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
@@ -72,6 +78,24 @@ export const FactCards: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
         const jy = 560 - 260 * Math.sin(flyK * Math.PI) + (1070 - 560) * flyK;
         return (
           <>
+            <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
+              {/* стена в плитке и пол */}
+              <rect x={-100} y={300} width={1280} height={880} fill="#1b2a44" />
+              {Array.from({ length: 11 }, (_, r) =>
+                Array.from({ length: 8 }, (_, c) => (
+                  <rect key={`${r}${c}`} x={-40 + c * 150 + (r % 2) * 75} y={310 + r * 80} width={140} height={70} rx={4} fill="#223454" stroke={ink} strokeWidth={2} opacity={0.6} />
+                )),
+              )}
+              <rect x={-100} y={1180} width={1280} height={300} fill="#101728" />
+              <line x1={-100} y1={1180} x2={1180} y2={1180} stroke={ink} strokeWidth={8} />
+              {/* крючок с полотенцем и душ */}
+              <circle cx={160} cy={560} r={8} fill={colors.dim} stroke={ink} strokeWidth={3} />
+              <path d="M160 568 Q120 700 150 840 L230 840 Q250 700 200 568 Z" fill="#e9dcc2" {...stroke} strokeWidth={5} />
+              <path d="M140 700 L236 700" stroke={colors.red} strokeWidth={8} />
+              <line x1={900} y1={330} x2={900} y2={420} stroke={colors.dim} strokeWidth={10} />
+              <line x1={900} y1={420} x2={850} y2={470} stroke={colors.dim} strokeWidth={10} strokeLinecap="round" />
+              <ellipse cx={842} cy={478} rx={34} ry={14} fill={colors.dim} stroke={ink} strokeWidth={4} />
+            </svg>
             <Character pose="stand" outfit={off ? "shirt" : "jacket"} frame={frame} fps={fps} x={390} y={400} scale={0.95} talkAt={talkAt} />
             {dustK > 0 && dustK < 1 && (
               <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
@@ -110,6 +134,18 @@ export const FactCards: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
         return (
           <Shake at={first + 0.3} amp={10} dur={0.4}>
             <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
+              {/* аптечные полки с пузырьками */}
+              {[520, 700, 880].map((sy, r) => (
+                <g key={r} opacity={0.5}>
+                  <rect x={60} y={sy} width={960} height={14} rx={4} fill="#3a4668" stroke={ink} strokeWidth={3} />
+                  {Array.from({ length: 9 }, (_, i) => (
+                    <g key={i}>
+                      <rect x={90 + i * 108} y={sy - 70 - (i % 3) * 14} width={44} height={70 + (i % 3) * 14} rx={8} fill={["#2a3458", "#3a2a3a", "#2a3a3a"][(i + r) % 3]} stroke={ink} strokeWidth={3} />
+                      <rect x={100 + i * 108} y={sy - 80 - (i % 3) * 14} width={24} height={14} rx={3} fill={colors.white} stroke={ink} strokeWidth={2} opacity={0.8} />
+                    </g>
+                  ))}
+                </g>
+              ))}
               <path d="M540 410 L750 495 L750 700 Q750 870 540 950 Q330 870 330 700 L330 495 Z" fill="#2a3458" {...stroke} strokeWidth={9} />
               <path d="M540 450 L710 520 L710 700 Q710 830 540 905 L540 450 Z" fill="#3a4a78" opacity={0.6} />
               <text x={540} y={770} textAnchor="middle" fontFamily={fonts.display} fontWeight={900} fontSize={270} fill={colors.white} stroke={ink} strokeWidth={8} paintOrder="stroke">I</text>
@@ -135,6 +171,16 @@ export const FactCards: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
           <>
             {radioOn && <Glow x={830} y={660} r={120} color={colors.green} opacity={0.5 + 0.3 * Math.abs(Math.sin(t * 4))} />}
             <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
+              {/* ночное окно и стол */}
+              <rect x={600} y={300} width={400} height={300} rx={10} fill="#0a0e1f" {...stroke} strokeWidth={6} />
+              <circle cx={880} cy={380} r={34} fill="#f5f3ea" opacity={0.85} />
+              <circle cx={866} cy={368} r={28} fill="#0a0e1f" />
+              {[0, 1, 2, 3, 4].map((i) => (
+                <circle key={i} cx={640 + ((i * 97) % 340)} cy={330 + ((i * 61) % 220)} r={2} fill={colors.white} opacity={0.5 + 0.5 * Math.abs(Math.sin(t * 2 + i))} />
+              ))}
+              <rect x={-100} y={880} width={1280} height={40} fill="#6b4420" {...stroke} strokeWidth={5} />
+              <rect x={-100} y={920} width={1280} height={22} fill="#4a2e14" />
+              <rect x={-100} y={942} width={1280} height={500} fill="#101728" />
               {/* телефон */}
               <g transform="rotate(-6 260 680)">
                 <rect x={150} y={470} width={230} height={420} rx={34} fill="#1a1d28" {...stroke} />
