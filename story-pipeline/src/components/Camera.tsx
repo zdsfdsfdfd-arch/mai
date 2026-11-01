@@ -26,14 +26,20 @@ export const useCamera = (keys: CamKey[]) => {
   return ks[ks.length - 1];
 };
 
-export const Camera: React.FC<{ keys: CamKey[]; origin?: string; children: React.ReactNode }> = ({ keys, origin = "540px 800px", children }) => {
+export const Camera: React.FC<{ keys: CamKey[]; origin?: string; drift?: number; children: React.ReactNode }> = ({ keys, origin = "540px 800px", drift = 1, children }) => {
   const c = useCamera(keys);
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const t = frame / fps;
+  const dx = (Math.sin(t * 0.7) * 4 + Math.sin(t * 1.9) * 1.5) * drift;
+  const dy = (Math.cos(t * 0.5) * 4 + Math.cos(t * 1.3) * 1.5) * drift;
+  const ds = Math.sin(t * 0.35) * 0.005 * drift;
   return (
     <div
       style={{
         position: "absolute",
         inset: 0,
-        transform: `translate(${-c.x}px, ${-c.y}px) scale(${c.scale})`,
+        transform: `translate(${-c.x + dx}px, ${-c.y + dy}px) scale(${c.scale + ds})`,
         transformOrigin: origin,
       }}
     >

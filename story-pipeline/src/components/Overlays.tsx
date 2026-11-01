@@ -1,7 +1,7 @@
 import React from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { pop } from "../anim";
-import { colors, fonts } from "../theme";
+import { colors, fonts, hardShadow, ink } from "../theme";
 import type { TopPlaque as TopPlaqueSpec } from "../types";
 
 // Верхняя бежевая плашка, слегка повёрнутая: «Часть 1 · ДЕНЬ 1 · 01:30» или «2. ВЫХОД».
@@ -34,7 +34,8 @@ export const TopPlaque: React.FC<{ part: number; dayLabel: string; spec?: TopPla
           color: colors.beigeInk,
           padding: "18px 44px 20px",
           transform: "rotate(-2.5deg)",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
+          border: `4px solid ${ink}`,
+          boxShadow: hardShadow(9),
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -79,7 +80,8 @@ export const StatusPlaque: React.FC<{ text: string; delay?: number }> = ({ text,
           letterSpacing: 2,
           padding: "14px 34px",
           borderRadius: 18,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+          border: `4px solid ${ink}`,
+          boxShadow: hardShadow(7),
           textTransform: "uppercase",
         }}
       >
@@ -110,9 +112,10 @@ export const Hud: React.FC<{ label: string; value: string; tone?: "red" | "green
         fontFamily: fonts.mono,
         color,
         border: `4px solid ${color}`,
-        borderRadius: 10,
+        borderRadius: 12,
         padding: "10px 18px",
-        background: "rgba(0,0,0,0.45)",
+        background: "rgba(5,7,14,0.75)",
+        boxShadow: hardShadow(6),
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-end",
@@ -181,7 +184,8 @@ export const Label: React.FC<{ text: string; x: number; y: number; delay?: numbe
         padding: "12px 26px",
         borderRadius: 14,
         whiteSpace: "nowrap",
-        boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
+        border: `4px solid ${ink}`,
+        boxShadow: hardShadow(6),
         textTransform: "uppercase",
       }}
     >

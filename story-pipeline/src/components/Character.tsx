@@ -1,10 +1,10 @@
 import React from "react";
 import { interpolate } from "remotion";
-import { colors } from "../theme";
+import { colors, ink } from "../theme";
 
-// Персонаж-рэгдолл: круглая голова с лицом, шея, туловище-капсула, руки и ноги из двух капсул
-// с круглыми суставами, кисти и ступни. Конечности качаются с запаздыванием и затуханием,
-// при падении обмякают. Интерфейс совместим с прежним персонажем (та же рамка 300×560, ступни у низа).
+// Персонаж в стиле «стикер» с гибкими резиновыми конечностями: руки и ноги — плавные трубки через локоть
+// и колено (без шарниров), крупная голова, живое лицо: моргает, смотрит, дышит, вздрагивает, говорит.
+// Рамка 300×560, ступни у низа (y≈554), тень на полу. API совместим со всеми сценами.
 
 export type Pose = "stand" | "point" | "sit" | "knock" | "walk" | "run" | "cover" | "fall" | "lie";
 export type Outfit = "jacket" | "robe" | "suit" | "shirt";
@@ -16,8 +16,11 @@ type Props = {
   fps: number;
   knockAt?: number[];
   talkAt?: number[];
-  sitAt?: number; // плавный переход stand → sit
-  fallK?: number; // 0..1 для позы fall (обмякание)
+  flinchAt?: number[];
+  lookAt?: [number, number];
+  sitAt?: number;
+  fallK?: number;
+  squash?: number;
   scale?: number;
   x?: number;
   y?: number;
@@ -27,20 +30,15 @@ type Props = {
   glasses?: boolean;
   mood?: Mood;
   opacity?: number;
+  shadow?: boolean;
 };
 
-const cloth = (o: Outfit) => (o === "robe" ? "#7a2d3a" : o === "suit" ? "#141622" : o === "shirt" ? "#e9e2c9" : colors.jacket);
+const SW = 6;
+const cloth = (o: Outfit) => (o === "robe" ? "#8a3344" : o === "suit" ? "#1a1d2e" : o === "shirt" ? "#efe7d2" : "#2f4a8f");
+const clothDark = (o: Outfit) => (o === "robe" ? "#5e2030" : o === "suit" ? "#0f111c" : o === "shirt" ? "#cfc6ae" : "#1f3366");
 const smooth = (k: number) => k * k * (3 - 2 * k);
 const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
-
-// Капсула от (0,0) вниз на длину len, ширина w; на конце сустав.
-const Seg: React.FC<{ len: number; w: number; fill: string; joint?: boolean; children?: React.ReactNode }> = ({ len, w, fill, joint = true, children }) => (
-  <g>
-    <rect x={-w / 2} y={-w / 2} width={w} height={len + w / 2} rx={w / 2} fill={fill} />
-    {joint && <circle cx={0} cy={0} r={w * 0.42} fill="#000" opacity={0.18} />}
-    {children}
-  </g>
-);
+const rad = (d: number) => (d * Math.PI) / 180;
 
 type Angles = { fu: number; fl: number; bu: number; bl: number; ft: number; fs: number; bt: number; bs: number; torso: number; head: number; bodyY: number; lean: number };
 
@@ -74,11 +72,38 @@ const poseAngles = (pose: Pose, t: number, extra: { hit: number; gesture: number
   }
 };
 
-export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], talkAt = [], sitAt, fallK = 0, scale = 1, x = 0, y = 0, flip = false, outfit = "jacket", mustache = false, glasses = false, mood = "neutral", opacity = 1 }) => {
+// Гибкая конечность: плавная кривая через локоть/колено, обводка, блик.
+const Limb: React.FC<{ ox: number; oy: number; a1: number; a2: number; l1: number; l2: number; w: number; fill: string; end: "hand" | "shoe"; skin: string }> = ({ ox, oy, a1, a2, l1, l2, w, fill, end, skin }) => {
+  const ex = ox - l1 * Math.sin(rad(a1));
+  const ey = oy + l1 * Math.cos(rad(a1));
+  const hx = ex - l2 * Math.sin(rad(a1 + a2));
+  const hy = ey + l2 * Math.cos(rad(a1 + a2));
+  const cx = 2 * ex - (ox + hx) / 2;
+  const cy = 2 * ey - (oy + hy) / 2;
+  const d = `M${ox} ${oy} Q${cx} ${cy} ${hx} ${hy}`;
+  return (
+    <g>
+      <path d={d} fill="none" stroke={ink} strokeWidth={w + 2 * SW} strokeLinecap="round" />
+      <path d={d} fill="none" stroke={fill} strokeWidth={w} strokeLinecap="round" />
+      <path d={d} fill="none" stroke={colors.white} strokeWidth={w * 0.22} strokeLinecap="round" opacity={0.16} transform="translate(-4 -3)" />
+      {end === "hand" ? (
+        <circle cx={hx} cy={hy} r={21} fill={skin} stroke={ink} strokeWidth={SW} />
+      ) : (
+        <g transform={`translate(${hx} ${hy}) rotate(${a1 + a2})`}>
+          <path d="M-22 -6 L44 -6 Q58 -4 56 10 L56 14 Q56 22 48 22 L-16 22 Q-24 22 -24 14 Z" fill="#15161f" stroke={ink} strokeWidth={SW} strokeLinejoin="round" />
+          <path d="M-14 6 L40 6" stroke={colors.white} strokeWidth={3} opacity={0.4} />
+        </g>
+      )}
+    </g>
+  );
+};
+
+export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], talkAt = [], flinchAt = [], lookAt, sitAt, fallK = 0, squash = 0, scale = 1, x = 0, y = 0, flip = false, outfit = "jacket", mustache = false, glasses = false, mood = "neutral", opacity = 1, shadow = true }) => {
   const t = frame / fps;
   const c = cloth(outfit);
-  const limbFill = outfit === "shirt" ? "#e9e2c9" : c;
-  const pants = colors.pants;
+  const cd = clothDark(outfit);
+  const limbFill = outfit === "shirt" ? colors.skin : c;
+  const pants = "#232a44";
 
   let hit = 0;
   for (const k of knockAt) {
@@ -86,9 +111,16 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
     if (d >= 0 && d <= 9) hit = Math.max(hit, interpolate(d, [0, 3, 9], [0, 1, 0]));
   }
   let gesture = 0;
+  let talk = 0;
   for (const g of talkAt) {
     const d = t - g;
     if (d >= 0 && d <= 0.9) gesture = Math.max(gesture, Math.sin((d / 0.9) * Math.PI));
+    if (d >= 0 && d <= 1.4) talk = Math.max(talk, Math.abs(Math.sin(d * 14)) * (1 - d / 1.4));
+  }
+  let flinch = 0;
+  for (const f of flinchAt) {
+    const d = t - f;
+    if (d >= 0 && d <= 0.7) flinch = Math.max(flinch, d < 0.12 ? d / 0.12 : 1 - (d - 0.12) / 0.58);
   }
   let a = poseAngles(pose, t, { hit, gesture, fallK });
   if (sitAt !== undefined) {
@@ -98,121 +130,141 @@ export const Character: React.FC<Props> = ({ pose, frame, fps, knockAt = [], tal
     const m = (key: keyof Angles) => lerp(st[key], s[key], k);
     a = { fu: m("fu"), fl: m("fl"), bu: m("bu"), bl: m("bl"), ft: m("ft"), fs: m("fs"), bt: m("bt"), bs: m("bs"), torso: m("torso"), head: m("head"), bodyY: m("bodyY"), lean: 0 };
   }
-  // вторичное движение: лёгкое запаздывающее покачивание свободных конечностей и дыхание
-  const idle = Math.sin(t * 1.7) * 2.5;
+  // вторичное движение: дыхание, покачивание свободных рук с запаздыванием, вздрагивание
+  const idle = Math.sin(t * 1.7) * 3;
   const breathe = Math.sin(t * 2.2) * 2;
+  const headBob = Math.sin(t * 2.2 + 0.6) * 1.5 + Math.sin(t * 0.9) * 1;
   const blink = (frame + 11) % Math.round(fps * 3.4) < 3;
-
-  // пропорции (стоя): голова, шея, торс 170, руки 95+88, ноги 105+105
+  const fu = a.fu + idle * 0.4 - 120 * flinch;
+  const fl = a.fl + idle * 0.6 - 30 * flinch;
+  const bu = a.bu + idle * 0.5 - 110 * flinch;
+  const bl = a.bl + idle * 0.4 - 20 * flinch;
+  const torso = a.torso - 14 * flinch;
+  const head = a.head - 8 * flinch;
+  const bodyY = a.bodyY + breathe * 0.5 - 12 * flinch;
+  const sq = Math.max(0, Math.min(1, squash)) + flinch * 0.15;
   const skin = colors.skin;
-  const hair = colors.hair;
-  const shoe = "#1b1b22";
-  const eyeOpen = !blink;
-  const scared = mood === "scared";
+  const skinDark = "#d3a984";
+  const hair = "#1b1722";
+  const scared = mood === "scared" || flinch > 0.5;
   const smile = mood === "smile";
+  const tired = mood === "tired";
+  const grounded = pose !== "fall" && pose !== "lie";
+  const look = lookAt ?? [Math.sin(t * 0.5) * 0.4, Math.sin(t * 0.33) * 0.2];
+  const px = look[0] * 4.5;
+  const py = look[1] * 3;
+  const eyeR = 12 + 3 * flinch;
 
   return (
     <svg width={300 * scale} height={560 * scale} viewBox="0 0 300 560" style={{ position: "absolute", left: x, top: y, transform: flip ? "scaleX(-1)" : undefined, overflow: "visible", opacity }}>
-      <g transform={`translate(150 ${340 + a.bodyY + breathe * 0.5}) rotate(${a.torso})`}>
-        {/* задняя нога от бедра */}
-        <g transform={`translate(-22 0) rotate(${a.bt})`}>
-          <Seg len={100} w={38} fill={pants}>
-            <g transform={`translate(0 100) rotate(${a.bs})`}>
-              <Seg len={92} w={32} fill={pants}>
-                <rect x={-18} y={88} width={64} height={22} rx={10} fill={shoe} opacity={0.85} />
-              </Seg>
-            </g>
-          </Seg>
-        </g>
-        {/* задняя рука от плеча */}
-        <g transform={`translate(-30 -150) rotate(${a.bu + idle * 0.5})`}>
-          <Seg len={92} w={34} fill={limbFill}>
-            <g transform={`translate(0 92) rotate(${a.bl})`}>
-              <Seg len={82} w={30} fill={limbFill}>
-                <circle cx={0} cy={86} r={17} fill={skin} />
-              </Seg>
-            </g>
-          </Seg>
-        </g>
+      {shadow && <ellipse cx={150} cy={554} rx={(grounded ? 78 : 120) * (1 + sq * 0.3)} ry={10} fill={ink} opacity={0.3} />}
+      <g transform={`translate(150 ${340 + bodyY}) translate(0 212) scale(${1 + sq * 0.22} ${1 - sq * 0.22}) translate(0 -212) rotate(${torso})`}>
+        {/* задняя нога и рука */}
+        <Limb ox={-22} oy={0} a1={a.bt} a2={a.bs} l1={100} l2={92} w={40} fill={pants} end="shoe" skin={skin} />
+        <Limb ox={-32} oy={-150} a1={bu} a2={bl} l1={92} l2={80} w={34} fill={limbFill} end="hand" skin={skin} />
         {/* туловище */}
-        <rect x={-52} y={-172} width={104} height={178} rx={44} fill={c} />
+        <path d="M-50 -176 L50 -176 Q58 -176 58 -166 L54 -14 Q52 6 32 6 L-32 6 Q-52 6 -54 -14 L-58 -166 Q-58 -176 -50 -176 Z" fill={c} stroke={ink} strokeWidth={SW} strokeLinejoin="round" />
+        <path d="M22 -170 Q54 -150 54 -90 L52 -20 Q52 2 30 4 L44 4 Q55 -10 55 -40 L57 -120 Q57 -160 22 -170 Z" fill={cd} opacity={0.6} />
+        {outfit === "jacket" && (
+          <g>
+            <polygon points="-2,-174 44,-174 22,-128" fill="#e3dfd4" stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+            <line x1={10} y1={-126} x2={8} y2={-10} stroke={ink} strokeWidth={3} opacity={0.6} />
+            <rect x={-44} y={-60} width={30} height={22} rx={6} fill="none" stroke={ink} strokeWidth={3} opacity={0.5} />
+          </g>
+        )}
         {outfit === "robe" && (
           <g>
-            <polygon points="-10,-170 52,-170 20,-60" fill="#e8d8c0" />
-            <rect x={-52} y={-70} width={104} height={12} fill="#5a1f2a" />
+            <polygon points="-10,-174 52,-174 20,-60" fill="#e8d8c0" stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+            <rect x={-55} y={-72} width={110} height={14} fill="#5a1f2a" stroke={ink} strokeWidth={3} />
           </g>
         )}
         {outfit === "suit" && (
           <g>
-            <polygon points="-6,-170 48,-170 20,-95" fill={colors.white} />
-            <polygon points="16,-160 30,-160 23,-95" fill={colors.red} />
+            <polygon points="-6,-174 48,-174 20,-95" fill={colors.white} stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+            <polygon points="16,-164 30,-164 23,-95" fill={colors.red} stroke={ink} strokeWidth={3} strokeLinejoin="round" />
           </g>
         )}
-        {outfit === "jacket" && <polygon points="0,-170 46,-170 22,-128" fill={colors.collar} />}
-        {/* бёдра */}
-        <rect x={-50} y={-20} width={100} height={36} rx={18} fill={pants} />
+        {outfit === "shirt" && (
+          <g>
+            <path d="M-6 -174 L22 -150 L46 -174" fill="none" stroke={ink} strokeWidth={4} strokeLinejoin="round" />
+            <line x1={22} y1={-150} x2={22} y2={-40} stroke={ink} strokeWidth={3} opacity={0.5} />
+          </g>
+        )}
+        {/* бёдра и ремень */}
+        <rect x={-54} y={-22} width={108} height={42} rx={18} fill={pants} stroke={ink} strokeWidth={SW} />
+        <rect x={-50} y={-16} width={100} height={10} rx={4} fill={ink} opacity={0.7} />
         {/* передняя нога */}
-        <g transform={`translate(22 0) rotate(${a.ft})`}>
-          <Seg len={100} w={38} fill={pants}>
-            <g transform={`translate(0 100) rotate(${a.fs})`}>
-              <Seg len={92} w={32} fill={pants}>
-                <rect x={-18} y={88} width={64} height={22} rx={10} fill={shoe} />
-              </Seg>
-            </g>
-          </Seg>
-        </g>
+        <Limb ox={22} oy={0} a1={a.ft} a2={a.fs} l1={100} l2={92} w={40} fill={pants} end="shoe" skin={skin} />
         {/* шея и голова */}
-        <g transform={`translate(0 -172) rotate(${a.head})`}>
-          <rect x={-14} y={-26} width={28} height={30} rx={12} fill={skin} />
-          <g transform="translate(0 -78)">
-            <circle cx={0} cy={0} r={56} fill={skin} />
-            {/* волосы */}
-            <path d="M-57 2 C-58 -58, 30 -80, 58 -28 C60 -16, 56 -10, 54 -14 C40 -44, 8 -52, -16 -36 C-34 -24, -46 -10, -50 8 C-54 8, -57 6, -57 2 Z" fill={hair} />
-            {/* глаза (три четверти, смотрит вправо) */}
-            {eyeOpen ? (
+        <g transform={`translate(0 ${-174 + headBob}) rotate(${head})`}>
+          <rect x={-16} y={-30} width={32} height={36} rx={12} fill={skin} stroke={ink} strokeWidth={SW} />
+          <g transform="translate(2 -82)">
+            <circle cx={-58} cy={2} r={13} fill={skin} stroke={ink} strokeWidth={SW} />
+            <path d="M-62 -2 Q-56 2 -60 8" fill="none" stroke={ink} strokeWidth={3} />
+            <circle cx={0} cy={0} r={66} fill={skin} stroke={ink} strokeWidth={SW} />
+            <path d="M-30 40 Q0 70 40 40 Q10 56 -30 40 Z" fill={skinDark} opacity={0.5} />
+            <g transform={`scale(1.18) translate(${Math.sin(t * 2.2 + 1) * 1.2} 0)`}>
+              <path d="M-57 2 C-58 -58, 30 -80, 58 -28 C60 -16, 56 -10, 54 -14 C40 -44, 8 -52, -16 -36 C-34 -24, -46 -10, -50 8 C-54 8, -57 6, -57 2 Z" fill={hair} stroke={ink} strokeWidth={5} strokeLinejoin="round" />
+              <path d="M-20 -48 C-4 -62, 24 -60, 40 -44" fill="none" stroke="#3a3346" strokeWidth={4} strokeLinecap="round" />
+            </g>
+            <circle cx={2} cy={16} r={9} fill="#e58a8a" opacity={0.3} />
+            <circle cx={50} cy={16} r={9} fill="#e58a8a" opacity={0.3} />
+            {!blink ? (
               <>
-                <circle cx={10} cy={-4} r={9} fill={colors.white} />
-                <circle cx={34} cy={-4} r={9} fill={colors.white} />
-                <circle cx={13} cy={-3} r={4.5} fill="#0b0b10" />
-                <circle cx={37} cy={-3} r={4.5} fill="#0b0b10" />
+                <circle cx={12} cy={-4} r={eyeR} fill={colors.white} stroke={ink} strokeWidth={3} />
+                <circle cx={41} cy={-4} r={eyeR} fill={colors.white} stroke={ink} strokeWidth={3} />
+                <circle cx={15 + px} cy={-3 + py} r={5.5 - 1.5 * flinch} fill={ink} />
+                <circle cx={44 + px} cy={-3 + py} r={5.5 - 1.5 * flinch} fill={ink} />
+                <circle cx={13.5 + px} cy={-5.5 + py} r={2} fill={colors.white} />
+                <circle cx={42.5 + px} cy={-5.5 + py} r={2} fill={colors.white} />
+                {tired && (
+                  <>
+                    <path d="M0 -10 Q12 -4 24 -10 L24 -16 L0 -16 Z" fill={skin} />
+                    <path d="M29 -10 Q41 -4 53 -10 L53 -16 L29 -16 Z" fill={skin} />
+                    <path d="M1 -9 Q12 -3 23 -9" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
+                    <path d="M30 -9 Q41 -3 52 -9" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
+                  </>
+                )}
               </>
             ) : (
               <>
-                <rect x={2} y={-5} width={16} height={3} rx={1.5} fill="#0b0b10" />
-                <rect x={26} y={-5} width={16} height={3} rx={1.5} fill="#0b0b10" />
+                <path d="M2 -4 Q12 2 22 -4" fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" />
+                <path d="M31 -4 Q41 2 51 -4" fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" />
               </>
             )}
-            {/* брови */}
-            <path d={scared ? "M0 -24 L20 -20" : "M2 -18 L18 -18"} stroke="#0b0b10" strokeWidth={3} strokeLinecap="round" />
-            <path d={scared ? "M28 -22 L46 -26" : "M28 -18 L44 -18"} stroke="#0b0b10" strokeWidth={3} strokeLinecap="round" />
-            {/* рот */}
-            {scared ? <ellipse cx={26} cy={24} rx={8} ry={10} fill="#3a1f1f" /> : smile ? <path d="M12 20 Q26 34 40 20" stroke="#3a1f1f" strokeWidth={3} fill="none" strokeLinecap="round" /> : <path d="M16 24 L36 24" stroke="#3a1f1f" strokeWidth={3} strokeLinecap="round" />}
-            {mustache && <path d="M8 14 C18 4, 36 6, 44 16 C36 12, 18 14, 8 14 Z" fill={hair} />}
+            <path d={scared ? "M0 -32 L22 -26" : tired ? "M2 -20 L22 -24" : "M2 -24 L22 -24"} stroke={ink} strokeWidth={5} strokeLinecap="round" />
+            <path d={scared ? "M32 -28 L52 -34" : tired ? "M32 -24 L52 -20" : "M32 -24 L52 -24"} stroke={ink} strokeWidth={5} strokeLinecap="round" />
+            <path d="M30 4 Q36 12 28 15" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
+            {scared ? (
+              <ellipse cx={28} cy={30} rx={9} ry={12} fill="#3a1f1f" stroke={ink} strokeWidth={3} />
+            ) : talk > 0.1 ? (
+              <ellipse cx={28} cy={28} rx={8 + 4 * talk} ry={2 + 9 * talk} fill="#3a1f1f" stroke={ink} strokeWidth={3} />
+            ) : smile ? (
+              <path d="M12 24 Q28 40 44 24" stroke={ink} strokeWidth={4} fill="#3a1f1f" strokeLinecap="round" />
+            ) : tired ? (
+              <path d="M16 30 L40 30" stroke={ink} strokeWidth={4} strokeLinecap="round" />
+            ) : (
+              <path d="M16 28 Q28 34 40 28" stroke={ink} strokeWidth={4} fill="none" strokeLinecap="round" />
+            )}
+            {mustache && <path d="M8 18 C18 8, 40 10, 48 20 C40 16, 18 18, 8 18 Z" fill={hair} stroke={ink} strokeWidth={3} />}
             {glasses && (
-              <g fill="none" stroke="#0b0b10" strokeWidth={3}>
-                <circle cx={10} cy={-4} r={14} />
-                <circle cx={36} cy={-4} r={14} />
-                <line x1={24} y1={-4} x2={22} y2={-4} />
+              <g fill="none" stroke={ink} strokeWidth={4}>
+                <circle cx={12} cy={-4} r={17} />
+                <circle cx={41} cy={-4} r={17} />
+                <line x1={29} y1={-4} x2={24} y2={-4} />
               </g>
             )}
+            {scared && <path d="M62 -40 Q70 -28 62 -20 Q54 -28 62 -40 Z" fill="#7cc4ff" stroke={ink} strokeWidth={3} />}
           </g>
         </g>
         {/* передняя рука */}
-        <g transform={`translate(30 -150) rotate(${a.fu + idle * 0.3})`}>
-          <Seg len={92} w={34} fill={limbFill}>
-            <g transform={`translate(0 92) rotate(${a.fl})`}>
-              <Seg len={82} w={30} fill={limbFill}>
-                <circle cx={0} cy={86} r={17} fill={skin} />
-              </Seg>
-            </g>
-          </Seg>
-        </g>
+        <Limb ox={32} oy={-150} a1={fu} a2={fl} l1={92} l2={80} w={34} fill={limbFill} end="hand" skin={skin} />
       </g>
     </svg>
   );
 };
 
-// Чёрный силуэт другого человека, с шагом (тот же риг, залит чёрным).
+// Чёрный силуэт другого человека, с шагом.
 export const Silhouette: React.FC<{ frame: number; fps: number; x: number; y: number; scale?: number; walking?: boolean; flip?: boolean }> = ({ frame, fps, x, y, scale = 1, walking = true, flip = false }) => {
   const t = frame / fps;
   const sw = walking ? Math.sin(t * 7) : 0;

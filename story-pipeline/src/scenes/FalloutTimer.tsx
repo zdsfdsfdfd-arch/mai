@@ -1,16 +1,18 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
-import { pop, sec } from "../anim";
+import { interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import { pop, sec, stamp } from "../anim";
 import * as B from "../beats3";
 import { Camera, focusKey } from "../components/Camera";
+import { Backdrop, Glow, Shake } from "../components/Fx";
+import { Enter } from "../components/Motion";
 import { Label } from "../components/Overlays";
-import { colors, fonts } from "../theme";
+import { colors, fonts, ink, stroke } from "../theme";
 import type { SceneTimeline } from "../types";
 
 type Props = { minutes: number };
 
-// После удара: школа, далёкий гриб, большой таймер бежит к 15:00, с неба начинает сыпаться пыль,
-// знак радиации и плашка «главная опасность».
+// После удара: дымка, далёкий гриб, школа с выбитыми окнами, большой таймер бежит к 15:00,
+// с неба сыплется пыль, знак радиации впечатывается и пульсирует.
 export const FalloutTimer: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -23,54 +25,80 @@ export const FalloutTimer: React.FC<{ scene: SceneTimeline }> = ({ scene }) => {
   const timerK = interpolate(t, [startAt, dustAt], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const minutes = Math.floor(timerK * p.minutes);
   const secs = Math.floor((timerK * p.minutes * 60) % 60);
-  const timer = pop(frame, fps, sec(startAt, fps));
   const dustK = interpolate(t, [dustAt, dustAt + 1.5], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const tre = pop(frame, fps, sec(dustAt, fps) + 6);
-  const keys = [focusKey(0, 540, 760, 1.0), focusKey(startAt + 0.5, 540, 820, 1.1), focusKey(dustAt + 0.5, 540, 760, 1.0), focusKey(dur, 540, 740, 1.05)];
-  const dust = Array.from({ length: 70 }, (_, i) => ({ x: (i * 157) % 1080, y0: (i * 211) % 1200, s: 1.2 + (i % 4) * 0.4, r: 3 + (i % 3) * 2 }));
+  const tre = stamp(frame, fps, sec(dustAt, fps) + 6);
+  const keys = [focusKey(0, 540, 760, 1.0), focusKey(startAt + 0.5, 540, 800, 1.1), focusKey(dustAt + 0.5, 540, 780, 1.0), focusKey(dur, 540, 760, 1.05)];
+  const dust = Array.from({ length: 90 }, (_, i) => ({ x: (i * 157) % 1080, y0: (i * 211) % 1300, s: 1.2 + (i % 4) * 0.4, r: 2.5 + (i % 3) * 2 }));
+  const blink = Math.floor(t * 2) % 2 === 0;
 
   return (
-    <AbsoluteFill style={{ background: `linear-gradient(180deg, #3a2a2a 0%, #6a4a3a 40%, #2b2b33 100%)` }}>
+    <Backdrop variant="haze" grid={false} particles={false}>
       <Camera keys={keys}>
-        <svg width={1080} height={1920} style={{ position: "absolute" }}>
-          {/* далёкий гриб */}
-          <g transform="translate(820 520) scale(0.55)">
-            <rect x={-40} y={-10} width={80} height={320} fill="#4a3a3a" opacity={0.8} />
-            <ellipse cx={0} cy={-30} rx={210} ry={110} fill="#6a5a5a" />
-            <ellipse cx={0} cy={-110} rx={150} ry={70} fill="#8a7a7a" opacity={0.9} />
-          </g>
-          {/* школа слева, разбитые окна */}
-          <rect x={120} y={600} width={420} height={360} fill="#3a4668" />
-          {[0, 1, 2].map((r) =>
-            [0, 1, 2, 3].map((c) => <rect key={`${r}-${c}`} x={150 + c * 100} y={630 + r * 100} width={60} height={70} fill="#05070d" />),
-          )}
-          <text x={330} y={590} textAnchor="middle" fontFamily={fonts.mono} fontSize={28} fill={colors.beige} letterSpacing={4}>ШКОЛА</text>
-          <rect x={0} y={960} width={1080} height={400} fill="#2b2b33" />
-          {/* пыль */}
-          {dustK > 0 &&
-            dust.map((d, i) => {
-              const y = (d.y0 + (t - dustAt) * 90 * d.s) % 1300;
-              return <circle key={i} cx={d.x + Math.sin(t * 2 + i) * 12} cy={y} r={d.r} fill="#bfb5a0" opacity={0.75 * dustK} />;
-            })}
-        </svg>
-        {/* таймер */}
-        <div style={{ position: "absolute", left: 0, right: 0, top: 300, textAlign: "center", opacity: timer.opacity, transform: `translateY(${timer.y}px) scale(${timer.scale})` }}>
-          <div style={{ fontFamily: fonts.mono, fontSize: 30, letterSpacing: 6, color: colors.dim }}>ДО ПЫЛИ</div>
-          <div style={{ fontFamily: fonts.mono, fontSize: 170, fontWeight: 700, color: timerK >= 1 ? colors.red : colors.white, lineHeight: 1.05 }}>
-            {String(minutes).padStart(2, "0")}:{String(secs).padStart(2, "0")}
+        <Shake at={dustAt + 0.2} amp={9} dur={0.4}>
+          <Glow x={820} y={560} r={300} color="#ff9a4a" opacity={0.35} />
+          <svg width={1080} height={1920} style={{ position: "absolute", overflow: "visible" }}>
+            {/* далёкий гриб */}
+            <g transform="translate(820 520) scale(0.6)" opacity={0.8}>
+              <path d="M-40 320 C-40 140, -60 60, -34 -10 L34 -10 C60 60, 40 140, 40 320 Z" fill="#5a4648" {...stroke} />
+              <ellipse cx={0} cy={-30} rx={210} ry={110} fill="#6f5c5c" {...stroke} />
+              <ellipse cx={-70} cy={-80} rx={120} ry={80} fill="#86716f" {...stroke} />
+              <ellipse cx={0} cy={-120} rx={150} ry={70} fill="#9a8484" {...stroke} />
+            </g>
+            {/* дымка */}
+            {[0, 1, 2].map((i) => (
+              <ellipse key={i} cx={300 + i * 300 + Math.sin(t * 0.3 + i) * 40} cy={880 + i * 20} rx={360} ry={40} fill="#c9a07a" opacity={0.12} />
+            ))}
+            {/* школа */}
+            <rect x={120} y={596} width={424} height={368} fill="#3a4668" {...stroke} />
+            <rect x={104} y={580} width={456} height={26} rx={6} fill="#4a567a" {...stroke} strokeWidth={5} />
+            {[0, 1, 2].map((r) =>
+              [0, 1, 2, 3].map((c) => (
+                <g key={`${r}-${c}`}>
+                  <rect x={150 + c * 100} y={628 + r * 100} width={64} height={74} rx={4} fill="#05070d" stroke={ink} strokeWidth={4} />
+                  <path d={`M${160 + c * 100} ${640 + r * 100} L${190 + c * 100} ${670 + r * 100} L${175 + c * 100} ${696 + r * 100}`} fill="none" stroke="#cfe3ff" strokeWidth={3} opacity={0.5} />
+                </g>
+              )),
+            )}
+            <g transform={`rotate(${-8 + Math.sin(t * 1.2) * 2} 332 560)`}>
+              <rect x={250} y={540} width={164} height={44} rx={8} fill={colors.beige} {...stroke} strokeWidth={5} />
+              <text x={332} y={572} textAnchor="middle" fontFamily={fonts.mono} fontSize={26} fontWeight={700} fill={ink} letterSpacing={4}>ШКОЛА</text>
+            </g>
+            <rect x={-100} y={964} width={1280} height={500} fill="#2b2b33" />
+            <line x1={-100} y1={964} x2={1180} y2={964} stroke={ink} strokeWidth={8} />
+            {/* обломки */}
+            <polygon points="620,964 680,920 740,964" fill="#4a4a55" {...stroke} strokeWidth={5} />
+            <polygon points="780,964 830,940 900,964" fill="#3f3f4a" {...stroke} strokeWidth={5} />
+            {/* пыль */}
+            {dustK > 0 &&
+              dust.map((d, i) => {
+                const y = (d.y0 + (t - dustAt) * 110 * d.s) % 1400;
+                return <circle key={i} cx={d.x + Math.sin(t * 2 + i) * 14} cy={y} r={d.r} fill="#d9cfb8" stroke={ink} strokeWidth={1.5} opacity={0.8 * dustK} />;
+              })}
+          </svg>
+          {/* таймер */}
+          <Enter at={startAt} from="down" dist={160} origin="540px 400px">
+          <div style={{ position: "absolute", left: 0, right: 0, top: 290, textAlign: "center" }}>
+            <div style={{ fontFamily: fonts.mono, fontSize: 30, fontWeight: 700, letterSpacing: 8, color: colors.beige, textShadow: `3px 3px 0 ${ink}` }}>ДО ПЫЛИ</div>
+            <div style={{ fontFamily: fonts.mono, fontSize: 180, fontWeight: 700, color: timerK >= 1 ? colors.red : colors.white, lineHeight: 1.05, WebkitTextStroke: `6px ${ink}`, paintOrder: "stroke fill", textShadow: `10px 10px 0 ${ink}` }}>
+              {String(minutes).padStart(2, "0")}
+              <span style={{ opacity: blink || timerK >= 1 ? 1 : 0.25 }}>:</span>
+              {String(secs).padStart(2, "0")}
+            </div>
           </div>
-        </div>
-        {/* знак радиации */}
-        <svg width={1080} height={1920} style={{ position: "absolute", opacity: tre.opacity, transform: `scale(${tre.scale})`, transformOrigin: "540px 820px" }}>
-          <circle cx={540} cy={1040} r={110} fill={colors.yellow} />
-          {[0, 1, 2].map((i) => (
-            <path key={i} d="M540 1040 L540 930 A110 110 0 0 1 635 985 Z" fill="#0b0b10" transform={`rotate(${i * 120} 540 1040)`} />
-          ))}
-          <circle cx={540} cy={1040} r={22} fill="#0b0b10" />
-          <circle cx={540} cy={1040} r={12} fill={colors.yellow} />
-        </svg>
+          </Enter>
+          {/* знак радиации */}
+          {tre.opacity > 0 && <Glow x={540} y={1040} r={200} color={colors.yellow} opacity={0.35 + 0.25 * Math.abs(Math.sin(t * 5))} />}
+          <svg width={1080} height={1920} style={{ position: "absolute", opacity: tre.opacity, transform: `scale(${tre.scale}) rotate(${-8 + Math.sin(t * 1.5) * 2}deg)`, transformOrigin: "540px 1040px", overflow: "visible" }}>
+            <circle cx={540} cy={1040} r={116} fill={colors.yellow} {...stroke} strokeWidth={9} />
+            {[0, 1, 2].map((i) => (
+              <path key={i} d="M540 1040 L540 924 A116 116 0 0 1 640 982 Z" fill={ink} transform={`rotate(${i * 120 + t * 20} 540 1040)`} />
+            ))}
+            <circle cx={540} cy={1040} r={26} fill={ink} />
+            <circle cx={540} cy={1040} r={13} fill={colors.yellow} />
+          </svg>
+        </Shake>
       </Camera>
       <Label text="РАДИОАКТИВНАЯ ПЫЛЬ · ГЛАВНАЯ ОПАСНОСТЬ" x={540} y={1225} delay={sec(dangerAt, fps)} tone="red" size={28} />
-    </AbsoluteFill>
+    </Backdrop>
   );
 };

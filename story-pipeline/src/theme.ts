@@ -25,7 +25,15 @@ export const colors = {
   door: "#7a4b2a",
   doorDark: "#5a3419",
   lightCone: "#f7e7b0",
+  ink: "#0a0c14",
+  shadow: "#070910",
 };
+
+// Стиль «стикер»: толстая тёмная обводка у всех нарисованных объектов и жёсткая смещённая тень.
+export const ink = colors.ink;
+export const SW = 7;
+export const stroke = { stroke: colors.ink, strokeWidth: SW, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
+export const hardShadow = (d = 8) => `${d}px ${d}px 0 ${colors.ink}`;
 
 export const fonts = {
   display: "'Sofia Sans Condensed', 'Arial Narrow', sans-serif",

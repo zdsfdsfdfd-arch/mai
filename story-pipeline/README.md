@@ -81,5 +81,16 @@ $env:ENGINE="edge"; $env:EDGE_VOICE="ru-RU-DmitryNeural"; $env:FFMPEG_BIN="C:\..
 и запустить `ENGINE=files npm run episode`. События анимации (`src/beats*.ts`) привязаны к началам фраз из
 `timeline.json`, поэтому картинка и звуковые эффекты сходятся с любой записью.
 
-Персонаж (`src/components/Character.tsx`) — рэгдолл из капсул с видимыми суставами: позы stand, point, sit,
-knock, walk, run, cover, fall, lie; одежда jacket / robe / suit / shirt; мимика по `mood`, рот открывается по `talkAt`.
+Персонаж (`src/components/Character.tsx`) — «стикер» с гибкими резиновыми конечностями (плавные трубки через локоть
+и колено): позы stand, point, sit, knock, walk, run, cover, fall, lie; одежда jacket / robe / suit / shirt; мимика по `mood`,
+рот по `talkAt`, вздрагивание по `flinchAt`, взгляд `lookAt`, присед `squash`.
+
+## Стиль и движение
+
+- `src/theme.ts`: обводка `ink`, толщина `SW`, жёсткая тень `hardShadow()`; все нарисованные объекты с обводкой.
+- `src/components/Fx.tsx`: `Backdrop` (градиент, точечная сетка, прожектор, частицы), `Grain` (зерно, `public/fx/noise.png`),
+  `Vignette`, `Glow`, `Burst` (лучи удара), `Shake`, `Bracket`, `Card` (стикер с тенью), `BigText`, `Puff`.
+- `src/components/Motion.tsx`: `Enter` (пружина с перелётом из направления, уход в `until`), `DrawPath` (прорисовка SVG-пути),
+  `Float` (живое покачивание), `GEnter`, `useReveal`.
+- `src/Episode.tsx`: переходы между сценами с перекрытием 12 кадров: шторка по диагонали с жёлтой кромкой, сдвиг
+  вверх с параллаксом, наезд с размытием (для ударных сцен со статусом `!`). Камера (`Camera.tsx`) всегда чуть дрейфует.
