@@ -98,7 +98,8 @@ Write-Step "5. Открытие приложения с главного экр�
 if ($favCount -eq 0) { Add-Result 'open_app' 'SKIP' 'на главном экране нет приложений' '' }
 else {
     $marker = Send-Marker
-    Send-Key 'KEYCODE_DPAD_DOWN'; foreach ($i in 1..12) { Send-Key 'KEYCODE_DPAD_LEFT' 200 }
+    Send-Key 'KEYCODE_BACK' 300; Send-Key 'KEYCODE_BACK' 300   # close any overlay; BACK on the home itself does nothing
+    foreach ($i in 1..12) { Send-Key 'KEYCODE_DPAD_LEFT' 200 }
     Send-Key 'KEYCODE_DPAD_CENTER' 2500
     $launch = Wait-Event $marker 'launch' 6
     $resumed = Get-ResumedActivity
@@ -118,10 +119,10 @@ $closed = Wait-Event $marker 'overlay' 4 { $_.Fields['name'] -eq 'settings' -and
 if ($open -and $closed) { Add-Result 'settings_panel' 'PASS' 'открылась по MENU, закрылась по BACK' "$($open.Line) | $($closed.Line)" } elseif ($open) { Add-Result 'settings_panel' 'FAIL' 'открылась, но не закрылась по BACK' $open.Line } else { Add-Result 'settings_panel' 'FAIL' 'не открылась по MENU (на пульте нет MENU? используйте шестерёнку)' '' }
 
 # 7. all apps
-Write-Step "7. Экран «Все приложения»"
+Write-Step "7. Экран «Все приложения» (кнопка ▼ с дока)"
 $marker = Send-Marker
-Send-Key 'KEYCODE_DPAD_DOWN'; foreach ($i in 1..($favCount + 2)) { Send-Key 'KEYCODE_DPAD_RIGHT' 200 }
-Send-Key 'KEYCODE_DPAD_CENTER' 1200
+Send-Key 'KEYCODE_BACK' 300; Send-Key 'KEYCODE_BACK' 300
+Send-Key 'KEYCODE_DPAD_DOWN' 1200
 $open = Wait-Event $marker 'overlay' 4 { $_.Fields['name'] -eq 'allapps' -and $_.Fields['open'] -eq 'true' }
 Send-Key 'KEYCODE_BACK' 800
 $closed = Wait-Event $marker 'overlay' 4 { $_.Fields['name'] -eq 'allapps' -and $_.Fields['open'] -eq 'false' }
@@ -132,6 +133,7 @@ Write-Step "8. Перестановка плиток (длинное нажат�
 if ($favCount -lt 2) { Add-Result 'reorder' 'SKIP' 'меньше двух приложений на главном экране' '' }
 else {
     $marker = Send-Marker
+    Send-Key 'KEYCODE_BACK' 300; Send-Key 'KEYCODE_BACK' 300
     foreach ($i in 1..($favCount + 3)) { Send-Key 'KEYCODE_DPAD_LEFT' 150 }
     Send-Key 'KEYCODE_DPAD_CENTER' -LongPress 1200
     Send-Key 'KEYCODE_DPAD_DOWN' 500       # Открыть → Переместить

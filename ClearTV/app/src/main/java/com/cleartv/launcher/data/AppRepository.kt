@@ -60,6 +60,7 @@ class AppRepository(private val context: Context) {
         }
         query(Intent.CATEGORY_LEANBACK_LAUNCHER, leanback = true)
         query(Intent.CATEGORY_LAUNCHER, leanback = false)
+        queryVendorEntries(result, self)
 
         val collator = Collator.getInstance(Locale.getDefault())
         val comparator = Comparator<AppEntry> { a, b -> collator.compare(a.label, b.label) }
@@ -68,6 +69,43 @@ class AppRepository(private val context: Context) {
         Logs.event("apps_loaded", "total" to list.size, "leanback" to list.count { it.leanback }, "ms" to (System.nanoTime() - started) / 1_000_000)
         return list
     }
+
+    /**
+     * Apps that declare neither LAUNCHER nor LEANBACK_LAUNCHER but a vendor category on their MAIN activity
+     * (Salute TV's own apps only carry STAR_LAUNCHER). An intent with no category matches every MAIN filter,
+     * and GET_RESOLVED_FILTER tells which category it was.
+     */
+    private fun queryVendorEntries(result: LinkedHashMap<String, AppEntry>, self: String) {
+        val infos = try { pm.queryIntentActivities(Intent(Intent.ACTION_MAIN), PackageManager.GET_RESOLVED_FILTER) } catch (t: Throwable) { emptyList() }
+        for (ri in infos) {
+            val ai = ri.activityInfo ?: continue
+            if (ai.packageName == self || result.containsKey(ai.packageName) || !ai.exported) continue
+            val filter = ri.filter ?: continue
+            var vendor: String? = null
+            var home = false
+            for (i in 0 until filter.countCategories()) {
+                val c = filter.getCategory(i) ?: continue
+                if (c == Intent.CATEGORY_HOME) home = true
+                if (c in STANDARD_CATEGORIES) continue
+                if (!c.startsWith("android.intent.category.") || c.endsWith("LAUNCHER")) vendor = c
+            }
+            if (home || vendor == null) continue
+            val label = try { ri.loadLabel(pm)?.toString()?.trim() } catch (t: Throwable) { null }
+            result[ai.packageName] = AppEntry(
+                packageName = ai.packageName,
+                component = ComponentName(ai.packageName, ai.name),
+                label = if (label.isNullOrEmpty()) ai.packageName else label,
+                leanback = false,
+                system = (ai.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0,
+                entry = vendor.substringAfterLast('.'),
+            )
+        }
+    }
+
+    private val accents = HashMap<String, Int>()
+
+    /** Dominant colour of the app's card, known once its artwork has been rendered. */
+    fun accent(entry: AppEntry): Int? = synchronized(accents) { accents[entry.packageName] }
 
     fun launchIntent(entry: AppEntry): Intent {
         val intent = pm.getLeanbackLaunchIntentForPackage(entry.packageName)
@@ -98,10 +136,12 @@ class AppRepository(private val context: Context) {
         val banner = loadBanner(entry)
         if (banner != null && banner.intrinsicWidth > 0 && banner.intrinsicHeight > 0) {
             drawCenterCrop(canvas, banner, w, h)
+            synchronized(accents) { accents[entry.packageName] = dominantColor(bitmap) }
             return bitmap
         }
         val icon = loadIcon(entry)
         val base = dominantColor(icon)
+        synchronized(accents) { accents[entry.packageName] = base }
         canvas.drawColor(darken(base))
         // soft highlight so flat cards do not look dead
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(28, 255, 255, 255) }
@@ -144,6 +184,13 @@ class AppRepository(private val context: Context) {
             val c = Canvas(sample)
             d.setBounds(0, 0, SAMPLE, SAMPLE)
             d.draw(c)
+            dominantColor(sample, recycle = true)
+        } catch (t: Throwable) { FALLBACK }
+    }
+
+    private fun dominantColor(source: Bitmap, recycle: Boolean = false): Int {
+        return try {
+            val sample = if (source.width == SAMPLE && source.height == SAMPLE) source else Bitmap.createScaledBitmap(source, SAMPLE, SAMPLE, true)
             var r = 0.0; var g = 0.0; var b = 0.0; var weight = 0.0
             val hsv = FloatArray(3)
             val px = IntArray(SAMPLE * SAMPLE)
@@ -154,7 +201,7 @@ class AppRepository(private val context: Context) {
                 val wgt = 0.15 + hsv[1] * (if (hsv[2] in 0.15f..0.95f) 1.0 else 0.3)
                 r += Color.red(p) * wgt; g += Color.green(p) * wgt; b += Color.blue(p) * wgt; weight += wgt
             }
-            sample.recycle()
+            if (sample !== source || recycle) sample.recycle()
             if (weight <= 0) FALLBACK else Color.rgb((r / weight).toInt(), (g / weight).toInt(), (b / weight).toInt())
         } catch (t: Throwable) { FALLBACK }
     }
@@ -213,5 +260,9 @@ class AppRepository(private val context: Context) {
     companion object {
         private const val SAMPLE = 24
         private val FALLBACK = Color.rgb(0x2A, 0x2E, 0x34)
+        private val STANDARD_CATEGORIES = setOf(
+            Intent.CATEGORY_DEFAULT, Intent.CATEGORY_LAUNCHER, Intent.CATEGORY_LEANBACK_LAUNCHER, Intent.CATEGORY_HOME,
+            Intent.CATEGORY_INFO, "android.intent.category.CAR_LAUNCHER", "android.intent.category.LAUNCHER_APP",
+        )
     }
 }

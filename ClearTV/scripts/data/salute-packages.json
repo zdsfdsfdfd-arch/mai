@@ -1,0 +1,926 @@
+{
+  "version": 1,
+  "updated": "2026-11-05",
+  "about": "База знаний о пакетах Салют ТВ (SberDevices / StarkOS) для инвентаризации и clean.ps1. action: disable — реклама, телеметрия или мусор, подтверждённые отчётами с устройств (отключается в рекомендуемой чистке через pm disable-user, обратимо); ask — сервис Сбера, которым можно пользоваться (только по выбору пользователя); keep — никогда не трогать. Классификация по названиям не производится: каждая запись подтверждена хотя бы одним списком пакетов с реального устройства из источников ниже. Поле breaks — что перестанет работать.",
+  "sources": {
+    "chistytv": "https://github.com/by-sonic/chistytv (data/packages.json; первоисточники: официальный список безопасных к отключению пакетов SberBox на 4PDA, тема Sber SBX, документация Сбера по ADB)",
+    "tvcleaner": "https://github.com/Slim1694/TV-Cleaner-for-Salute (packages.json; проверено на SBER_55_CV9632-N55, Realtek RTK88X2CU)",
+    "freemytv": "https://github.com/kryzhukov/sber-tv-at30a6-free-my-tv (docs/ИНСТРУКЦИЯ.md; SaluteTV AT30A6, Amlogic T5W, Android 13 / StarkOS)",
+    "cleanyourtv": "https://github.com/Gathin23/cleanyourtv (examples/sber-salute-tv-at30a6 и sber-salute-tv-pb766: списки, проверенные с перезагрузками 19–23.10.2026 на Android 13/Amlogic и Android 11/MediaTek)"
+  },
+  "platform": {
+    "detect_packages": [
+      "ru.sberdevices.starlauncher",
+      "ru.sberdevices.settings",
+      "ru.sberdevices.services"
+    ],
+    "stock_home": "ru.sberdevices.starlauncher/.ui.mainscreen.MainActivity",
+    "stock_screensaver": "ru.sberdevices.starscreensaver/ru.sberdevices.starscreensaver.StarScreenSaverService",
+    "overlay_package": "ru.sberdevices.services",
+    "notes": [
+      "Штатный лаунчер ru.sberdevices.starlauncher остаётся установленным и включённым (платы CVTE): HOME переключается только через cmd package set-home-activity. На обеих проверенных моделях (at30a6, pb766) выбор HOME и ADB пережили перезагрузку (CleanYourTV). Отключение starlauncher на части прошивок даёт recovery-петлю (ЧистыйТВ/4PDA), а удаление приводит к его переустановке платформенным сервисом при загрузке (Free My TV).",
+      "ru.sberdevices.services (uid system) нельзя отключить: services.core включает его обратно в течение секунды, отключение отдельных компонентов для shell запрещено (Android 13). Он же переустанавливает «обязательные» приложения после pm uninstall и включает часть пакетов обратно при загрузке (openbeta, starkidsroom, parentcontrol, startube, subscriptions, smarthome.promo, ru.sberdevices.tv, rcfupdater, Okko). Поэтому только pm disable-user; вернувшиеся при загрузке пакеты ClearTV скрывает, а не отключает в цикле.",
+      "«Ротация» приложений: StarOS удаляет сторонние приложения, когда на /data остаётся меньше ~355 МБ (порог Android sys_storage_threshold_percentage 5 % + 200 МБ из конфига Сбера). ClearTV может попасть под ротацию на 8 ГБ eMMC: clean.ps1 -LowerStorageThreshold ставит порог 1 % (откат — settings delete).",
+      "Заставка: пока screensaver_components указывает на заставку Сбера, StarOS включает ru.sberdevices.starscreensaver обратно при загрузке; сначала выбирается заставка ClearTV, затем отключается пакет (clean.ps1 делает это в таком порядке).",
+      "Полноэкранные промо поверх всего рисует ru.sberdevices.services (SYSTEM_ALERT_WINDOW); запрет оверлея убирает их и визуальные карточки ассистента (голос работает).",
+      "Приложения Сбера объявляют только категорию STAR_LAUNCHER (не LEANBACK_LAUNCHER), поэтому обычные лаунчеры их не видят; ClearTV дополнительно ищет MAIN-активности с нестандартными категориями.",
+      "HDMI/AV: ru.sberdevices.tvinputs (Amlogic) или com.mediatek.tvinput (MediaTek) обрабатывают VIEW на passthrough-URI — ряд «Источники» ClearTV работает без настройки.",
+      "ADB: на at30a6 (Android 13) меню разработчика заблокировано (7 нажатий не работают), переключатель Sber Studio порт 5555 не открыл; сработал ярлык FactoryMenu (com.stb.factorymenu с 4PDA) → Debug → ADB Enable (заводское меню CVTE рискованно: не трогать другие пункты). На pb766 (Android 11) меню разработчика открывается как обычно, ro.adb.secure=0 (запроса нет, доступ любому в сети). TV Cleaner for Salute предлагает ярлык devmenu.apk, открывающий экран разработчика напрямую. Для сохранения порта после перезагрузки: setprop persist.adb.tcp.port 5555."
+    ],
+    "reenabled_at_boot": [
+      "ru.more.play",
+      "ru.sberdevices.subscriptions",
+      "ru.sberdevices.smarthome.promo",
+      "ru.sberdevices.tv",
+      "ru.sberdevices.rcfupdater",
+      "ru.sberdevices.openbeta",
+      "ru.sberdevices.starkidsroom.prod",
+      "ru.sberdevices.parentcontrol",
+      "ru.sberdevices.startube"
+    ],
+    "default_hidden": [
+      "com.cvte.fac.menu",
+      "com.stb.factorymenu",
+      "com.cvte.factory.at",
+      "com.cvte.license.at",
+      "com.cvte.tv.tools",
+      "ru.sberdevices.TvFactoryHelper",
+      "ru.sberdevices.webview",
+      "com.sberbank.settings",
+      "com.android.tv.settings",
+      "ru.sberdevices.starcleaner",
+      "ru.sberdevices.subscriptions",
+      "ru.sberdevices.smarthome.promo",
+      "ru.sberdevices.tv",
+      "ru.sberdevices.rcfupdater",
+      "ru.sberdevices.openbeta",
+      "ru.sberdevices.starkidsroom.prod",
+      "ru.sberdevices.parentcontrol",
+      "ru.sberdevices.survey",
+      "ru.sberdevices.bugreporter"
+    ],
+    "labels": {
+      "ru.sberdevices.starlauncher": "Салют ТВ",
+      "ru.sberdevices.starmarket": "Каталог Сбера",
+      "ru.sberdevices.settings": "Центр управления",
+      "ru.sberdevices.startube": "СберTube",
+      "ru.sberdevices.starlivetv": "Телеканалы"
+    }
+  },
+  "packages": [
+    {
+      "id": "ru.sberdevices.smarthome.promo",
+      "title": "Промо «Умного дома»",
+      "group": "ads",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "Промо; включается обратно при загрузке на части прошивок (скрывается в ClearTV)",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.survey",
+      "title": "Опросы Сбера",
+      "group": "ads",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "Всплывающие опросы при включении",
+      "sources": [
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.trafficwidget",
+      "title": "Виджет пробок",
+      "group": "ads",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "Виджет на штатном главном экране",
+      "sources": [
+        "chistytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.newswidget",
+      "title": "Виджет новостей",
+      "group": "ads",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "Виджет на штатном главном экране",
+      "sources": [
+        "chistytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.bugreporter",
+      "title": "Отправка отчётов об ошибках",
+      "group": "telemetry",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "Логи перестанут уходить в Сбер",
+      "sources": [
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.crashreporter",
+      "title": "Отчёты о сбоях",
+      "group": "telemetry",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "",
+      "sources": [
+        "chistytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.openbeta",
+      "title": "Бета-программа (канал бета-прошивок)",
+      "group": "junk",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "Бета-канал прошивок; платформа может установить его заново",
+      "sources": [
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.starcleaner",
+      "title": "«Очистка памяти» Сбера",
+      "group": "junk",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "Всплывающий «ускоритель» памяти",
+      "sources": [
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.ctv.autotest.helper",
+      "title": "Заводские автотесты (CTV)",
+      "group": "junk",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "com.ctv.newfactorytest",
+      "title": "Заводской тест (CTV)",
+      "group": "junk",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "com.android.printspooler",
+      "title": "Служба печати Android",
+      "group": "junk",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "Печать (на ТВ не используется)",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "com.android.wallpaperpicker",
+      "title": "Выбор обоев Android",
+      "group": "junk",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "com.android.contacts",
+      "title": "Контакты",
+      "group": "junk",
+      "action": "disable",
+      "risk": "low",
+      "breaks": "",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.starscreensaver",
+      "title": "Заставка Сбера (с контентом и рекламой)",
+      "group": "ads",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Заставка Сбера (~220 МБ кэша); сначала выбрать заставку ClearTV, иначе включается обратно при загрузке",
+      "sources": [
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.startube",
+      "title": "СберTube (встроенный YouTube)",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "СберTube (клиент YouTube Сбера); платформа может переустановить/включить его при загрузке",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.videos",
+      "title": "«Видео» (витрина фильмов / Okko)",
+      "group": "apps",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Витрина фильмов Сбера",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.videoplayer",
+      "title": "Видеоплеер Сбера",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Видео с флешки, если нет другого плеера",
+      "sources": [
+        "chistytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.music",
+      "title": "СберЗвук (музыка)",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Музыка Сбера",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.sberplay",
+      "title": "SberPlay (игры)",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Игры Сбера",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.starbrowser",
+      "title": "Браузер Сбера",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Открытие ссылок, если нет другого браузера",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.starprofile",
+      "title": "Сбер ID (профиль и подписки)",
+      "group": "apps",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Вход в Сбер ID и подписки",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.subscriptions",
+      "title": "Подписки Сбера",
+      "group": "apps",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Управление подписками",
+      "sources": [
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.starmarket",
+      "title": "Магазин приложений Сбера",
+      "group": "apps",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Установка и обновление приложений Сбера",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.catalog",
+      "title": "Каталог приложений Сбера",
+      "group": "apps",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Каталог приложений",
+      "sources": [
+        "chistytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.starkidsroom.prod",
+      "title": "Детская комната",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Детский режим",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.parentcontrol",
+      "title": "Родительский контроль",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "PIN-ограничения",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.huaweicast",
+      "title": "Huawei Cast Plus (приём трансляции)",
+      "group": "sharing",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Трансляция с телефонов Huawei",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.TV",
+      "title": "Смотрёшка (Сбер)",
+      "group": "streaming",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Онлайн ТВ-каналы",
+      "sources": [
+        "chistytv"
+      ]
+    },
+    {
+      "id": "tv.lfstrm.smotreshka_stb",
+      "title": "Смотрёшка",
+      "group": "streaming",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Онлайн ТВ-каналы",
+      "sources": [
+        "chistytv"
+      ]
+    },
+    {
+      "id": "org.mozilla.tv.firefox",
+      "title": "Firefox для ТВ",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Браузер",
+      "sources": [
+        "chistytv"
+      ]
+    },
+    {
+      "id": "org.videolan.vlc",
+      "title": "VLC",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Видео с флешки, если нет другого плеера",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "com.cultraview.newfilemanager",
+      "title": "Файловый менеджер",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Открытие флешек, если нет другого проводника",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "com.salute.star",
+      "title": "«Умный дом» Салют",
+      "group": "apps",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Управление умным домом с ТВ (назначение подтверждено не полностью)",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "com.sberbank.settings",
+      "title": "Настройки СберБанка",
+      "group": "apps",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Назначение уточняется",
+      "sources": [
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.starlauncher",
+      "title": "Штатный главный экран Салют",
+      "group": "launcher",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Отключение уводит ТВ в recovery-петлю на части прошивок даже со сторонним лаунчером; прошивка возвращает его при каждой загрузке",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.assistant",
+      "title": "Ассистент Салют (голос)",
+      "group": "assistant",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Кнопка ассистента и голосовой ввод с пульта",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.services",
+      "title": "Службы StarOS (протокол пульта/телефона, ассистент, оверлей промо)",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Пульт, ассистент, связь с телефоном",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.services.core",
+      "title": "StarServicesCore (ядро платформы, OTA, сторож services)",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Платформа, обновления, ассистент",
+      "sources": [
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.SberDevicesServiceSystem",
+      "title": "Системная служба Сбера (владелец устройства)",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Управление устройством",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.settings",
+      "title": "Настройки Сбера",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Настройки ТВ",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.tvinputs",
+      "title": "HDMI-входы",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Переключение входов",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.starlivetv",
+      "title": "Телеканалы (эфир/антенна и онлайн-каналы Сбера)",
+      "group": "apps",
+      "action": "ask",
+      "risk": "medium",
+      "breaks": "Приложение «Телеканалы»; HDMI-входы не зависят (их обслуживает tvinputs)",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.app.setup",
+      "title": "Установщик приложений Сбера (TvSetupApp)",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Первичная настройка; в TV-Cleaner в списке защищённых",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.app.starkeyboard",
+      "title": "Экранная клавиатура Сбера",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Единственная клавиатура",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.resources",
+      "title": "Ресурсы StarOS",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Интерфейс системных приложений",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.webview",
+      "title": "WebView Сбера",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Веб-содержимое в приложениях",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.gamepad.service",
+      "title": "Геймпады и пульт с телефона (Homuz)",
+      "group": "system",
+      "action": "keep",
+      "risk": "medium",
+      "breaks": "Геймпады, управление с телефона",
+      "sources": [
+        "chistytv",
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.rcfupdater",
+      "title": "Обновление прошивки пульта",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Пульт",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "com.cvte.sber.onekey",
+      "title": "Обработчик кнопок пульта (CVTE)",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Кнопки родного пульта",
+      "sources": [
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.tv",
+      "title": "Настройка провайдеров (телегид Сбера)",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Настройка провайдеров для телегида; включается обратно при загрузке",
+      "sources": [
+        "tvcleaner",
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.TvFactoryHelper",
+      "title": "Заводской помощник Сбера",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Неизвестно",
+      "sources": [
+        "tvcleaner",
+        "freemytv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.beeperstarter",
+      "title": "Beeper starter",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Неизвестно",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.CleanupStub",
+      "title": "CleanupStub",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Неизвестно",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "com.cultraview.SwipeService",
+      "title": "SwipeService (плата)",
+      "group": "vendor",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Неизвестно",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "mediatek.factorymenu.ui",
+      "title": "Заводское меню MediaTek",
+      "group": "vendor",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Сервисное меню; запуск включает заводской режим",
+      "sources": [
+        "tvcleaner",
+        "chistytv"
+      ]
+    },
+    {
+      "id": "com.ctv.android.tvboot",
+      "title": "Загрузка ТВ (CTV)",
+      "group": "vendor",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Загрузка",
+      "sources": [
+        "tvcleaner"
+      ]
+    },
+    {
+      "id": "com.maxhub.screenshare.server.tv",
+      "title": "MHshare (приём трансляции экрана)",
+      "group": "sharing",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Трансляция экрана через MHshare",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.screenshare.platform",
+      "title": "ScreenShare platform (для MHshare)",
+      "group": "sharing",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Трансляция экрана через MHshare",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.cvte.dssshare.dlna",
+      "title": "DLNA-рендерер (CVTE)",
+      "group": "sharing",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Приём DLNA",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.mediatek.androidbox",
+      "title": "Miracast-приёмник (WFDSinkTest, MediaTek)",
+      "group": "sharing",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Miracast",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.more.play",
+      "title": "Okko",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Okko; переустанавливается и включается платформой Сбера при загрузке",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.mts.mtstv",
+      "title": "KION",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "KION",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.ivi.client",
+      "title": "Иви",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Иви",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.vgtrk.smotrim",
+      "title": "Смотрим",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Смотрим",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.tv1.android.tv",
+      "title": "Первый канал",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Первый канал",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.yandex.browser.tv",
+      "title": "Яндекс Браузер для ТВ",
+      "group": "apps",
+      "action": "ask",
+      "risk": "low",
+      "breaks": "Браузер",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.updater",
+      "title": "OTA-обновление прошивки",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Обновления прошивки",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.systemui",
+      "title": "System UI Сбера",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Системный интерфейс",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "ru.sberdevices.location.provider",
+      "title": "Провайдер геолокации Сбера",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Часовой пояс/геолокация",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.mediatek.tvinput",
+      "title": "TV-входы MediaTek (HDMI, AV, тюнер)",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Входы и тюнер",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.mediatek.tv.service",
+      "title": "TV-сервис MediaTek",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Входы и тюнер",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.cvte.tv.setting",
+      "title": "LiveTvGlobal (CVTE)",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Настройки ТВ-тракта",
+      "sources": [
+        "cleanyourtv"
+      ]
+    },
+    {
+      "id": "com.cvte.tv.media",
+      "title": "«Файлы» (USB-медиа, CVTE)",
+      "group": "system",
+      "action": "keep",
+      "risk": "high",
+      "breaks": "Просмотр USB",
+      "sources": [
+        "cleanyourtv"
+      ]
+    }
+  ]
+}

@@ -25,6 +25,7 @@ param(
     [string]$Apk,
     [string]$Wallpapers,
     [switch]$SetHome,
+    [switch]$NoKeepHome,
     [switch]$NoLaunch,
     [switch]$Yes,
     [switch]$AutoInstallTools
@@ -123,8 +124,14 @@ if ($SetHome) {
             Pause-Ms 1000
             $after = Get-ResolvedHome
             if ($after -eq $HomeComponent) {
-                Add-JournalEntry -Action 'set-home' -Description "HOME: $current -> $HomeComponent" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand "cmd package set-home-activity $current" -Previous $current -New $HomeComponent -Verify 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' | Out-Null
+                $restoreCmd = "am start -n $HomeComponent --ez cleartv.keep_home false; cmd package set-home-activity $current"
+                Add-JournalEntry -Action 'set-home' -Description "HOME: $current -> $HomeComponent" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand $restoreCmd -Previous $current -New $HomeComponent -Verify 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' | Out-Null
                 Write-Ok "Главный экран: $after"
+                if (-not $NoKeepHome) {
+                    # Salute TV firmware may put its launcher back at boot: ask ClearTV to keep the HOME choice through the TV's own ADB.
+                    Invoke-Adb shell am start -n $HomeComponent --ez cleartv.keep_home true | Out-Null
+                    Write-Info "Хранитель главного экрана включён: на телевизоре появится запрос «Разрешить отладку по USB?» от ClearTV — отметьте «Всегда разрешать» и подтвердите."
+                }
                 Write-Info "Проверьте кнопку HOME на пульте. Откат: scripts\restore.ps1"
             } else {
                 Write-Fail "HOME не изменился (сейчас: $after). Прошивка игнорирует set-home-activity; обходные пути с системными пакетами не применяются намеренно."

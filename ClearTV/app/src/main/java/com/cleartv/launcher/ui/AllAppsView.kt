@@ -75,7 +75,7 @@ class AllAppsView(private val home: HomeActivity, private val host: FrameLayout)
         populate(entries)
         host.visibility = View.VISIBLE
         view.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
-        Ui.appear(view, home.motion, Ui.dpF(context, 24f))
+        Ui.appear(view, home.motion, Ui.dpF(context, 40f))
         grid.post { firstCard()?.requestFocus() }
         Logs.event("overlay", "name" to "allapps", "open" to true, "count" to entries.size)
     }
@@ -125,6 +125,13 @@ class AllAppsView(private val home: HomeActivity, private val host: FrameLayout)
             }
             grid.addView(row, lp)
         }
+    }
+
+    /** True while the focused card sits in the grid's first row (Up then closes the grid). */
+    fun isFocusInFirstRow(): Boolean {
+        val focused = home.currentFocus ?: return false
+        val firstRow = grid.getChildAt(0) as? ViewGroup ?: return false
+        return focused.parent === firstRow
     }
 
     private fun firstCard(): View? = (grid.getChildAt(0) as? ViewGroup)?.getChildAt(0)

@@ -68,4 +68,31 @@
     <string name="wp_deep">Глубина</string>
     <string name="wp_ember">Янтарь</string>
     <string name="wp_forest">Лес</string>
+
+    <string name="home_guard_label">ClearTV: защита главного экрана</string>
+    <string name="home_guard_description">Возвращает ClearTV, если прошивка сама показала свой лаунчер. Содержимое экрана не читается.</string>
+    <string name="dream_label">ClearTV: часы</string>
+    <string name="settings_keep_home">Удерживать главный экран после перезагрузки</string>
+    <string name="settings_keep_home_sub">Через отладку по сети на самом ТВ (порт 5555). Один раз подтвердите запрос «Разрешить отладку» с галочкой «Всегда»</string>
+    <string name="settings_home_guard">Защита от возврата штатного лаунчера</string>
+    <string name="settings_home_guard_on">Включена в специальных возможностях</string>
+    <string name="settings_home_guard_off">Включите «ClearTV: защита главного экрана» в Настройки → Спец. возможности</string>
+    <string name="settings_home_guard_paused">Приостановлена (включите переключатель)</string>
+    <string name="settings_dream">Заставка ClearTV</string>
+    <string name="settings_dream_on">Выбрана: часы на обоях, без рекламы</string>
+    <string name="settings_dream_off">Сейчас: %1$s. Выбрать можно в настройках заставки или scripts\clean.ps1 -Screensaver</string>
+    <string name="keeper_result_restored">ClearTV снова главный экран</string>
+    <string name="keeper_result_already">ClearTV уже главный экран</string>
+    <string name="keeper_result_adb_off">Отладка по сети на ТВ выключена (порт 5555 закрыт)</string>
+    <string name="keeper_result_not_approved">Запрос отладки не подтверждён на экране ТВ</string>
+    <string name="keeper_result_failed">Не удалось: %1$s</string>
+
+    <string name="greeting_morning">Доброе утро</string>
+    <string name="greeting_day">Добрый день</string>
+    <string name="greeting_evening">Добрый вечер</string>
+    <string name="greeting_night">Доброй ночи</string>
+    <string name="pill_inputs">Источники</string>
+    <string name="pill_settings">Настройки</string>
+    <string name="wp_black">Чёрный</string>
+    <string name="inputs_title">Источники</string>
 </resources>

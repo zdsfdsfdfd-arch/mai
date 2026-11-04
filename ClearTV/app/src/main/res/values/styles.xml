@@ -22,6 +22,25 @@
         <item name="android:textColorAlertDialogListItem">@color/text_primary</item>
     </style>
 
+    <!-- Frosted top-right buttons (Inputs, network, Settings) -->
+    <style name="Pill">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:background">@drawable/bg_pill</item>
+        <item name="android:drawablePadding">8dp</item>
+        <item name="android:drawableTint">@color/text_primary</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
     <style name="SectionTitle">
         <item name="android:textSize">@dimen/section_title_size</item>
         <item name="android:textColor">@color/text_secondary</item>

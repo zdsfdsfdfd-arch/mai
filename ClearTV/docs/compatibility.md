@@ -24,9 +24,40 @@
 | Роль `android.app.role.HOME` (Android 10+) | управляется системой | только диагностика (`cmd role get-role-holders`) |
 | Отключение штатного лаунчера (`pm disable-user`) | везде, где он не защищён | **не выполняется автоматически.** Возможный шаг только после подтверждённой работы ClearTV и отдельного согласия; записывается в журнал с командой `pm enable` |
 
-Если прошивка Салют ТВ принудительно возвращает свой лаунчер (например, через persistent-сервис или
-сброс HOME при загрузке), `verify.ps1` это покажет (тесты home_key, reboot). Обходные пути с системными
-пакетами в проекте не предусмотрены намеренно.
+## Что известно о Салют ТВ из отчётов с реальных устройств (источники: docs/THIRD-PARTY.md)
+
+- Прошивка **возвращает `ru.sberdevices.starlauncher` при каждой загрузке и может сбросить выбор HOME**
+  (SaluteTV AT30A6, Android 13 / StarkOS). Поэтому в ClearTV два независимых механизма: «хранитель» HOME
+  (после загрузки через ~45 с повторяет `cmd package set-home-activity` через ADB на 127.0.0.1:5555, если
+  отладка по сети включена и ключ ClearTV подтверждён) и служба спец. возможностей, которая открывает ClearTV,
+  как только на экране появляется штатный лаунчер.
+- **Отключать `ru.sberdevices.starlauncher` нельзя**: на части прошивок это даёт recovery-петлю даже со
+  сторонним лаунчером (ЧистыйТВ, 4PDA). ClearTV его не трогает.
+- `cmd package set-home-activity` на Салют ТВ (Android 13) работает; на Android 10+ дополнительно есть роль
+  HOME (`cmd role get-role-holders android.app.role.HOME`), что видно в `device-report.md`.
+- Полноэкранные промо поверх всего рисует `ru.sberdevices.services` (`SYSTEM_ALERT_WINDOW`); запрет через
+  `appops` убирает их, но и визуальные карточки ассистента (голос работает). Это отдельный флаг `clean.ps1`.
+- `ru.sberdevices.SberDevicesServiceSystem` — владелец устройства (device owner); `ru.sberdevices.assistant`,
+  `services`, `services.core`, `settings`, `tvinputs`, `starlivetv`, `app.setup`, `app.starkeyboard`,
+  `gamepad.service`, `rcfupdater`, `com.cvte.sber.onekey` и пакеты плат (`com.droidlogic.*`, `com.cvte.*`,
+  `com.mediatek.*`, `com.realtek.*`) — не трогать: пульт, входы, настройки, ассистент.
+- Выбор HOME и ADB **пережили перезагрузку** на обеих проверенных моделях (at30a6 и pb766, CleanYourTV) при
+  включённом штатном лаунчере. Хранитель HOME и служба защиты в ClearTV — страховка на случай других прошивок.
+- **Платформенный сервис** `ru.sberdevices.services` переустанавливает удалённые «обязательные» приложения и включает
+  часть пакетов обратно при загрузке (`openbeta`, `starkidsroom`, `parentcontrol`, `startube`, `subscriptions`,
+  `smarthome.promo`, `ru.sberdevices.tv`, `rcfupdater`, Okko). ClearTV скрывает их на главном экране (список
+  `salute_hidden_default`), а не воюет с ними.
+- **«Ротация»**: StarOS удаляет сторонние приложения при нехватке места на /data (порог ~355 МБ). `clean.ps1
+  -LowerStorageThreshold` снижает порог Android до 1 %; при малом объёме свободного места скрипт предупреждает.
+- **Приложения Сбера** объявляют только категорию `STAR_LAUNCHER`; ClearTV находит их отдельным запросом
+  (MAIN без категории) и показывает с читаемыми именами (Салют ТВ, Каталог Сбера, Центр управления, СберTube).
+- **Включение ADB.** На Android 11 (pb766) меню разработчика открывается как обычно (7 нажатий на номер сборки),
+  запроса «Разрешить отладку» нет (`ro.adb.secure=0`), поэтому отладку надо выключать после работы. На Android 13
+  (at30a6) меню разработчика заблокировано, переключатель в Sber Studio порт не открыл; сработал ярлык FactoryMenu
+  с 4PDA (`com.stb.factorymenu` → Debug → ADB Enable; в заводском меню больше ничего не трогать). TV Cleaner for
+  Salute предлагает `devmenu.apk`, открывающий экран разработчика. Порт 5555 не сохраняется между перезагрузками;
+  `setprop persist.adb.tcp.port 5555` оставляет его (нужно для хранителя HOME).
+- На Android 14 `adb install` может ждать подтверждения на экране ТВ.
 
 ## Функции, зависящие от прошивки
 

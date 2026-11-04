@@ -9,6 +9,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <!-- INTERNET: only for the local ADB socket (127.0.0.1:5555) used by the optional HOME keeper -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Package visibility (API 30+): the launcher only needs apps with a launcher activity and a few system intents -->
     <queries>
@@ -24,6 +27,11 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.HOME" />
         </intent>
+        <!-- Vendor launcher entries (Salute TV declares only STAR_LAUNCHER on its own apps) -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+        <intent><action android:name="android.settings.WIFI_SETTINGS" /></intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="content" android:host="android.media.tv" />
@@ -36,6 +44,8 @@
         <intent><action android:name="android.settings.HOME_SETTINGS" /></intent>
         <intent><action android:name="android.settings.MANAGE_DEFAULT_APPS_SETTINGS" /></intent>
         <intent><action android:name="android.settings.APPLICATION_DETAILS_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.ACCESSIBILITY_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.DREAM_SETTINGS" /></intent>
         <package android:name="com.android.tv.settings" />
         <package android:name="com.android.settings" />
     </queries>
@@ -76,5 +86,42 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Optional: re-apply the HOME choice ~45 s after boot (Salute TV firmware resets it); off by default -->
+        <receiver android:name=".BootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".HomeKeeperJob"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <!-- Optional: accessibility service that brings ClearTV back when the firmware launcher appears on its own -->
+        <service
+            android:name=".guard.HomeGuardService"
+            android:exported="true"
+            android:label="@string/home_guard_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data android:name="android.accessibilityservice" android:resource="@xml/home_guard" />
+        </service>
+
+        <!-- Screensaver without promotions: clock on the current wallpaper -->
+        <service
+            android:name=".dream.ClearDream"
+            android:exported="true"
+            android:label="@string/dream_label"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="android.service.dream" android:resource="@xml/dream" />
+        </service>
     </application>
 </manifest>

@@ -1,3 +1,5 @@
 com.example.mediaapp/.TvMainActivity
 com.example.usergame/.GameActivity
 com.stock.launcher/.AllAppsActivity
+ru.sberdevices.startube/.MainActivity
+ru.sberdevices.smarthome.promo/.PromoActivity

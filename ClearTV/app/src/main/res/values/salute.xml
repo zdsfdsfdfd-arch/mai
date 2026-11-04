@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Salute TV (StarOS) defaults, from device-verified lists (docs/THIRD-PARTY.md). Applied once on first start
+     when the platform is detected; the user can change everything afterwards in Settings → Hidden apps. -->
+<resources>
+    <string-array name="salute_detect_packages" translatable="false">
+        <item>ru.sberdevices.starlauncher</item>
+        <item>ru.sberdevices.settings</item>
+        <item>ru.sberdevices.services</item>
+    </string-array>
+    <!-- Factory menus, helper apps and packages the platform re-enables at boot: hidden, not disabled -->
+    <string-array name="salute_hidden_default" translatable="false">
+        <item>com.cvte.fac.menu</item>
+        <item>com.stb.factorymenu</item>
+        <item>com.cvte.factory.at</item>
+        <item>com.cvte.license.at</item>
+        <item>com.cvte.tv.tools</item>
+        <item>ru.sberdevices.TvFactoryHelper</item>
+        <item>ru.sberdevices.webview</item>
+        <item>com.sberbank.settings</item>
+        <item>com.android.tv.settings</item>
+        <item>ru.sberdevices.starcleaner</item>
+        <item>ru.sberdevices.subscriptions</item>
+        <item>ru.sberdevices.smarthome.promo</item>
+        <item>ru.sberdevices.tv</item>
+        <item>ru.sberdevices.rcfupdater</item>
+        <item>ru.sberdevices.openbeta</item>
+        <item>ru.sberdevices.starkidsroom.prod</item>
+        <item>ru.sberdevices.parentcontrol</item>
+        <item>ru.sberdevices.survey</item>
+        <item>ru.sberdevices.bugreporter</item>
+        <item>ru.sberdevices.starscreensaver</item>
+    </string-array>
+    <!-- package=label: names the stock manifests do not give -->
+    <string-array name="salute_labels">
+        <item>ru.sberdevices.starlauncher=Салют ТВ</item>
+        <item>ru.sberdevices.starmarket=Каталог Сбера</item>
+        <item>ru.sberdevices.settings=Центр управления</item>
+        <item>ru.sberdevices.startube=СберTube</item>
+        <item>ru.sberdevices.starlivetv=Телеканалы</item>
+    </string-array>
+</resources>

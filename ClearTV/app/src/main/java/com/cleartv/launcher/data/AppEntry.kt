@@ -11,4 +11,6 @@ data class AppEntry(
     val leanback: Boolean,
     /** Part of the system image (cannot be uninstalled, only disabled by the user/ADB). */
     val system: Boolean,
+    /** Which launcher entry was found: "leanback", "launcher" or the vendor category (e.g. Salute TV's STAR_LAUNCHER). */
+    val entry: String = "leanback",
 )

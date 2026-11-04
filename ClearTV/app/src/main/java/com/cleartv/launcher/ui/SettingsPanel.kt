@@ -14,6 +14,7 @@ import android.widget.TextView
 import com.cleartv.core.ClockMode
 import com.cleartv.core.Grid
 import com.cleartv.launcher.R
+import com.cleartv.launcher.data.HomeKeeper
 import com.cleartv.launcher.data.WallpaperRepository
 import com.cleartv.launcher.util.Async
 import com.cleartv.launcher.util.Logs
@@ -205,6 +206,33 @@ class SettingsPanel(private val home: HomeActivity, private val host: FrameLayou
         row(list).set(s.getString(R.string.settings_home), home.homeStatusText(), null, R.drawable.ic_home)
             .setOnClickListener { home.openHomeSettings() }
 
+        row(list).apply {
+            set(s.getString(R.string.settings_keep_home), s.getString(R.string.settings_keep_home_sub), null, R.drawable.ic_restore)
+            setToggle(prefs.keepHome)
+            setOnClickListener {
+                prefs.keepHome = !prefs.keepHome
+                setToggle(prefs.keepHome)
+                if (prefs.keepHome) HomeKeeper.runAsync(home, "settings", interactive = true) { home.showKeeperResult(it) }
+            }
+        }
+
+        row(list).apply {
+            val systemOn = home.isHomeGuardEnabledInSystem()
+            val sub = when { !systemOn -> s.getString(R.string.settings_home_guard_off); !prefs.homeGuard -> s.getString(R.string.settings_home_guard_paused); else -> s.getString(R.string.settings_home_guard_on) }
+            set(s.getString(R.string.settings_home_guard), sub, null, R.drawable.ic_home)
+            if (systemOn) setToggle(prefs.homeGuard)
+            setOnClickListener {
+                if (systemOn) { prefs.homeGuard = !prefs.homeGuard; refresh() }
+                else home.openAccessibilitySettings()
+            }
+        }
+
+        row(list).apply {
+            val on = home.isClearDreamSelected()
+            set(s.getString(R.string.settings_dream), if (on) s.getString(R.string.settings_dream_on) else s.getString(R.string.settings_dream_off, home.currentScreensaver() ?: "—"), null, R.drawable.ic_clock)
+            setOnClickListener { home.openDreamSettings() }
+        }
+
         row(list).set(s.getString(R.string.settings_about), home.versionText(), null, R.drawable.ic_info)
             .setOnClickListener { push { buildAbout() } }
 
@@ -238,7 +266,8 @@ class SettingsPanel(private val home: HomeActivity, private val host: FrameLayou
                     card.bindSpecial(wp.title, 0)
                     card.isSelected = wp.id == prefs.wallpaperId
                     if (card.isSelected) card.tag = TAG_FIRST
-                    Async.run({ home.wallpapers.decode(wp, Ui.dp(context, 208f), Ui.dp(context, 117f)) }) { bmp, _ -> if (bmp != null) card.setArtwork(bmp) }
+                    if (wp.black) card.image.setBackgroundColor(android.graphics.Color.BLACK)
+                    else Async.run({ home.wallpapers.decode(wp, Ui.dp(context, 208f), Ui.dp(context, 117f)) }) { bmp, _ -> if (bmp != null) card.setArtwork(bmp) }
                     card.setOnClickListener { prefs.wallpaperId = wp.id; refresh() }
                     if (!wp.bundled) card.setOnLongClickListener {
                         Ui.dialog(context).setTitle(wp.title).setItems(arrayOf(context.getString(R.string.menu_delete))) { _, _ ->

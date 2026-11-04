@@ -1,0 +1,6 @@
+com.stock.launcher/.HomeActivity
+ru.sberdevices.starlauncher/.ui.mainscreen.MainActivity
+com.example.mediaapp/.TvMainActivity
+com.example.usergame/.GameActivity
+ru.sberdevices.startube/.MainActivity
+ru.sberdevices.videos/.StarMain

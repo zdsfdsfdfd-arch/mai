@@ -16,11 +16,12 @@ import java.io.FileOutputStream
  */
 class WallpaperRepository(private val context: Context) {
 
-    data class Wallpaper(val id: String, val title: String, val resId: Int = 0, val file: File? = null) {
-        val bundled: Boolean get() = resId != 0
+    data class Wallpaper(val id: String, val title: String, val resId: Int = 0, val file: File? = null, val black: Boolean = false) {
+        val bundled: Boolean get() = resId != 0 || black
     }
 
     val bundled: List<Wallpaper> = listOf(
+        Wallpaper(BLACK, context.getString(R.string.wp_black), black = true),
         Wallpaper("bundled:graphite", context.getString(R.string.wp_graphite), R.drawable.wp_graphite),
         Wallpaper("bundled:deep", context.getString(R.string.wp_deep), R.drawable.wp_deep),
         Wallpaper("bundled:ember", context.getString(R.string.wp_ember), R.drawable.wp_ember),
@@ -45,6 +46,7 @@ class WallpaperRepository(private val context: Context) {
 
     /** Blocking decode scaled to roughly [reqW]x[reqH]; never larger than needed to save memory. */
     fun decode(wp: Wallpaper, reqW: Int, reqH: Int): Bitmap? {
+        if (wp.black) return null
         val started = System.nanoTime()
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         decodeWith(wp, bounds)
@@ -88,5 +90,8 @@ class WallpaperRepository(private val context: Context) {
 
     fun delete(wp: Wallpaper): Boolean = wp.file?.delete() ?: false
 
-    companion object { private val EXTENSIONS = setOf("jpg", "jpeg", "png", "webp") }
+    companion object {
+        const val BLACK = "bundled:black"
+        private val EXTENSIONS = setOf("jpg", "jpeg", "png", "webp")
+    }
 }

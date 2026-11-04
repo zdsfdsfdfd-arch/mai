@@ -12,14 +12,16 @@
 [CmdletBinding()]
 param(
     [string]$Ip,
-    [switch]$SetHome
+    [switch]$Full,
+    [switch]$SafeOnly,
+    [switch]$Yes
 )
 $ErrorActionPreference = 'Continue'
 $scripts = $PSScriptRoot
 $root = Split-Path -Parent $scripts
 Write-Host "ClearTV: диагностика телевизора, установка и проверка." -ForegroundColor Cyan
 Write-Host "Телевизор и этот компьютер должны быть в одной сети, на телевизоре включена отладка по сети (ADB)."
-Write-Host "Главный экран телевизора этот запуск НЕ меняет."
+if ($Full) { Write-Host "Режим: полная настройка (главный экран, защита, заставка, отключение рекламы Сбера)." } elseif ($SafeOnly) { Write-Host "Режим: только диагностика, установка и проверка. Главный экран не меняется." } else { Write-Host "Сначала диагностика, установка и проверка; затем будет предложена полная настройка." }
 Write-Host ""
 if (-not $Ip) { $Ip = Read-Host "IP-адрес телевизора (Настройки -> Сеть), например 192.168.1.50" }
 $Ip = $Ip.Trim()
@@ -30,7 +32,6 @@ $steps = @(
     @{ Name = 'Установка ClearTV'; File = 'install.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } },
     @{ Name = 'Проверка на телевизоре'; File = 'verify.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } }
 )
-if ($SetHome) { $steps += @{ Name = 'Назначение главным экраном'; File = 'install.ps1'; Params = @{ Ip = $Ip; SetHome = $true; NoLaunch = $true; Yes = $true } } }
 
 $summary = @()
 foreach ($s in $steps) {
@@ -46,6 +47,44 @@ foreach ($s in $steps) {
     } catch {
         Write-Host ("Шаг '" + $s.Name + "' завершился с ошибкой: " + $_.Exception.Message) -ForegroundColor Red
         $summary += "{0}: ОШИБКА — {1}" -f $s.Name, $_.Exception.Message
+    }
+}
+
+# ------------------------------------------------------------------ full setup (home screen, guard, screensaver, Sber ads off)
+$reportsDir = if ($env:CLEARTV_REPORTS_DIR) { $env:CLEARTV_REPORTS_DIR } else { Join-Path $root 'reports' }
+$verifyOk = $false
+try {
+    $vr = Get-Content (Join-Path $reportsDir 'verify-report.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $must = @('installed', 'cold_start', 'dpad_navigation')
+    $verifyOk = (@($vr.Results | Where-Object { $_.Test -in $must -and $_.Status -eq 'PASS' }).Count -eq $must.Count)
+} catch { }
+$doFull = $Full
+if (-not $Full -and -not $SafeOnly) {
+    Write-Host ""
+    if ($verifyOk) {
+        Write-Host "Базовая проверка пройдена. Полная настройка сделает ClearTV главным экраном, включит защиту от возврата" -ForegroundColor Cyan
+        Write-Host "лаунчера Сбера, заставку ClearTV и отключит рекламу/телеметрию Сбера (только отключение, откат — restore.ps1)." -ForegroundColor Cyan
+        $answer = if ($Yes) { 'y' } else { Read-Host "Выполнить полную настройку? [y/N]" }
+        $doFull = ($answer -match '^[yYдД]')
+    } else {
+        Write-Host "Базовая проверка не пройдена полностью — полная настройка пропущена (см. отчёт verify-report.md)." -ForegroundColor Yellow
+    }
+}
+if ($doFull) {
+    if (-not $verifyOk) {
+        Write-Host "Полная настройка запрошена, но базовая проверка (installed/cold_start/dpad_navigation) не пройдена — отказ. Пришлите отчёты." -ForegroundColor Red
+        $summary += "Полная настройка: пропущена (проверка не пройдена)"
+    } else {
+        $fullSteps = @(
+            @{ Name = 'Главный экран ClearTV'; File = 'install.ps1'; Params = @{ Ip = $Ip; SetHome = $true; NoLaunch = $true; Yes = $true } },
+            @{ Name = 'Очистка Сбера, защита, заставка'; File = 'clean.ps1'; Params = @{ Ip = $Ip; Mode = 'Recommended'; BlockOverlays = $true; Screensaver = $true; HomeGuard = $true; LowerStorageThreshold = $true; Yes = $true } }
+        )
+        foreach ($s in $fullSteps) {
+            Write-Host ""; Write-Host ("#" * 70) -ForegroundColor Cyan; Write-Host ("# " + $s.Name) -ForegroundColor Cyan; Write-Host ("#" * 70) -ForegroundColor Cyan
+            $started = Get-Date
+            try { $stepParams = $s.Params; & (Join-Path $scripts $s.File) @stepParams; $summary += "{0}: выполнено ({1} с)" -f $s.Name, [int]((Get-Date) - $started).TotalSeconds }
+            catch { Write-Host ("Шаг '" + $s.Name + "' завершился с ошибкой: " + $_.Exception.Message) -ForegroundColor Red; $summary += "{0}: ОШИБКА — {1}" -f $s.Name, $_.Exception.Message }
+        }
     }
 }
 

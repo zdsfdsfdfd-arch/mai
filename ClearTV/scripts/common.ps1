@@ -344,6 +344,24 @@ function Get-EventsSince([string]$Marker) {
     return @(ConvertFrom-LogcatEvents $text $Marker)
 }
 
+# ------------------------------------------------------------------ device health (after every change)
+function Test-DeviceHealth([string]$ExpectedHome) {
+    # Returns $null when fine, otherwise a human-readable problem (mirrors TV-Cleaner-for-Salute's HealthCheck).
+    if ((Get-ShellText 'echo ok').Trim() -ne 'ok') { return 'телевизор не отвечает на команды' }
+    $resolved = Get-ResolvedHome
+    if (-not $resolved) { return 'на телевизоре не осталось главного экрана (HOME не резолвится)' }
+    if ($ExpectedHome -and $resolved -ne $ExpectedHome) { return "сменился главный экран: теперь $resolved" }
+    $conn = Get-ShellText 'dumpsys connectivity'
+    if ($conn -and $conn -notmatch 'CONNECTED/CONNECTED') { return 'телевизор потерял сеть' }
+    return $null
+}
+function Get-SecureSetting([string]$Key) { $v = (Get-ShellText "settings get secure $Key").Trim(); if ($v -eq 'null') { '' } else { $v } }
+function Get-GlobalSetting([string]$Key) { $v = (Get-ShellText "settings get global $Key").Trim(); if ($v -eq 'null') { '' } else { $v } }
+function Get-RestoreSettingCommand([string]$Namespace, [string]$Key, [string]$Previous) {
+    if ([string]::IsNullOrEmpty($Previous)) { return "settings delete $Namespace $Key" }
+    return "settings put $Namespace $Key '$Previous'"
+}
+
 # ------------------------------------------------------------------ operations journal
 function Read-Journal {
     $j = Read-JsonFile $JournalPath
@@ -417,6 +435,22 @@ $script:CoreSystemPackages = @(
 )
 $script:VendorPrefixes = @('com.droidlogic.', 'com.amlogic.', 'com.mediatek.', 'com.mtk.', 'com.realtek.', 'com.rtk.', 'com.mstar.', 'com.novatek.', 'com.hisilicon.', 'com.hikeen.', 'com.allwinner.', 'com.rockchip.', 'com.qualcomm.', 'vendor.', 'com.qti.')
 $script:SystemSharedUids = @('android.uid.system', 'android.uid.phone', 'android.uid.bluetooth', 'android.uid.nfc', 'android.uid.networkstack', 'android.uid.shell', 'android.uid.se', 'android.uid.systemui')
+$script:KnowledgeBasePath = Join-Path (Join-Path $PSScriptRoot 'data') 'salute-packages.json'
+$script:KnowledgeBase = $null
+$script:ClearTvDream = 'com.cleartv.launcher/com.cleartv.launcher.dream.ClearDream'
+$script:ClearTvGuard = 'com.cleartv.launcher/com.cleartv.launcher.guard.HomeGuardService'
+
+function Get-KnowledgeBase {
+    if ($null -eq $script:KnowledgeBase) {
+        $kb = Read-JsonFile $script:KnowledgeBasePath
+        $map = @{}
+        if ($kb) { foreach ($e in @($kb.packages)) { $map[$e.id] = $e } }
+        $script:KnowledgeBase = @{ Raw = $kb; Map = $map }
+    }
+    return $script:KnowledgeBase
+}
+function Get-KnownPackage([string]$Package) { return (Get-KnowledgeBase).Map[$Package] }
+
 $script:PowerPermissions = @('android.permission.INSTALL_PACKAGES', 'android.permission.DELETE_PACKAGES', 'android.permission.REBOOT', 'android.permission.MASTER_CLEAR', 'android.permission.RECOVERY', 'android.permission.WRITE_SECURE_SETTINGS', 'android.permission.MANAGE_DEVICE_ADMINS', 'android.permission.UPDATE_DEVICE_STATS')
 
 function Get-PackageCategory {
@@ -443,27 +477,38 @@ function Get-PackageCategory {
     if ($Info.Flags -match '\bPERSISTENT\b') { $critical = $true; $reasons += 'persistent-процесс' }
     if ($pkg -match '^com\.android\.' -and $isSystem -and -not $hasLauncher) { $critical = $true; $reasons += 'системный компонент com.android.* без пользовательского интерфейса' }
 
+    # Knowledge base: entries confirmed by package lists from real Salute TV devices (scripts/data/salute-packages.json)
+    $known = Get-KnownPackage $pkg
+    $knownTitle = ''; $knownBreaks = ''; $knownSources = ''
+    if ($known) {
+        $knownTitle = [string]$known.title; $knownBreaks = [string]$known.breaks; $knownSources = (@($known.sources) -join ', ')
+        if ($known.action -eq 'keep') { $critical = $true; $reasons += "база знаний ($knownSources): $knownTitle — не трогать" }
+    }
+
     $category = 'UNKNOWN'
     if ($critical) { $category = 'CRITICAL' }
+    elseif ($known -and $known.action -eq 'disable') { $category = 'PROMOTIONAL'; $reasons += "база знаний ($knownSources): $knownTitle ($($known.group))" }
+    elseif ($known -and $known.action -eq 'ask') { $category = 'OPTIONAL'; $reasons += "база знаний ($knownSources): $knownTitle — по желанию" }
     elseif ($isThirdParty) { $category = 'OPTIONAL'; $reasons += 'установлено пользователем (не из прошивки)' }
     elseif ($hasLauncher) { $category = 'OPTIONAL'; $reasons += 'пользовательское приложение из прошивки с собственной иконкой' }
     else { $reasons += 'назначение не установлено по структурным признакам — требуется проверка на устройстве' }
 
-    if ($Context.ObservedOnScreen -contains $pkg -and $category -ne 'CRITICAL') { $reasons += 'наблюдался на экране при фиксации рекламного блока (см. reports/focus-captures.json)'; $category = 'PROMOTIONAL-CANDIDATE' }
+    if ($Context.ObservedOnScreen -contains $pkg -and $category -ne 'CRITICAL' -and $category -ne 'PROMOTIONAL') { $reasons += 'наблюдался на экране при фиксации рекламного блока (см. reports/focus-captures.json)'; $category = 'PROMOTIONAL-CANDIDATE' }
     if ($Context.BootPkgs -contains $pkg) { $reasons += 'стартует при загрузке (BOOT_COMPLETED)' }
 
     $disable = ''; $restore = ''; $risk = 'Unknown'; $consequence = ''
     switch ($category) {
-        'CRITICAL' { $risk = 'High'; $consequence = 'Потеря базовых функций (настройки, входы, сеть, звук, пульт, обновления) или циклическая перезагрузка. Не изменять.' }
+        'CRITICAL' { $risk = 'High'; $consequence = $(if ($knownBreaks) { "Не изменять. При отключении: $knownBreaks" } else { 'Потеря базовых функций (настройки, входы, сеть, звук, пульт, обновления) или циклическая перезагрузка. Не изменять.' }) }
+        'PROMOTIONAL' { $risk = 'Low'; $disable = "pm disable-user --user 0 $pkg"; $restore = "pm enable $pkg"; $consequence = $(if ($knownBreaks) { "Реклама/телеметрия/мусор по отчётам с устройств. Перестанет работать: $knownBreaks. Обратимо (pm enable)." } else { 'Реклама/телеметрия/мусор по отчётам с устройств. Обратимо (pm enable).' }) }
         'OPTIONAL' {
             $risk = 'Low'
             if ($isThirdParty) { $disable = "pm uninstall -k --user 0 $pkg"; $restore = "cmd package install-existing $pkg"; $consequence = 'Приложение исчезнет из списка; данные сохранятся (-k).' }
-            else { $disable = "pm disable-user --user 0 $pkg"; $restore = "pm enable $pkg"; $consequence = 'Приложение скрыто и не запускается; фоновые сервисы пакета остановлены. Обратимо.' }
+            else { $disable = "pm disable-user --user 0 $pkg"; $restore = "pm enable $pkg"; $consequence = $(if ($knownBreaks) { "Отключать только по желанию. Перестанет работать: $knownBreaks. Обратимо." } else { 'Приложение скрыто и не запускается; фоновые сервисы пакета остановлены. Обратимо.' }) }
         }
         'PROMOTIONAL-CANDIDATE' { $risk = 'Medium'; $disable = "pm disable-user --user 0 $pkg"; $restore = "pm enable $pkg"; $consequence = 'Кандидат: отключать только после подтверждения, что это рекламный компонент без зависимостей.' }
         default { $risk = 'Unknown'; $consequence = 'Назначение не подтверждено. Не изменять до проверки.' }
     }
-    return [pscustomobject]@{ Category = $category; Reasons = $reasons; Risk = $risk; DisableCommand = $disable; RestoreCommand = $restore; Consequence = $consequence; System = $isSystem; HasLauncher = $hasLauncher }
+    return [pscustomobject]@{ Category = $category; Reasons = $reasons; Risk = $risk; DisableCommand = $disable; RestoreCommand = $restore; Consequence = $consequence; System = $isSystem; HasLauncher = $hasLauncher; Known = $knownTitle; Breaks = $knownBreaks; Sources = $knownSources }
 }
 
 function Get-DeviceInventory {
@@ -476,6 +521,7 @@ function Get-DeviceInventory {
     $raw.Leanback      = Get-ShellText 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER'
     $raw.Launcher      = Get-ShellText 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER'
     $raw.Home          = Get-ShellText 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
+    $raw.MainAny       = Get-ShellText 'cmd package query-activities --brief -a android.intent.action.MAIN'
     $raw.TvInput       = Get-ShellText 'cmd package query-services --brief -a android.media.tv.TvInputService'
     $raw.Voice         = Get-ShellText 'cmd package query-services --brief -a android.service.voice.VoiceInteractionService'
     $raw.Boot          = Get-ShellText 'cmd package query-receivers --brief -a android.intent.action.BOOT_COMPLETED'
@@ -488,6 +534,7 @@ function Get-DeviceInventory {
         LeanbackPkgs = & $pkgOf (ConvertFrom-BriefComponents $raw.Leanback)
         LauncherPkgs = & $pkgOf (ConvertFrom-BriefComponents $raw.Launcher)
         HomePkgs     = & $pkgOf (ConvertFrom-BriefComponents $raw.Home)
+        MainAnyPkgs  = & $pkgOf (ConvertFrom-BriefComponents $raw.MainAny)
         TvInputPkgs  = & $pkgOf (ConvertFrom-BriefComponents $raw.TvInput)
         VoicePkgs    = & $pkgOf (ConvertFrom-BriefComponents $raw.Voice)
         BootPkgs     = & $pkgOf (ConvertFrom-BriefComponents $raw.Boot)
@@ -513,8 +560,9 @@ function Get-DeviceInventory {
             Enabled = $(if ($ctx.DisabledPkgs -contains $info.Package) { 'disabled' } else { $info.Enabled })
             Version = $info.VersionName; TargetSdk = $info.TargetSdk; Path = $(if ($paths[$info.Package]) { $paths[$info.Package] } else { $info.CodePath })
             SharedUser = $info.SharedUser
-            Launcher = $(if ($ctx.LeanbackPkgs -contains $info.Package) { 'leanback' } elseif ($ctx.LauncherPkgs -contains $info.Package) { 'launcher' } else { '' })
+            Launcher = $(if ($ctx.LeanbackPkgs -contains $info.Package) { 'leanback' } elseif ($ctx.LauncherPkgs -contains $info.Package) { 'launcher' } elseif ($ctx.MainAnyPkgs -contains $info.Package -and $ctx.HomePkgs -notcontains $info.Package) { 'main-only (vendor category, e.g. STAR_LAUNCHER)' } else { '' })
             Home = ($ctx.HomePkgs -contains $info.Package)
+            Known = $c.Known; Breaks = $c.Breaks; Sources = $c.Sources
             Reasons = $c.Reasons; DisableCommand = $c.DisableCommand; RestoreCommand = $c.RestoreCommand; Consequence = $c.Consequence
         }
     }
@@ -528,14 +576,14 @@ function Format-InventoryMarkdown($Inventory, [string]$DeviceTitle) {
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine("Сформировано: $(Get-Date -Format 'yyyy-MM-dd HH:mm'). Всего пакетов: $($rows.Count).")
     [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("Классификация выполнена по **структурным признакам** (sharedUserId, объявленные сервисы, привилегии, наличие иконки, принадлежность прошивке), а не по названиям пакетов. Категория PROMOTIONAL присваивается только компонентам, фактически зафиксированным на экране при показе рекламного блока (`diagnose.ps1 -Capture`); до этого они остаются UNKNOWN. Пакеты CRITICAL и UNKNOWN не изменяются.")
+    [void]$sb.AppendLine("Классификация выполнена по **структурным признакам** (sharedUserId, объявленные сервисы, привилегии, наличие иконки, принадлежность прошивке) и по **базе знаний** scripts/data/salute-packages.json, где каждая запись подтверждена списком пакетов с реального Салют ТВ (источники указаны в колонке Reasons). PROMOTIONAL — реклама, телеметрия и мусор по этим отчётам (отключаются clean.ps1, обратимо). PROMOTIONAL-CANDIDATE — компоненты, зафиксированные на экране при показе рекламы (`diagnose.ps1 -Capture`). Пакеты CRITICAL и UNKNOWN не изменяются.")
     [void]$sb.AppendLine("")
-    foreach ($cat in @('CRITICAL', 'OPTIONAL', 'PROMOTIONAL-CANDIDATE', 'UNKNOWN')) {
+    foreach ($cat in @('CRITICAL', 'PROMOTIONAL', 'OPTIONAL', 'PROMOTIONAL-CANDIDATE', 'UNKNOWN')) {
         $subset = @($rows | Where-Object { $_.Category -eq $cat })
         [void]$sb.AppendLine("## $cat ($($subset.Count))")
         [void]$sb.AppendLine("")
         if ($subset.Count -eq 0) { [void]$sb.AppendLine("_нет_"); [void]$sb.AppendLine(""); continue }
-        [void]$sb.Append((ConvertTo-MarkdownTable $subset @('Package', 'Version', 'Enabled', 'Launcher', 'SharedUser', 'Reasons', 'Risk', 'DisableCommand', 'RestoreCommand', 'Consequence')))
+        [void]$sb.Append((ConvertTo-MarkdownTable $subset @('Package', 'Known', 'Version', 'Enabled', 'Launcher', 'Reasons', 'Breaks', 'Risk', 'DisableCommand', 'RestoreCommand', 'Consequence')))
         [void]$sb.AppendLine("")
     }
     return $sb.ToString()

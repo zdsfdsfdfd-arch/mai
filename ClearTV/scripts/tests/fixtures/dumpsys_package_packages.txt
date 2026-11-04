@@ -173,6 +173,97 @@ Packages:
     User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
       gids=[3003]
       runtime permissions:
+  Package [ru.sberdevices.starlauncher] (abc):
+    userId=10050
+    pkg=Package{1 ru.sberdevices.starlauncher}
+    codePath=/system/priv-app/StarLauncher
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[ PRIVILEGED ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [ru.sberdevices.services] (abc):
+    userId=10050
+    pkg=Package{1 ru.sberdevices.services}
+    codePath=/system/priv-app/SberServices
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE PERSISTENT ]
+    privateFlags=[ PRIVILEGED ]
+    install permissions:
+      android.permission.SYSTEM_ALERT_WINDOW: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [ru.sberdevices.smarthome.promo] (abc):
+    userId=10050
+    pkg=Package{1 ru.sberdevices.smarthome.promo}
+    codePath=/system/app/SmartHomePromo
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [ru.sberdevices.crashreporter] (abc):
+    userId=10050
+    pkg=Package{1 ru.sberdevices.crashreporter}
+    codePath=/system/app/CrashReporter
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [ru.sberdevices.startube] (abc):
+    userId=10050
+    pkg=Package{1 ru.sberdevices.startube}
+    codePath=/system/app/StarTube
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [ru.sberdevices.starscreensaver] (abc):
+    userId=10050
+    pkg=Package{1 ru.sberdevices.starscreensaver}
+    codePath=/system/app/StarScreensaver
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [ru.sberdevices.assistant] (abc):
+    userId=10050
+    pkg=Package{1 ru.sberdevices.assistant}
+    codePath=/system/priv-app/Assistant
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[ PRIVILEGED ]
+    install permissions:
+      android.permission.RECORD_AUDIO: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
 
 Hidden system packages:
 

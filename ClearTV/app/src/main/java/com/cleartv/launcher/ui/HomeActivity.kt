@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
@@ -20,7 +21,6 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextClock
 import android.widget.TextView
@@ -31,21 +31,27 @@ import com.cleartv.launcher.ClearTvApp
 import com.cleartv.launcher.R
 import com.cleartv.launcher.data.AppEntry
 import com.cleartv.launcher.data.AppRepository
+import com.cleartv.launcher.data.HomeKeeper
 import com.cleartv.launcher.data.NetworkMonitor
 import com.cleartv.launcher.data.Prefs
+import com.cleartv.launcher.data.SaluteDefaults
 import com.cleartv.launcher.data.TvInputsRepository
 import com.cleartv.launcher.data.WallpaperRepository
+import com.cleartv.launcher.guard.HomeGuardService
 import com.cleartv.launcher.util.Async
 import com.cleartv.launcher.util.Logs
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 /**
- * The home screen: clock, favourites row, optional HDMI inputs row, "all apps" grid and settings sheet.
+ * The home screen, laid out like a tvOS top shelf: greeting, thin clock and date top-left, three frosted
+ * pills top-right (Inputs, network, Settings), the focused app's name above a rounded dock band at the
+ * bottom, and an ambient glow in that app's colour. Down opens the grid of every app.
  *
  * Everything is driven by D-pad focus. The activity never finishes on BACK (that is what a HOME activity
- * does), and the HOME key, when ClearTV is the default launcher, brings the row back to its first card.
+ * does), and the HOME key, when ClearTV is the default launcher, brings the dock back to its first card.
  */
 class HomeActivity : Activity() {
 
@@ -58,14 +64,16 @@ class HomeActivity : Activity() {
 
     private lateinit var content: FrameLayout
     private lateinit var wallpaperView: ImageView
+    private lateinit var scrim: View
+    private lateinit var ambient: AmbientView
+    private lateinit var greeting: TextView
     private lateinit var clock: TextClock
     private lateinit var dateView: TextView
-    private lateinit var netIcon: ImageView
-    private lateinit var netLabel: TextView
-    lateinit var settingsButton: ImageButton; private set
-    private lateinit var inputsTitle: TextView
-    private lateinit var inputsRow: FocusRow
-    private lateinit var appsTitle: TextView
+    private lateinit var pillInputs: TextView
+    private lateinit var pillNetwork: TextView
+    lateinit var settingsButton: TextView; private set
+    private lateinit var heroName: TextView
+    private lateinit var dockBand: FrameLayout
     lateinit var appsRow: FocusRow; private set
     private lateinit var hint: TextView
     private lateinit var overlay: FrameLayout
@@ -77,6 +85,7 @@ class HomeActivity : Activity() {
     private var favorites: MutableList<AppEntry> = ArrayList()
     private var inputs: List<TvInputsRepository.Source> = emptyList()
     val inputsFound: Int get() = inputs.size
+    private var labels: Map<String, String> = emptyMap()
 
     private var packageReceiver: BroadcastReceiver? = null
     private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
@@ -85,6 +94,7 @@ class HomeActivity : Activity() {
     private var firstRender = true
     private var currentWallpaperId: String? = null
     private var move: MoveState? = null
+    private var heroText: CharSequence = ""
     private val createdAt = SystemClock.uptimeMillis()
 
     private val tickReceiver = object : BroadcastReceiver() {
@@ -104,35 +114,44 @@ class HomeActivity : Activity() {
         inputsRepo = app.inputs
         network = NetworkMonitor(this)
         motion = Ui.motion(prefs)
+        labels = SaluteDefaults.labels(this)
 
         setContentView(R.layout.activity_home)
         content = findViewById(R.id.content)
         wallpaperView = findViewById(R.id.wallpaper)
+        scrim = findViewById(R.id.scrim)
+        ambient = findViewById(R.id.ambient)
+        greeting = findViewById(R.id.greeting)
         clock = findViewById(R.id.clock)
         dateView = findViewById(R.id.date)
-        netIcon = findViewById(R.id.net_icon)
-        netLabel = findViewById(R.id.net_label)
-        settingsButton = findViewById(R.id.settings_button)
-        inputsTitle = findViewById(R.id.inputs_title)
-        inputsRow = findViewById(R.id.inputs_row)
-        appsTitle = findViewById(R.id.apps_title)
+        pillInputs = findViewById(R.id.pill_inputs)
+        pillNetwork = findViewById(R.id.pill_network)
+        settingsButton = findViewById(R.id.pill_settings)
+        heroName = findViewById(R.id.hero_name)
+        dockBand = findViewById(R.id.dock_band)
         appsRow = findViewById(R.id.apps_row)
         hint = findViewById(R.id.hint)
         overlay = findViewById(R.id.overlay)
-        if (Build.VERSION.SDK_INT >= 26) settingsButton.defaultFocusHighlightEnabled = false
 
+        applyFonts()
+        for (pill in listOf(pillInputs, pillNetwork, settingsButton)) {
+            if (Build.VERSION.SDK_INT >= 26) pill.defaultFocusHighlightEnabled = false
+            pill.nextFocusDownId = R.id.apps_row
+        }
         settingsPanel = SettingsPanel(this, overlay)
         allApps = AllAppsView(this, overlay)
 
         settingsButton.setOnClickListener { settingsPanel.toggle() }
+        pillInputs.setOnClickListener { showInputsDialog() }
+        pillNetwork.setOnClickListener { openNetworkSettings() }
         appsRow.smooth = motion.smoothScroll
-        inputsRow.smooth = motion.smoothScroll
         appsRow.onChildFocused = { index, view ->
-            val pkg = (view as? AppCardView)?.entry?.packageName
+            val card = view as? AppCardView
+            val pkg = card?.entry?.packageName
             if (pkg != null) prefs.lastFocusedPackage = pkg
+            showHero(card)
             Logs.event("focus", "row" to "apps", "index" to index, "pkg" to (pkg ?: "all_apps"))
         }
-        inputsRow.onChildFocused = { index, _ -> Logs.event("focus", "row" to "inputs", "index" to index) }
 
         applyClockMode()
         updateDate()
@@ -143,11 +162,20 @@ class HomeActivity : Activity() {
         packageReceiver = repo.registerPackageListener { appsDirty = true; if (resumed) loadApps() }
         prefsListener = prefs.addListener { key -> onPrefChanged(key) }
         prefs.countLaunch()
+        applyKeepHomeExtra(intent)
         if (app.safeModeNotice) {
             app.safeModeNotice = false
             Ui.dialog(this).setMessage(R.string.safe_mode_notice).setPositiveButton(R.string.ok, null).show()
         }
         Logs.event("app_start", "launches" to prefs.launchCount, "sinceProcessMs" to (System.currentTimeMillis() - app.startedAt))
+    }
+
+    private fun applyFonts() {
+        clock.typeface = Fonts.outfit(this, 300)
+        greeting.typeface = Fonts.text(this, 500, getString(R.string.greeting_day))
+        dateView.typeface = Fonts.text(this, 400, "Я")
+        heroName.typeface = Fonts.text(this, 300, "Я")
+        for (pill in listOf(pillInputs, pillNetwork, settingsButton)) pill.typeface = Fonts.text(this, 500, pill.text)
     }
 
     override fun onResume() {
@@ -161,7 +189,9 @@ class HomeActivity : Activity() {
         applyClockMode()
         network.start { updateNetwork(it) }
         if (appsDirty) loadApps()
-        Logs.event("home_resumed", "defaultHome" to repo.isDefaultHome(), "home" to (repo.currentHome()?.flattenToShortString() ?: "none"))
+        val isDefault = repo.isDefaultHome()
+        Logs.event("home_resumed", "defaultHome" to isDefault, "home" to (repo.currentHome()?.flattenToShortString() ?: "none"))
+        if (!isDefault && prefs.keepHome) HomeKeeper.runAsync(this, "resume", interactive = false)
     }
 
     override fun onPause() {
@@ -179,6 +209,7 @@ class HomeActivity : Activity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        applyKeepHomeExtra(intent)
         if (intent != null && intent.hasCategory(Intent.CATEGORY_HOME)) {
             Logs.event("home_pressed")
             cancelMove()
@@ -186,6 +217,27 @@ class HomeActivity : Activity() {
             appsRow.scrollToStart()
             appsRow.focusIndex(0)
         }
+    }
+
+    /** `am start -n <ClearTV> --ez cleartv.keep_home true|false` lets the PC scripts switch the keeper. */
+    private fun applyKeepHomeExtra(intent: Intent?) {
+        if (intent == null || !intent.hasExtra(HomeKeeper.EXTRA_KEEP_HOME)) return
+        val on = intent.getBooleanExtra(HomeKeeper.EXTRA_KEEP_HOME, false)
+        prefs.keepHome = on
+        Logs.event("keep_home", "on" to on, "via" to "intent")
+        if (on) HomeKeeper.runAsync(this, "intent", interactive = true) { showKeeperResult(it) }
+    }
+
+    fun showKeeperResult(outcome: HomeKeeper.Outcome) {
+        val text = when (outcome.status) {
+            HomeKeeper.Status.RESTORED -> getString(R.string.keeper_result_restored)
+            HomeKeeper.Status.ALREADY_HOME -> getString(R.string.keeper_result_already)
+            HomeKeeper.Status.ADB_OFF -> getString(R.string.keeper_result_adb_off)
+            HomeKeeper.Status.NOT_APPROVED -> getString(R.string.keeper_result_not_approved)
+            HomeKeeper.Status.DISABLED -> return
+            HomeKeeper.Status.FAILED -> getString(R.string.keeper_result_failed, outcome.detail)
+        }
+        toast(text)
     }
 
     // ------------------------------------------------------------------ keys
@@ -200,12 +252,29 @@ class HomeActivity : Activity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_MENU && event.repeatCount == 0) {
-            if (allApps.isOpen) allApps.hide()
-            settingsPanel.toggle()
-            return true
+        when (keyCode) {
+            KeyEvent.KEYCODE_MENU -> if (event.repeatCount == 0) {
+                if (allApps.isOpen) allApps.hide()
+                settingsPanel.toggle()
+                return true
+            }
+            KeyEvent.KEYCODE_DPAD_DOWN -> if (!allApps.isOpen && !settingsPanel.isOpen && focusInDock()) {
+                // Nothing lies below the dock: Down slides the grid of every app up.
+                if (event.repeatCount == 0) openAllApps()
+                return true
+            }
+            KeyEvent.KEYCODE_DPAD_UP -> if (allApps.isOpen && allApps.isFocusInFirstRow()) {
+                if (event.repeatCount == 0) allApps.hide()
+                return true
+            }
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun focusInDock(): Boolean {
+        var v: View? = currentFocus
+        while (v != null) { if (v === appsRow) return true; v = v.parent as? View }
+        return false
     }
 
     @Deprecated("Deprecated in API 33; still the simplest hook for remote BACK on TV")
@@ -243,7 +312,9 @@ class HomeActivity : Activity() {
         appsDirty = false
         Async.run({ repo.load() }) { list, error ->
             if (error != null) { Logs.e("app discovery failed", error); return@run }
-            allEntries = list ?: emptyList()
+            val loaded = list ?: emptyList()
+            SaluteDefaults.applyFirstRun(this, prefs, loaded.map { it.packageName })
+            allEntries = loaded.map { e -> labels[e.packageName]?.let { e.copy(label = it) } ?: e }
             rebuildFavorites()
             if (allApps.isOpen) allApps.update(visibleEntries())
         }
@@ -279,8 +350,8 @@ class HomeActivity : Activity() {
 
     private fun renderAppsRow() {
         val focusedPkg = (currentFocus as? AppCardView)?.entry?.packageName ?: prefs.lastFocusedPackage
-        val hadFocus = currentFocus?.let { it === appsRow || appsRow.container.indexOfChild(it) >= 0 } ?: false
-        val gap = Ui.dp(this, 18f)
+        val hadFocus = focusInDock()
+        val gap = Ui.dp(this, 16f)
         appsRow.clear()
         for (entry in favorites) {
             val card = newAppCard(AppCardView.Size.LARGE, entry, inRow = true)
@@ -300,7 +371,7 @@ class HomeActivity : Activity() {
         }
         if (firstRender) {
             firstRender = false
-            Ui.appear(appsRow, motion, Ui.dpF(this, 18f))
+            Ui.appear(dockBand, motion, Ui.dpF(this, 18f))
             Logs.event("first_frame", "ms" to (SystemClock.uptimeMillis() - createdAt))
         }
     }
@@ -309,7 +380,7 @@ class HomeActivity : Activity() {
         val card = AppCardView(this, size)
         card.motion = motion
         card.bind(entry)
-        card.showLabel(prefs.showLabels)
+        card.showLabel(if (inRow) prefs.showLabels else true)
         card.setOnClickListener { launch(entry) }
         card.setOnLongClickListener { showAppMenu(entry, inRow); true }
         return card
@@ -320,12 +391,33 @@ class HomeActivity : Activity() {
         val scale = minOf(resources.displayMetrics.density, 2f)
         val w = (card.size.wDp * scale).toInt()
         val h = (card.size.hDp * scale).toInt()
-        repo.cachedArtwork(entry, w, h)?.let { card.setArtwork(it); return }
-        Async.run({ repo.artwork(entry, w, h) }) { bmp: Bitmap?, _ -> if (card.entry === entry && bmp != null) card.setArtwork(bmp) }
+        repo.cachedArtwork(entry, w, h)?.let { card.setArtwork(it); if (card.isFocused) showHero(card); return }
+        Async.run({ repo.artwork(entry, w, h) }) { bmp: Bitmap?, _ ->
+            if (card.entry === entry && bmp != null) { card.setArtwork(bmp); if (card.isFocused) showHero(card) }
+        }
+    }
+
+    /** Top shelf: the focused card's name and the ambient glow in its colour. */
+    private fun showHero(card: AppCardView?) {
+        val text: CharSequence = card?.entry?.label ?: card?.label?.text ?: ""
+        val accent = card?.entry?.let { repo.accent(it) } ?: Color.rgb(0x2E, 0x34, 0x40)
+        ambient.setColor(accent, animate = motion.focusMs > 0)
+        if (ambient.alpha < 1f) { if (motion.overlayMs > 0) ambient.animate().alpha(1f).setDuration(500).start() else ambient.alpha = 1f }
+        if (text == heroText) return
+        heroText = text
+        heroName.animate().cancel()
+        heroName.typeface = Fonts.text(this, 300, text)
+        if (motion.focusMs == 0L) { heroName.text = text; heroName.alpha = 1f; return }
+        heroName.animate().alpha(0f).translationY(Ui.dpF(this, 4f)).setDuration(90).withEndAction {
+            heroName.text = text
+            heroName.translationY = Ui.dpF(this, -6f)
+            heroName.animate().alpha(1f).translationY(0f).setDuration(160).setInterpolator(Ui.decelerate).start()
+        }.start()
     }
 
     fun launch(entry: AppEntry) {
         try {
+            HomeGuardService.noteUserLaunch(entry.packageName)
             startActivity(repo.launchIntent(entry))
             Logs.event("launch", "pkg" to entry.packageName, "ok" to true)
         } catch (t: Throwable) {
@@ -466,23 +558,18 @@ class HomeActivity : Activity() {
     }
 
     private fun renderInputs() {
-        val show = inputs.isNotEmpty() && prefs.showInputs
-        inputsTitle.visibility = if (show) View.VISIBLE else View.GONE
-        inputsRow.visibility = if (show) View.VISIBLE else View.GONE
-        inputsRow.clear()
-        if (!show) return
-        val gap = Ui.dp(this, 12f)
-        for (src in inputs) {
-            val card = AppCardView(this, AppCardView.Size.THUMB)
-            card.motion = motion
-            card.bindSpecial(src.label, if (src.hdmi) R.drawable.ic_hdmi else R.drawable.ic_input)
-            card.setOnClickListener {
-                val ok = startSafely(src.intent)
-                Logs.event("input_launch", "id" to src.id, "ok" to ok)
-                if (!ok) toast(getString(R.string.toast_input_failed))
-            }
-            inputsRow.add(card, gap)
-        }
+        pillInputs.visibility = if (inputs.isNotEmpty() && prefs.showInputs) View.VISIBLE else View.GONE
+    }
+
+    private fun showInputsDialog() {
+        if (inputs.isEmpty()) return
+        val names = inputs.map { it.label }.toTypedArray()
+        Ui.dialog(this).setTitle(R.string.inputs_title).setItems(names) { _, which ->
+            val src = inputs[which]
+            val ok = startSafely(src.intent)
+            Logs.event("input_launch", "id" to src.id, "ok" to ok)
+            if (!ok) toast(getString(R.string.toast_input_failed))
+        }.show()
     }
 
     // ------------------------------------------------------------------ wallpaper / clock / network
@@ -492,6 +579,13 @@ class HomeActivity : Activity() {
         if (!force && id == currentWallpaperId) return
         currentWallpaperId = id
         val wp = wallpapers.find(id)
+        if (wp.black) {
+            wallpaperView.setImageDrawable(null)
+            wallpaperView.visibility = View.GONE
+            scrim.visibility = View.GONE
+            Logs.event("wallpaper", "id" to wp.id)
+            return
+        }
         val size = Point()
         windowManager.defaultDisplay.getRealSize(size)
         val w = minOf(size.x, 1920).coerceAtLeast(1)
@@ -503,6 +597,8 @@ class HomeActivity : Activity() {
     }
 
     private fun setWallpaperBitmap(bmp: Bitmap) {
+        scrim.visibility = View.VISIBLE
+        wallpaperView.visibility = View.VISIBLE
         if (wallpaperView.drawable == null || motion.overlayMs == 0L) {
             wallpaperView.setImageBitmap(bmp)
             if (motion.overlayMs > 0L) { wallpaperView.alpha = 0f; wallpaperView.animate().alpha(1f).setDuration(400).start() } else wallpaperView.alpha = 1f
@@ -523,8 +619,14 @@ class HomeActivity : Activity() {
     private fun updateDate() {
         val locale = Locale.getDefault()
         val pattern = DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM")
-        val text = SimpleDateFormat(pattern, locale).format(Date())
-        dateView.text = if (text.isEmpty()) text else text.substring(0, 1).uppercase(locale) + text.substring(1)
+        dateView.text = SimpleDateFormat(pattern, locale).format(Date())
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        greeting.text = getString(when (hour) {
+            in 5..11 -> R.string.greeting_morning
+            in 12..17 -> R.string.greeting_day
+            in 18..22 -> R.string.greeting_evening
+            else -> R.string.greeting_night
+        })
     }
 
     private fun updateNetwork(status: NetworkMonitor.Status) {
@@ -534,10 +636,19 @@ class HomeActivity : Activity() {
             NetworkMonitor.Transport.OTHER -> R.drawable.ic_network to R.string.net_other
             NetworkMonitor.Transport.NONE -> R.drawable.ic_no_network to R.string.net_none
         }
-        netIcon.setImageResource(icon)
+        pillNetwork.setCompoundDrawablesRelativeWithIntrinsicBounds(icon, 0, 0, 0)
         var text = getString(label)
         if (status.transport != NetworkMonitor.Transport.NONE && !status.validated) text += " · " + getString(R.string.net_no_internet)
-        netLabel.text = text
+        pillNetwork.text = text
+    }
+
+    private fun openNetworkSettings() {
+        val candidates = listOf(Intent(Settings.ACTION_WIFI_SETTINGS), Intent(Settings.ACTION_WIRELESS_SETTINGS), Intent(Settings.ACTION_SETTINGS))
+        for (intent in candidates) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (repo.resolves(intent) && startSafely(intent)) return
+        }
+        openSystemSettings()
     }
 
     private fun onPrefChanged(key: String) {
@@ -550,14 +661,13 @@ class HomeActivity : Activity() {
             Prefs.K_REDUCED_MOTION -> {
                 motion = Ui.motion(prefs)
                 appsRow.smooth = motion.smoothScroll
-                inputsRow.smooth = motion.smoothScroll
                 forEachCard { it.motion = motion }
             }
         }
     }
 
     private fun forEachCard(action: (AppCardView) -> Unit) {
-        for (row in listOf(appsRow, inputsRow)) for (i in 0 until row.count) (row.childAt(i) as? AppCardView)?.let(action)
+        for (i in 0 until appsRow.count) (appsRow.childAt(i) as? AppCardView)?.let(action)
     }
 
     // ------------------------------------------------------------------ overlays & helpers used by panels
@@ -604,6 +714,16 @@ class HomeActivity : Activity() {
         Ui.dialog(this).setTitle(R.string.settings_home).setMessage(getString(R.string.home_action_hint, packageName + "/" + HomeActivity::class.java.name)).setPositiveButton(R.string.ok, null).show()
     }
 
+    fun openAccessibilitySettings() {
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (!(repo.resolves(intent) && startSafely(intent))) toast(getString(R.string.toast_not_available))
+    }
+
+    fun openDreamSettings() {
+        val intent = Intent(Settings.ACTION_DREAM_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (!(repo.resolves(intent) && startSafely(intent))) toast(getString(R.string.toast_not_available))
+    }
+
     fun homeStatusText(): String {
         val home: ComponentName? = repo.currentHome()
         return when {
@@ -618,6 +738,14 @@ class HomeActivity : Activity() {
         @Suppress("DEPRECATION")
         getString(R.string.about_version, info.versionName ?: "?", info.versionCode)
     } catch (t: Throwable) { "" }
+
+    fun isHomeGuardEnabledInSystem(): Boolean {
+        val enabled = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: return false
+        return enabled.split(':').any { it.startsWith("$packageName/") && it.contains("HomeGuardService") }
+    }
+
+    fun currentScreensaver(): String? = try { Settings.Secure.getString(contentResolver, "screensaver_components") } catch (t: Throwable) { null }
+    fun isClearDreamSelected(): Boolean = currentScreensaver()?.split(',')?.any { it.startsWith("$packageName/") } ?: false
 
     fun canPickDocument(): Boolean = repo.resolves(pickIntent())
 
@@ -652,12 +780,19 @@ class HomeActivity : Activity() {
         sb.append("Leanback feature: ").append(packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)).append('\n')
         sb.append("Default HOME: ").append(repo.currentHome()?.flattenToShortString() ?: "none").append('\n')
         sb.append("HOME candidates: ").append(repo.homeCandidates().joinToString { it.packageName }).append('\n')
-        sb.append("Apps: ").append(allEntries.size).append(" total, ").append(allEntries.count { it.leanback }).append(" leanback, favourites ").append(favorites.size).append(", hidden ").append(prefs.hidden.size).append('\n')
+        sb.append("Apps: ").append(allEntries.size).append(" total, ").append(allEntries.count { it.leanback }).append(" leanback, ")
+            .append(allEntries.count { !it.leanback && it.entry == "launcher" }).append(" launcher, ")
+            .append(allEntries.count { it.entry != "leanback" && it.entry != "launcher" }).append(" vendor (").append(allEntries.filter { it.entry != "leanback" && it.entry != "launcher" }.map { it.entry }.distinct().joinToString()).append("), favourites ")
+            .append(favorites.size).append(", hidden ").append(prefs.hidden.size).append('\n')
+        sb.append("Salute TV detected: ").append(SaluteDefaults.detected(this, allEntries.map { it.packageName })).append('\n')
         sb.append("Network: ").append(network.current()).append('\n')
         sb.append("Inputs (resolvable): ").append(inputs.size).append('\n')
         sb.append(inputsRepo.diagnostics()).append('\n')
         sb.append("Document picker: ").append(canPickDocument()).append('\n')
         sb.append("Wallpaper folder: ").append(wallpapers.userDir().absolutePath).append('\n')
+        sb.append("Home guard (accessibility): ").append(isHomeGuardEnabledInSystem()).append('\n')
+        sb.append("Screensaver components: ").append(currentScreensaver() ?: "none").append('\n')
+        sb.append("Home keeper last outcome: ").append(HomeKeeper.lastOutcome ?: "never ran").append('\n')
         sb.append("Prefs: ").append(prefs.summary()).append('\n')
         sb.append("Crash history: ").append(prefs.crashHistory.size).append('\n')
         sb.append("\n--- recent log ---\n")

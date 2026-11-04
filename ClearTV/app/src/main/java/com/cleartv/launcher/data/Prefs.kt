@@ -22,6 +22,7 @@ class Prefs(context: Context) {
     var hidden: Set<String>
         get() = StringSetCodec.decode(sp.getString(K_HIDDEN, null))
         set(value) = sp.edit().putString(K_HIDDEN, StringSetCodec.encode(value)).apply()
+    val hiddenConfigured: Boolean get() = sp.contains(K_HIDDEN)
 
     var wallpaperId: String
         get() = sp.getString(K_WALLPAPER, DEFAULT_WALLPAPER) ?: DEFAULT_WALLPAPER
@@ -32,7 +33,7 @@ class Prefs(context: Context) {
         set(value) = sp.edit().putString(K_CLOCK, value.storageKey).apply()
 
     var showLabels: Boolean
-        get() = sp.getBoolean(K_LABELS, true)
+        get() = sp.getBoolean(K_LABELS, false)
         set(value) = sp.edit().putBoolean(K_LABELS, value).apply()
 
     var showInputs: Boolean
@@ -46,6 +47,16 @@ class Prefs(context: Context) {
     var safeMode: Boolean
         get() = sp.getBoolean(K_SAFE_MODE, false)
         set(value) = sp.edit().putBoolean(K_SAFE_MODE, value).apply()
+
+    /** Re-apply the HOME choice after boot through the TV's own ADB (opt-in; needs network debugging on). */
+    var keepHome: Boolean
+        get() = sp.getBoolean(K_KEEP_HOME, false)
+        set(value) = sp.edit().putBoolean(K_KEEP_HOME, value).apply()
+
+    /** The accessibility guard may be enabled system-wide; this switch lets the user pause its effect. */
+    var homeGuard: Boolean
+        get() = sp.getBoolean(K_HOME_GUARD, true)
+        set(value) = sp.edit().putBoolean(K_HOME_GUARD, value).apply()
 
     val crashHistory: List<Long>
         get() = (sp.getString(K_CRASHES, "") ?: "").split(',').mapNotNull { it.trim().toLongOrNull() }
@@ -95,12 +106,14 @@ class Prefs(context: Context) {
         append(" inputs=").append(showInputs)
         append(" reducedMotion=").append(reducedMotion)
         append(" safeMode=").append(safeMode)
+        append(" keepHome=").append(keepHome)
+        append(" homeGuard=").append(homeGuard)
         append(" launches=").append(launchCount)
     }
 
     companion object {
         const val FILE = "cleartv"
-        const val DEFAULT_WALLPAPER = "bundled:graphite"
+        const val DEFAULT_WALLPAPER = "bundled:black"
         const val K_FAVORITES = "favorites"
         const val K_HIDDEN = "hidden"
         const val K_WALLPAPER = "wallpaper"
@@ -112,5 +125,7 @@ class Prefs(context: Context) {
         const val K_CRASHES = "crash_history"
         const val K_LAST_FOCUS = "last_focus"
         const val K_LAUNCHES = "launch_count"
+        const val K_KEEP_HOME = "keep_home"
+        const val K_HOME_GUARD = "home_guard"
     }
 }

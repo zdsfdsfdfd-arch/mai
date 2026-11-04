@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="salute_labels">
+        <item>ru.sberdevices.starlauncher=Salute TV</item>
+        <item>ru.sberdevices.starmarket=Sber catalogue</item>
+        <item>ru.sberdevices.settings=Control centre</item>
+        <item>ru.sberdevices.startube=SberTube</item>
+        <item>ru.sberdevices.starlivetv=TV channels</item>
+    </string-array>
+</resources>

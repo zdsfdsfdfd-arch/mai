@@ -9,7 +9,8 @@
 | `inventory.md` / `.json` | `scripts/diagnose.ps1` | все пакеты с категорией, причинами, командами отключения/восстановления, риском |
 | `focus-captures.json` | `scripts/diagnose.ps1 -Capture` | какой пакет был на экране, когда вы зафиксировали рекламный блок |
 | `backup/<время>/` | `diagnose.ps1`, `install.ps1` | снимок состояния до изменений (справочный) |
-| `operations-journal.json` | `install.ps1`, `restore.ps1` | журнал изменений с командами отката |
+| `clean-plan.md` / `clean-report.md` | `scripts/clean.ps1` | что предложено и что отключено (с проверками здоровья ТВ) |
+| `operations-journal.json` | `install.ps1`, `clean.ps1`, `restore.ps1` | журнал изменений с командами отката |
 | `verify-report.md` / `.json` | `scripts/verify.ps1` | результаты проверок на телевизоре с доказательствами |
 | `raw/<время>/` | `diagnose.ps1`, `verify.ps1` | сырые дампы adb (не коммитятся) |
 | `adb-log.txt` | все скрипты | каждая команда adb с кодом выхода (не коммитится) |

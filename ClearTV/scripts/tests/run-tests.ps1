@@ -41,7 +41,7 @@ Check 'ConvertFrom-TvInputDump' ($tv.Count -eq 3 -and @($tv | Where-Object Passt
 $ev = ConvertFrom-LogcatEvents "I ClearTV : EVT focus row=apps index=0 pkg=a`nI ClearTV : MARK abc`nI ClearTV : EVT launch pkg=com.x ok=true`n" 'MARK abc'
 Check 'ConvertFrom-LogcatEvents after marker' ($ev.Count -eq 1 -and $ev[0].Name -eq 'launch' -and $ev[0].Fields['ok'] -eq 'true')
 $pk = ConvertFrom-DumpsysPackages (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_package_packages.txt') -Raw)
-Check 'ConvertFrom-DumpsysPackages count' ($pk.Count -eq 13) "got $($pk.Count)"
+Check 'ConvertFrom-DumpsysPackages count' ($pk.Count -eq 20) "got $($pk.Count)"
 $upd = $pk | Where-Object Package -eq 'com.example.updater'
 Check 'ConvertFrom-DumpsysPackages permissions' ($upd.GrantedPermissions -contains 'android.permission.INSTALL_PACKAGES' -and $upd.PrivateFlags -match 'PRIVILEGED')
 $sysui = $pk | Where-Object Package -eq 'com.android.systemui'
@@ -63,6 +63,13 @@ $ctx2 = $ctx.Clone(); $ctx2.ObservedOnScreen = @('com.example.mysteryservice')
 Check 'category: observed on screen -> PROMOTIONAL-CANDIDATE' ((Get-PackageCategory -Info ($pk | Where-Object Package -eq 'com.example.mysteryservice') -Context $ctx2).Category -eq 'PROMOTIONAL-CANDIDATE')
 $opt = Get-PackageCategory -Info ($pk | Where-Object Package -eq 'com.example.usergame') -Context $ctx
 Check 'OPTIONAL third-party has reversible commands' ($opt.DisableCommand -match 'pm uninstall -k --user 0' -and $opt.RestoreCommand -match 'install-existing')
+$ctxS = $ctx.Clone(); $ctxS.HomePkgs = @('com.stock.launcher', 'ru.sberdevices.starlauncher'); $ctxS.LeanbackPkgs = $ctx.LeanbackPkgs + @('ru.sberdevices.startube', 'ru.sberdevices.smarthome.promo')
+function CatS($name) { (Get-PackageCategory -Info ($pk | Where-Object Package -eq $name) -Context $ctxS) }
+Check 'KB: Sber launcher stays CRITICAL despite launcher activity' ((CatS 'ru.sberdevices.starlauncher').Category -eq 'CRITICAL')
+Check 'KB: smarthome.promo -> PROMOTIONAL with pm disable-user' ((CatS 'ru.sberdevices.smarthome.promo').Category -eq 'PROMOTIONAL' -and (CatS 'ru.sberdevices.smarthome.promo').DisableCommand -eq 'pm disable-user --user 0 ru.sberdevices.smarthome.promo')
+Check 'KB: crashreporter -> PROMOTIONAL' ((CatS 'ru.sberdevices.crashreporter').Category -eq 'PROMOTIONAL')
+Check 'KB: startube -> OPTIONAL (ask) with breaks text' ((CatS 'ru.sberdevices.startube').Category -eq 'OPTIONAL' -and (CatS 'ru.sberdevices.startube').Breaks -ne '')
+Check 'KB: assistant and services CRITICAL' ((CatS 'ru.sberdevices.assistant').Category -eq 'CRITICAL' -and (CatS 'ru.sberdevices.services').Category -eq 'CRITICAL')
 
 Write-Host "== 3. diagnose.ps1 -SkipDevice"
 & (Join-Path $scripts 'diagnose.ps1') -SkipDevice *> (Join-Path $tmp 'diag-skip.log')
@@ -75,7 +82,7 @@ Check 'device-report: model/api' ($dr.Device.Model -eq 'SBER_TV_FAKE' -and $dr.A
 Check 'device-report: memory and display' ($dr.Memory.TotalMb -eq 1500 -and $dr.Display.PhysicalSize -eq '1920x1080' -and $dr.Display.DensityDpi -eq '320')
 Check 'device-report: home + set-home support' ($dr.Home.Current -eq 'com.stock.launcher/.HomeActivity' -and $dr.Home.SetHomeActivitySupported -eq $true)
 Check 'device-report: inputs' ($dr.Tv.PassthroughInputs -eq 2 -and $dr.Tv.HdmiCecEnabled -eq $true)
-Check 'device-report: packages counted' ($dr.Packages.Total -eq 13 -and $dr.Packages.ByCategory.CRITICAL -ge 8)
+Check 'device-report: packages counted' ($dr.Packages.Total -eq 20 -and $dr.Packages.ByCategory.CRITICAL -ge 11 -and $dr.Packages.ByCategory.PROMOTIONAL -eq 2)
 $inv = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'inventory.json') -Raw | ConvertFrom-Json
 Check 'inventory.json: launcher is CRITICAL' ((($inv | Where-Object Package -eq 'com.stock.launcher').Category) -eq 'CRITICAL')
 Check 'inventory.md written' (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'inventory.md'))
@@ -92,7 +99,7 @@ $j = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json'
 $homeState = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw
 Check 'set-home applied on device' ($homeState.Trim() -eq 'com.cleartv.launcher/com.cleartv.launcher.ui.HomeActivity')
 $sh = $j | Where-Object Action -eq 'set-home'
-Check 'journal: set-home entry remembers previous launcher' ($sh.Previous -eq 'com.stock.launcher/.HomeActivity' -and $sh.RestoreCommand -eq 'cmd package set-home-activity com.stock.launcher/.HomeActivity')
+Check 'journal: set-home entry remembers previous launcher and turns the keeper off first' ($sh.Previous -eq 'com.stock.launcher/.HomeActivity' -and $sh.RestoreCommand -match 'cleartv.keep_home false; cmd package set-home-activity com.stock.launcher/.HomeActivity$')
 Check 'journal: update entry has no restore command' ((@($j | Where-Object Action -eq 'update-apk').Count -eq 1))
 
 Write-Host "== 6. verify.ps1 smoke run (fake device, time-scaled)"
@@ -120,14 +127,51 @@ $env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-empty'
 $out = & (Join-Path $scripts 'restore.ps1') -Yes *>&1 | Out-String
 Check 'restore without journal: says nothing to restore' ($out -match 'восстанавливать нечего')
 
+Write-Host "== 9a. clean.ps1 dry run and execution against the fake TV"
+$env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-clean'
+Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt') -ErrorAction SilentlyContinue
+& (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -DryRun *> (Join-Path $tmp 'clean-dry.log')
+$planMd = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'clean-plan.md') -Raw
+Check 'clean dry-run: plan lists promo + crashreporter only' (($planMd -match 'ru.sberdevices.smarthome.promo') -and ($planMd -match 'ru.sberdevices.crashreporter') -and ($planMd -notmatch 'ru.sberdevices.startube') -and ($planMd -notmatch 'ru.sberdevices.starlauncher'))
+Check 'clean dry-run: nothing disabled' (-not (Test-Path (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt')))
+& (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -Yes -BlockOverlays -Screensaver -HomeGuard -LowerStorageThreshold *> (Join-Path $tmp 'clean.log')
+$calls = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'calls.log') -Raw
+Check 'clean: screensaver is set before packages are disabled' ($calls.IndexOf('settings put secure screensaver_components') -lt $calls.IndexOf('pm disable-user --user 0 ru.sberdevices.smarthome.promo'))
+$global = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_global.txt') -Raw
+Check 'clean: storage threshold lowered to 1%' ($global -match 'sys_storage_threshold_percentage=1')
+$disabled = @(Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt') -ErrorAction SilentlyContinue)
+Check 'clean: promo and crashreporter disabled, nothing else' ($disabled.Count -eq 2 -and ($disabled -contains 'ru.sberdevices.smarthome.promo') -and ($disabled -contains 'ru.sberdevices.crashreporter'))
+$secure = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_secure.txt') -Raw
+Check 'clean: ClearTV screensaver and home guard set' (($secure -match 'screensaver_components=com.cleartv.launcher/com.cleartv.launcher.dream.ClearDream') -and ($secure -match 'enabled_accessibility_services=.*HomeGuardService') -and ($secure -match 'accessibility_enabled=1'))
+$ops = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'appops.txt') -Raw
+Check 'clean: overlay denied for ru.sberdevices.services' ($ops -match 'ru.sberdevices.services=deny')
+$jc = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json)
+Check 'clean: journal has 2 disable + overlay + screensaver + guard entries with restore commands' ((@($jc | Where-Object Action -eq 'disable-package').Count -eq 2) -and (@($jc | Where-Object { $_.Action -in @('appops-overlay','screensaver','home-guard') -and $_.RestoreCommand }).Count -eq 3))
+& (Join-Path $scripts 'restore.ps1') -Ip 192.168.1.50 -Yes *> (Join-Path $tmp 'clean-restore.log')
+$disabled = @(Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt') -ErrorAction SilentlyContinue | Where-Object { $_ })
+# [string] keeps an empty file from turning into an empty array, which -notmatch would filter instead of test
+$secure = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_secure.txt') -Raw -ErrorAction SilentlyContinue)
+$ops = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'appops.txt') -Raw -ErrorAction SilentlyContinue)
+$global = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_global.txt') -Raw -ErrorAction SilentlyContinue)
+Check 'restore after clean: packages enabled, settings and appops back' (($disabled.Count -eq 0) -and ($secure -notmatch 'screensaver_components=') -and ($secure -notmatch 'HomeGuardService') -and ($ops -match 'ru.sberdevices.services=allow') -and ($global -notmatch 'sys_storage_threshold_percentage='))
+$jc = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json)
+Check 'restore after clean: all entries marked restored' (@($jc | Where-Object { -not $_.Restored -and $_.RestoreCommand }).Count -eq 0)
+
 Write-Host "== 9. run-all.ps1 (one-click flow) against the fake TV"
 $env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-runall'
 Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'installed') -ErrorAction SilentlyContinue
-& (Join-Path $scripts 'run-all.ps1') -Ip 192.168.1.50 *> (Join-Path $tmp 'run-all.log')
+Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt') -ErrorAction SilentlyContinue
+& (Join-Path $scripts 'run-all.ps1') -Ip 192.168.1.50 -SafeOnly *> (Join-Path $tmp 'run-all.log')
 $zips = @(Get-ChildItem $tmp -Filter 'ClearTV-reports-*.zip')
 Check 'run-all: reports zip produced' ($zips.Count -eq 1)
 Check 'run-all: device, inventory and verify reports inside' ((Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'device-report.md')) -and (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'inventory.md')) -and (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'verify-report.md')))
-Check 'run-all: ClearTV installed, HOME untouched' ((Test-Path (Join-Path $env:CLEARTV_FAKE_STATE 'installed')) -and ((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw).Trim() -eq 'com.stock.launcher/.HomeActivity'))
+Check 'run-all (safe): ClearTV installed, HOME untouched, nothing disabled' ((Test-Path (Join-Path $env:CLEARTV_FAKE_STATE 'installed')) -and ((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw).Trim() -eq 'com.stock.launcher/.HomeActivity') -and -not (Test-Path (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt')))
+
+Write-Host "== 9b. run-all.ps1 -Full: gate on verify, then set-home + clean"
+$env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-full'
+& (Join-Path $scripts 'run-all.ps1') -Ip 192.168.1.50 -Full *> (Join-Path $tmp 'run-all-full.log')
+$fullLog = Get-Content (Join-Path $tmp 'run-all-full.log') -Raw
+Check 'run-all -Full: refused because dpad test fails on the fake TV (gate works)' (($fullLog -match 'не пройдена') -and ((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw).Trim() -eq 'com.stock.launcher/.HomeActivity'))
 
 Write-Host ""
 Write-Host "Passed: $passed  Failed: $failures   (logs: $tmp)"

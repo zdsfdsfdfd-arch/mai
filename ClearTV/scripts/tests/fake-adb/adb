@@ -24,6 +24,12 @@ case "$cmd" in
   logcat) [ -f "$STATE/logcat.txt" ] && cat "$STATE/logcat.txt"; exit 0 ;;
   shell)
     rest="${args[*]:1}"
+    if [[ "$rest" == *"; "* ]]; then
+      IFS=';' read -r -a parts <<< "$rest"
+      # re-dispatch each part through this script
+      for part in "${parts[@]}"; do part="$(echo "$part" | sed 's/^ *//; s/ *$//')"; [ -n "$part" ] && bash "$0" -s fake shell "$part"; done
+      exit 0
+    fi
     case "$rest" in
       "getprop sys.boot_completed") echo 1 ;;
       "getprop") cat "$FIX/getprop.txt" ;;
@@ -33,6 +39,18 @@ case "$cmd" in
         echo "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true"
         if [ -f "$STATE/home.txt" ]; then cat "$STATE/home.txt"; else echo "com.stock.launcher/.HomeActivity"; fi ;;
       "pm path com.cleartv.launcher") [ -f "$STATE/installed" ] && echo "package:/data/app/com.cleartv.launcher-1/base.apk" ;;
+      "echo ok") echo ok ;;
+      "pm disable-user --user 0 "*) pkg="${rest##* }"; grep -qx "$pkg" "$STATE/disabled.txt" 2>/dev/null || echo "$pkg" >> "$STATE/disabled.txt"; echo "Package $pkg new state: disabled-user" ;;
+      "pm enable "*) pkg="${rest##* }"; [ -f "$STATE/disabled.txt" ] && grep -vx "$pkg" "$STATE/disabled.txt" > "$STATE/disabled.tmp"; mv -f "$STATE/disabled.tmp" "$STATE/disabled.txt" 2>/dev/null; echo "Package $pkg new state: enabled" ;;
+      "pm list packages -d") [ -f "$STATE/disabled.txt" ] && sed 's/^/package:/' "$STATE/disabled.txt" ;;
+      "settings get secure "*|"settings get global "*) ns="$(echo "$rest" | cut -d' ' -f3)"; key="${rest##* }"; v="$(grep "^$key=" "$STATE/settings_$ns.txt" 2>/dev/null | head -1 | cut -d= -f2-)"; if [ -n "$v" ]; then echo "$v"; else echo null; fi ;;
+      "settings put secure "*|"settings put global "*) ns="$(echo "$rest" | cut -d' ' -f3)"; key="$(echo "$rest" | cut -d' ' -f4)"; val="$(echo "$rest" | cut -d' ' -f5- | sed "s/^'//; s/'\$//")"; touch "$STATE/settings_$ns.txt"; grep -v "^$key=" "$STATE/settings_$ns.txt" > "$STATE/s.tmp"; echo "$key=$val" >> "$STATE/s.tmp"; mv -f "$STATE/s.tmp" "$STATE/settings_$ns.txt" ;;
+      "settings delete secure "*|"settings delete global "*) ns="$(echo "$rest" | cut -d' ' -f3)"; key="${rest##* }"; if [ -f "$STATE/settings_$ns.txt" ]; then grep -v "^$key=" "$STATE/settings_$ns.txt" > "$STATE/s.tmp"; mv -f "$STATE/s.tmp" "$STATE/settings_$ns.txt"; fi; echo "Deleted 1 rows" ;;
+      "appops get "*) pkg="$(echo "$rest" | cut -d' ' -f3)"; m="$(grep "^$pkg=" "$STATE/appops.txt" 2>/dev/null | cut -d= -f2)"; echo "SYSTEM_ALERT_WINDOW: ${m:-allow}" ;;
+      "appops set "*) pkg="$(echo "$rest" | cut -d' ' -f3)"; mode="${rest##* }"; touch "$STATE/appops.txt"; grep -v "^$pkg=" "$STATE/appops.txt" > "$STATE/a.tmp"; echo "$pkg=$mode" >> "$STATE/a.tmp"; mv -f "$STATE/a.tmp" "$STATE/appops.txt" ;;
+      "dumpsys connectivity") echo "NetworkAgentInfo{ ni{[type: WIFI[], state: CONNECTED/CONNECTED]} }" ;;
+      "df /data") echo "Filesystem 1K-blocks Used Available Use% Mounted on"; echo "/dev/block/dm-1 3000000 2600000 400000 87% /data" ;;
+      "dumpsys wifi") echo "Wi-Fi is enabled" ;;
       "pm uninstall com.cleartv.launcher") rm -f "$STATE/installed"; echo "Success" ;;
       "dumpsys package com.cleartv.launcher") echo "  Package [com.cleartv.launcher] (1a2b3c):"; echo "    versionName=0.1.0" ;;
       "log -t ClearTV "*) msg="${rest#log -t ClearTV }"; msg="${msg//\"/}"; echo "11-04 12:00:00.000  1234  1234 I ClearTV : $msg" >> "$STATE/logcat.txt" ;;

@@ -3,20 +3,29 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg">
+    android:background="#FF000000">
 
     <ImageView
         android:id="@+id/wallpaper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:contentDescription="@null" />
+        android:contentDescription="@null"
+        android:visibility="gone" />
 
     <View
         android:id="@+id/scrim"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/scrim" />
+        android:background="@drawable/scrim"
+        android:visibility="gone" />
+
+    <!-- Ambient glow in the colour of the focused app (tvOS-style top shelf light) -->
+    <com.cleartv.launcher.ui.AmbientView
+        android:id="@+id/ambient"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0" />
 
     <FrameLayout
         android:id="@+id/content"
@@ -25,81 +34,115 @@
         android:clipChildren="false"
         android:clipToPadding="false">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <!-- Header: greeting, clock and date on the left; frosted pills on the right -->
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top|start"
-            android:layout_marginStart="@dimen/content_margin"
-            android:layout_marginTop="32dp"
-            android:orientation="vertical">
+            android:layout_marginStart="56dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="56dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-            <TextClock
-                android:id="@+id/clock"
+            <LinearLayout
+                android:id="@+id/left_block"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="16dp"
+                android:layout_toStartOf="@+id/top_buttons"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/greeting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="3dp"
+                    android:letterSpacing="0.22"
+                    android:singleLine="true"
+                    android:textAllCaps="true"
+                    android:textColor="#8CFFFFFF"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <TextClock
+                        android:id="@+id/clock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:letterSpacing="-0.04"
+                        android:textColor="@color/text_primary"
+                        android:textSize="54sp" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="26dp"
+                        android:layout_gravity="bottom"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="#33FFFFFF" />
+
+                    <TextView
+                        android:id="@+id/date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginBottom="9dp"
+                        android:letterSpacing="0.14"
+                        android:singleLine="true"
+                        android:textAllCaps="true"
+                        android:textColor="#A6FFFFFF"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/top_buttons"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-light"
-                android:includeFontPadding="false"
-                android:letterSpacing="-0.03"
-                android:textColor="@color/text_primary"
-                android:textSize="@dimen/clock_size" />
+                android:layout_alignBottom="@id/left_block"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="6dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:fontFamily="sans-serif"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/date_size" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/pill_inputs"
+                    style="@style/Pill"
+                    android:drawableStart="@drawable/ic_hdmi"
+                    android:text="@string/pill_inputs"
+                    android:visibility="gone" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="40dp"
-            android:layout_marginEnd="@dimen/content_margin"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/pill_network"
+                    style="@style/Pill"
+                    android:drawableStart="@drawable/ic_wifi"
+                    android:maxWidth="200dp"
+                    android:text="@string/net_none" />
 
-            <ImageView
-                android:id="@+id/net_icon"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:contentDescription="@null"
-                android:tint="@color/text_secondary" />
-
-            <TextView
-                android:id="@+id/net_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="@color/text_secondary"
-                android:textSize="15sp" />
-
-            <ImageButton
-                android:id="@+id/settings_button"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:layout_marginStart="22dp"
-                android:background="@drawable/bg_round_button"
-                android:contentDescription="@string/settings"
-                android:focusable="true"
-                android:padding="11dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_settings"
-                android:tint="@color/text_primary" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/pill_settings"
+                    style="@style/Pill"
+                    android:drawableStart="@drawable/ic_settings"
+                    android:text="@string/pill_settings" />
+            </LinearLayout>
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="110dp"
             android:background="@drawable/bg_hint"
-            android:fontFamily="sans-serif-medium"
             android:paddingStart="18dp"
             android:paddingTop="9dp"
             android:paddingEnd="18dp"
@@ -108,44 +151,45 @@
             android:textSize="14sp"
             android:visibility="gone" />
 
+        <!-- Dock block: the focused app's name (top shelf) above a rounded band holding the apps row -->
         <LinearLayout
-            android:id="@+id/rows"
+            android:id="@+id/dock_block"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:clipChildren="false"
             android:clipToPadding="false"
             android:orientation="vertical"
-            android:paddingBottom="22dp">
+            android:paddingBottom="30dp">
 
             <TextView
-                android:id="@+id/inputs_title"
-                style="@style/SectionTitle"
+                android:id="@+id/hero_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/content_margin"
-                android:text="@string/section_inputs"
-                android:visibility="gone" />
+                android:layout_marginStart="68dp"
+                android:layout_marginBottom="14dp"
+                android:alpha="0"
+                android:includeFontPadding="false"
+                android:letterSpacing="-0.02"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textSize="44sp" />
 
-            <com.cleartv.launcher.ui.FocusRow
-                android:id="@+id/inputs_row"
+            <FrameLayout
+                android:id="@+id/dock_band"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:layout_marginStart="44dp"
+                android:layout_marginEnd="44dp"
+                android:background="@drawable/bg_dock_band"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-            <TextView
-                android:id="@+id/apps_title"
-                style="@style/SectionTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/content_margin"
-                android:layout_marginTop="6dp"
-                android:text="@string/section_apps" />
-
-            <com.cleartv.launcher.ui.FocusRow
-                android:id="@+id/apps_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                <com.cleartv.launcher.ui.FocusRow
+                    android:id="@+id/apps_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </FrameLayout>
         </LinearLayout>
     </FrameLayout>
 

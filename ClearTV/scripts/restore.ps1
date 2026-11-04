@@ -67,6 +67,10 @@ foreach ($e in $pending) {
     } elseif ($e.Action -eq 'install-apk') {
         $ok = ((Get-ShellText "pm path $PackageName") -notmatch 'package:')
         if ($ok) { Write-Ok "ClearTV удалён" } else { Write-Fail "ClearTV всё ещё установлен" }
+    } elseif ($e.Action -eq 'disable-package') {
+        $pkg = ($e.RestoreCommand -replace '^pm enable\s+', '').Trim()
+        $ok = ((Get-ShellText 'pm list packages -d') -notmatch ("(?m)^package:" + [regex]::Escape($pkg) + '\s*$'))
+        if ($ok) { Write-Ok "$pkg включён" } else { Write-Fail "$pkg всё ещё отключён" }
     } elseif ($ok) { Write-Ok "выполнено" } else { Write-Fail "команда вернула ошибку (exit $($r.ExitCode))" }
     if ($ok) { Set-JournalRestored $e.Id }
 }
