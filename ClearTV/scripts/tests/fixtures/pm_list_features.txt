@@ -1,0 +1,3 @@
+feature:android.software.leanback
+feature:android.software.live_tv
+feature:android.hardware.hdmi.cec

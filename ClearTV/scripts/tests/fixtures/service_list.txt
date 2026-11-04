@@ -1,0 +1,4 @@
+Found 3 services:
+0	package: [android.content.pm.IPackageManager]
+1	activity: [android.app.IActivityManager]
+2	tv_input: [android.media.tv.ITvInputManager]

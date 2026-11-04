@@ -1,0 +1,2 @@
+com.example.usergame/.GameActivity
+com.android.tv.settings/.MainSettings

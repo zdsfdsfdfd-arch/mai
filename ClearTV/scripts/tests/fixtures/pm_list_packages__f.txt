@@ -1,0 +1,13 @@
+package:/system/framework/framework-res.apk=android
+package:/system/priv-app/SystemUI/SystemUI.apk=com.android.systemui
+package:/system/priv-app/TvSettings/TvSettings.apk=com.android.tv.settings
+package:/system/priv-app/StockLauncher/StockLauncher.apk=com.stock.launcher
+package:/system/app/VendorHdmi/VendorHdmi.apk=com.vendor.hdmi
+package:/system/app/VendorTuner/VendorTuner.apk=com.vendor.tuner
+package:/system/app/MediaApp/MediaApp.apk=com.example.mediaapp
+package:/system/app/MysteryService/MysteryService.apk=com.example.mysteryservice
+package:/system/priv-app/Updater/Updater.apk=com.example.updater
+package:/system/app/VoiceAssist/VoiceAssist.apk=com.example.voice
+package:/system/app/LatinIME/LatinIME.apk=com.android.inputmethod.latin
+package:/data/app/com.example.usergame-1/base.apk=com.example.usergame
+package:/system/app/Droidlogic/Droidlogic.apk=com.droidlogic.tvinput

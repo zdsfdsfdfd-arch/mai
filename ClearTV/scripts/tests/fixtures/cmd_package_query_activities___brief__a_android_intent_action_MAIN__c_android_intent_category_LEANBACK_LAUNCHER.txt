@@ -1,0 +1,3 @@
+com.example.mediaapp/.TvMainActivity
+com.example.usergame/.GameActivity
+com.stock.launcher/.AllAppsActivity

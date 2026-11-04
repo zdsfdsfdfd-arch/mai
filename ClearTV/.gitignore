@@ -1,0 +1,16 @@
+# Gradle / Android build output
+.gradle/
+build/
+app/build/
+core/build/
+local.properties
+keystore.properties
+*.iml
+.idea/
+.kotlin/
+# Reports generated on a real device are committed on purpose; raw dumps are not
+reports/raw/
+reports/backup/
+reports/adb-log.txt
+# Scratch
+*.log

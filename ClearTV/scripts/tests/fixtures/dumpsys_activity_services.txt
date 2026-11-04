@@ -1,0 +1,3 @@
+ACTIVITY MANAGER SERVICES
+  * ServiceRecord{1 u0 com.stock.launcher/.AdsService}
+  * ServiceRecord{2 u0 com.vendor.hdmi/.InputService}

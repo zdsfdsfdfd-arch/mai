@@ -1,0 +1,4 @@
+INPUT MANAGER
+  Devices:
+    1: Sber Remote Control
+    2: HDMI-CEC Keys

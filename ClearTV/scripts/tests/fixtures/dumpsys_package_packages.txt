@@ -1,0 +1,180 @@
+Packages:
+  Package [android] (abc):
+    userId=10050
+    sharedUser=SharedUserSetting{12 android.uid.system/1000}
+    pkg=Package{1 android}
+    codePath=/system/framework/framework-res.apk
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE PERSISTENT ]
+    privateFlags=[  ]
+    install permissions:
+
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.android.systemui] (abc):
+    userId=10050
+    sharedUser=SharedUserSetting{12 android.uid.systemui/1000}
+    pkg=Package{1 com.android.systemui}
+    codePath=/system/priv-app/SystemUI
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE PERSISTENT ]
+    privateFlags=[ PRIVILEGED ]
+    install permissions:
+
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.android.tv.settings] (abc):
+    userId=10050
+    sharedUser=SharedUserSetting{12 android.uid.system/1000}
+    pkg=Package{1 com.android.tv.settings}
+    codePath=/system/priv-app/TvSettings
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[ PRIVILEGED ]
+    install permissions:
+
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.stock.launcher] (abc):
+    userId=10050
+    pkg=Package{1 com.stock.launcher}
+    codePath=/system/priv-app/StockLauncher
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[ PRIVILEGED ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.vendor.hdmi] (abc):
+    userId=10050
+    pkg=Package{1 com.vendor.hdmi}
+    codePath=/system/app/VendorHdmi
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.vendor.tuner] (abc):
+    userId=10050
+    pkg=Package{1 com.vendor.tuner}
+    codePath=/system/app/VendorTuner
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.example.mediaapp] (abc):
+    userId=10050
+    pkg=Package{1 com.example.mediaapp}
+    codePath=/system/app/MediaApp
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.example.mysteryservice] (abc):
+    userId=10050
+    pkg=Package{1 com.example.mysteryservice}
+    codePath=/system/app/MysteryService
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+      android.permission.RECEIVE_BOOT_COMPLETED: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.example.updater] (abc):
+    userId=10050
+    pkg=Package{1 com.example.updater}
+    codePath=/system/priv-app/Updater
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[ PRIVILEGED ]
+    install permissions:
+      android.permission.INSTALL_PACKAGES: granted=true
+      android.permission.REBOOT: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.example.voice] (abc):
+    userId=10050
+    pkg=Package{1 com.example.voice}
+    codePath=/system/app/VoiceAssist
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+      android.permission.RECORD_AUDIO: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.android.inputmethod.latin] (abc):
+    userId=10050
+    pkg=Package{1 com.android.inputmethod.latin}
+    codePath=/system/app/LatinIME
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.example.usergame] (abc):
+    userId=10050
+    pkg=Package{1 com.example.usergame}
+    codePath=/data/app/com.example.usergame-1
+    versionCode=1 minSdk=28 targetSdk=33
+    versionName=2.3
+    flags=[ HAS_CODE ALLOW_BACKUP ]
+    privateFlags=[  ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+  Package [com.droidlogic.tvinput] (abc):
+    userId=10050
+    pkg=Package{1 com.droidlogic.tvinput}
+    codePath=/system/app/Droidlogic
+    versionCode=1 minSdk=28 targetSdk=30
+    versionName=1.0
+    flags=[ SYSTEM HAS_CODE ]
+    privateFlags=[  ]
+    install permissions:
+
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
+
+Hidden system packages:
+
+Shared users:
+  SharedUser [android.uid.system] (1):

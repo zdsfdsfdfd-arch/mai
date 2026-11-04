@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClearTV</string>
+    <string name="section_apps">Приложения</string>
+    <string name="section_inputs">Источники</string>
+    <string name="all_apps">Все приложения</string>
+    <string name="apps_count">%1$d приложений</string>
+    <string name="settings">Настройки</string>
+
+    <string name="net_wifi">Wi‑Fi</string>
+    <string name="net_ethernet">Ethernet</string>
+    <string name="net_other">Сеть</string>
+    <string name="net_none">Нет сети</string>
+    <string name="net_no_internet">без интернета</string>
+
+    <string name="menu_open">Открыть</string>
+    <string name="menu_move">Переместить</string>
+    <string name="menu_add_fav">Добавить на главный экран</string>
+    <string name="menu_remove_fav">Убрать с главного экрана</string>
+    <string name="menu_hide">Скрыть приложение</string>
+    <string name="menu_info">О приложении</string>
+    <string name="menu_uninstall">Удалить</string>
+    <string name="menu_delete">Удалить файл</string>
+    <string name="move_hint">◀ ▶ — переместить · OK — сохранить · Назад — отмена</string>
+
+    <string name="toast_launch_failed">Не удалось открыть %1$s</string>
+    <string name="toast_input_failed">Не удалось переключить источник</string>
+    <string name="toast_not_available">Недоступно на этом устройстве</string>
+    <string name="toast_added_fav">%1$s — добавлено на главный экран</string>
+    <string name="toast_removed_fav">%1$s — убрано с главного экрана</string>
+    <string name="toast_hidden">%1$s скрыто. Вернуть: Настройки → Скрытые приложения</string>
+    <string name="toast_order_saved">Порядок сохранён</string>
+
+    <string name="settings_wallpaper">Обои</string>
+    <string name="settings_labels">Подписи под карточками</string>
+    <string name="settings_clock">Часы</string>
+    <string name="clock_system">Как в системе</string>
+    <string name="clock_24">24 часа</string>
+    <string name="clock_12">12 часов</string>
+    <string name="settings_inputs">HDMI‑источники на главном экране</string>
+    <string name="settings_inputs_found">Найдено прошивкой: %1$d</string>
+    <string name="settings_inputs_none">Прошивка не сообщает о входах</string>
+    <string name="settings_reduced_motion">Меньше анимации</string>
+    <string name="settings_hidden">Скрытые приложения</string>
+    <string name="settings_reset">Сбросить порядок и избранное</string>
+    <string name="settings_reset_confirm">Вернуть порядок приложений и список главного экрана к начальному состоянию?</string>
+    <string name="settings_system">Системные настройки</string>
+    <string name="settings_system_sub">Сеть, звук, изображение, приложения, обновления</string>
+    <string name="settings_home">Главный экран по умолчанию</string>
+    <string name="home_is_default">ClearTV — текущий главный экран</string>
+    <string name="home_not_default">Сейчас: %1$s</string>
+    <string name="home_unknown">Не назначен</string>
+    <string name="home_action_hint">Прошивка не показывает экран выбора главного приложения. Назначить ClearTV можно с компьютера: scripts\\install.ps1 -SetHome (команда adb shell cmd package set-home-activity %1$s). Вернуть исходный лаунчер: scripts\\restore.ps1.</string>
+    <string name="settings_about">О ClearTV</string>
+    <string name="about_version">Версия %1$s (%2$d)</string>
+    <string name="on">Вкл</string>
+    <string name="off">Выкл</string>
+    <string name="ok">ОК</string>
+    <string name="cancel">Отмена</string>
+
+    <string name="wallpaper_pick_file">Выбрать файл…</string>
+    <string name="wallpaper_folder_hint">Свои изображения (JPG/PNG/WebP) можно скопировать в папку %1$s — например, командой scripts\\install.ps1 -Wallpapers.</string>
+    <string name="hidden_empty">Скрытых приложений нет</string>
+    <string name="hidden_unhide">Показать</string>
+    <string name="safe_mode_notice">ClearTV перезапущен в безопасном режиме после нескольких сбоев подряд: обои, порядок приложений и анимация возвращены к значениям по умолчанию. Журнал сохранён в files/crash.</string>
+
+    <string name="wp_graphite">Графит</string>
+    <string name="wp_deep">Глубина</string>
+    <string name="wp_ember">Янтарь</string>
+    <string name="wp_forest">Лес</string>
+</resources>

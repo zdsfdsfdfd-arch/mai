@@ -1,0 +1,2 @@
+com.example.mysteryservice/.BootReceiver
+com.example.updater/.BootReceiver

@@ -1,0 +1,2 @@
+DISPLAY MANAGER (dumpsys display)
+  mBaseDisplayInfo=DisplayInfo{..., refreshRate 60.0, ...}

@@ -1,0 +1,1 @@
+  mCurrentFocus=Window{a1 u0 com.stock.launcher/com.stock.launcher.HomeActivity}

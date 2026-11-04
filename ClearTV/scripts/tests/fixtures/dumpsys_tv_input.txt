@@ -1,0 +1,4 @@
+TvInputManagerService
+  TvInputInfo{id=com.vendor.hdmi/.InputService/HW1, type=HDMI, label=HDMI 1}
+  TvInputInfo{id=com.vendor.hdmi/.InputService/HW2, type=HDMI, label=HDMI 2}
+  TvInputInfo{id=com.vendor.tuner/.TunerService, type=TUNER}

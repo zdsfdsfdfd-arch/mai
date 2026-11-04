@@ -1,0 +1,1 @@
+default_input_method=com.android.inputmethod.latin/.LatinIME

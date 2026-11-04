@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Fake adb for ClearTV script tests. Answers from scripts/tests/fixtures/*.txt and keeps mutable state
+# (installed flag, HOME component, logcat) in $CLEARTV_FAKE_STATE so install/restore flows can be tested.
+FIX="${CLEARTV_FAKE_FIXTURES:?CLEARTV_FAKE_FIXTURES not set}"
+STATE="${CLEARTV_FAKE_STATE:?CLEARTV_FAKE_STATE not set}"
+mkdir -p "$STATE"
+args=("$@")
+if [ "${args[0]}" = "-s" ]; then args=("${args[@]:2}"); fi
+printf '%s\n' "${args[*]}" >> "$STATE/calls.log"
+cmd="${args[0]}"
+fixture() { # print fixture for a shell command string
+  local name; name="$(printf '%s' "$1" | tr ' /:.-' '_____' | cut -c1-120)"
+  if [ -f "$FIX/$name.txt" ]; then cat "$FIX/$name.txt"; fi
+}
+case "$cmd" in
+  start-server|kill-server|reboot) exit 0 ;;
+  version) echo "Android Debug Bridge version 1.0.41"; echo "Version 34.0.5-fake"; exit 0 ;;
+  connect) echo "connected to ${args[1]}"; exit 0 ;;
+  devices) echo "List of devices attached"; echo "192.168.1.50:5555      device product:salute_tv model:SBER_TV_FAKE device:sbertv transport_id:1"; exit 0 ;;
+  get-state) echo "device"; exit 0 ;;
+  install) echo "Performing Streamed Install"; echo "Success"; echo installed > "$STATE/installed"; exit 0 ;;
+  push) echo "1 file pushed, 0 skipped."; exit 0 ;;
+  pull) : > "${args[2]}"; echo "1 file pulled, 0 skipped."; exit 0 ;;
+  logcat) [ -f "$STATE/logcat.txt" ] && cat "$STATE/logcat.txt"; exit 0 ;;
+  shell)
+    rest="${args[*]:1}"
+    case "$rest" in
+      "getprop sys.boot_completed") echo 1 ;;
+      "getprop") cat "$FIX/getprop.txt" ;;
+      "getprop "*) key="${rest#getprop }"; grep -F "[$key]:" "$FIX/getprop.txt" | sed -E 's/.*: \[(.*)\]$/\1/' ;;
+      "cmd package set-home-activity "*) echo "${rest##* }" > "$STATE/home.txt"; echo "Success" ;;
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
+        echo "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true"
+        if [ -f "$STATE/home.txt" ]; then cat "$STATE/home.txt"; else echo "com.stock.launcher/.HomeActivity"; fi ;;
+      "pm path com.cleartv.launcher") [ -f "$STATE/installed" ] && echo "package:/data/app/com.cleartv.launcher-1/base.apk" ;;
+      "pm uninstall com.cleartv.launcher") rm -f "$STATE/installed"; echo "Success" ;;
+      "dumpsys package com.cleartv.launcher") echo "  Package [com.cleartv.launcher] (1a2b3c):"; echo "    versionName=0.1.0" ;;
+      "log -t ClearTV "*) msg="${rest#log -t ClearTV }"; msg="${msg//\"/}"; echo "11-04 12:00:00.000  1234  1234 I ClearTV : $msg" >> "$STATE/logcat.txt" ;;
+      "am start "*) echo "Starting: Intent { cmp=com.cleartv.launcher/.ui.HomeActivity }"; echo "Status: ok"; echo "LaunchState: COLD"; echo "TotalTime: 812"; echo "WaitTime: 850"; echo "Complete" ;;
+      "am force-stop "*|"am crash "*|"input keyevent"*|"svc wifi "*|"rm "*|"mkdir "*|"screencap "*|"dumpsys gfxinfo com.cleartv.launcher reset") ;;
+      "dumpsys activity activities") echo "    mResumedActivity: ActivityRecord{1f3 u0 com.cleartv.launcher/.ui.HomeActivity t12}" ;;
+      "dumpsys meminfo com.cleartv.launcher") echo "Applications Memory Usage (in Kilobytes):"; echo "    TOTAL PSS:    48231            TOTAL RSS:    98000      TOTAL SWAP PSS:        0" ;;
+      "dumpsys gfxinfo com.cleartv.launcher") echo "Total frames rendered: 240"; echo "Janky frames: 12 (5.00%)"; echo "50th percentile: 8ms"; echo "90th percentile: 14ms"; echo "95th percentile: 19ms"; echo "99th percentile: 33ms" ;;
+      *) fixture "$rest" ;;
+    esac ;;
+  *) echo "fake adb: unknown command: ${args[*]}" >&2; exit 1 ;;
+esac
+exit 0

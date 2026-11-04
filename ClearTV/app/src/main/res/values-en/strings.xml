@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_apps">Apps</string>
+    <string name="section_inputs">Inputs</string>
+    <string name="all_apps">All apps</string>
+    <string name="apps_count">%1$d apps</string>
+    <string name="settings">Settings</string>
+
+    <string name="net_wifi">Wi‑Fi</string>
+    <string name="net_ethernet">Ethernet</string>
+    <string name="net_other">Network</string>
+    <string name="net_none">No network</string>
+    <string name="net_no_internet">no internet</string>
+
+    <string name="menu_open">Open</string>
+    <string name="menu_move">Move</string>
+    <string name="menu_add_fav">Add to home screen</string>
+    <string name="menu_remove_fav">Remove from home screen</string>
+    <string name="menu_hide">Hide app</string>
+    <string name="menu_info">App info</string>
+    <string name="menu_uninstall">Uninstall</string>
+    <string name="menu_delete">Delete file</string>
+    <string name="move_hint">◀ ▶ — move · OK — save · Back — cancel</string>
+
+    <string name="toast_launch_failed">Could not open %1$s</string>
+    <string name="toast_input_failed">Could not switch input</string>
+    <string name="toast_not_available">Not available on this device</string>
+    <string name="toast_added_fav">%1$s added to the home screen</string>
+    <string name="toast_removed_fav">%1$s removed from the home screen</string>
+    <string name="toast_hidden">%1$s hidden. Restore: Settings → Hidden apps</string>
+    <string name="toast_order_saved">Order saved</string>
+
+    <string name="settings_wallpaper">Wallpaper</string>
+    <string name="settings_labels">Labels under cards</string>
+    <string name="settings_clock">Clock</string>
+    <string name="clock_system">System</string>
+    <string name="clock_24">24-hour</string>
+    <string name="clock_12">12-hour</string>
+    <string name="settings_inputs">HDMI inputs on the home screen</string>
+    <string name="settings_inputs_found">Reported by firmware: %1$d</string>
+    <string name="settings_inputs_none">Firmware reports no inputs</string>
+    <string name="settings_reduced_motion">Reduce motion</string>
+    <string name="settings_hidden">Hidden apps</string>
+    <string name="settings_reset">Reset order and home screen apps</string>
+    <string name="settings_reset_confirm">Reset the app order and the home screen list to the initial state?</string>
+    <string name="settings_system">System settings</string>
+    <string name="settings_system_sub">Network, sound, picture, apps, updates</string>
+    <string name="settings_home">Default home screen</string>
+    <string name="home_is_default">ClearTV is the current home screen</string>
+    <string name="home_not_default">Current: %1$s</string>
+    <string name="home_unknown">Not set</string>
+    <string name="home_action_hint">This firmware has no home-app chooser. Set ClearTV from a computer: scripts\\install.ps1 -SetHome (runs adb shell cmd package set-home-activity %1$s). Restore the stock launcher with scripts\\restore.ps1.</string>
+    <string name="settings_about">About ClearTV</string>
+    <string name="about_version">Version %1$s (%2$d)</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="wallpaper_pick_file">Choose a file…</string>
+    <string name="wallpaper_folder_hint">Your own images (JPG/PNG/WebP) can be copied to %1$s — for example with scripts\\install.ps1 -Wallpapers.</string>
+    <string name="hidden_empty">No hidden apps</string>
+    <string name="hidden_unhide">Show</string>
+    <string name="safe_mode_notice">ClearTV restarted in safe mode after repeated crashes: wallpaper, app order and animations were reset to defaults. The log is stored in files/crash.</string>
+
+    <string name="wp_graphite">Graphite</string>
+    <string name="wp_deep">Deep</string>
+    <string name="wp_ember">Ember</string>
+    <string name="wp_forest">Forest</string>
+</resources>
