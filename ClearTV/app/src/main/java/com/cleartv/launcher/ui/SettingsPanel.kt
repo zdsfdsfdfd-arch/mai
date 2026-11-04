@@ -237,6 +237,7 @@ class SettingsPanel(private val home: HomeActivity, private val host: FrameLayou
                     val wp = item as WallpaperRepository.Wallpaper
                     card.bindSpecial(wp.title, 0)
                     card.isSelected = wp.id == prefs.wallpaperId
+                    if (card.isSelected) card.tag = TAG_FIRST
                     Async.run({ home.wallpapers.decode(wp, Ui.dp(context, 208f), Ui.dp(context, 117f)) }) { bmp, _ -> if (bmp != null) card.setArtwork(bmp) }
                     card.setOnClickListener { prefs.wallpaperId = wp.id; refresh() }
                     if (!wp.bundled) card.setOnLongClickListener {
@@ -245,7 +246,7 @@ class SettingsPanel(private val home: HomeActivity, private val host: FrameLayou
                         }.show(); true
                     }
                 }
-                if (container.childCount == 0 && rowLayout.childCount == 0) card.tag = TAG_FIRST
+                if (container.childCount == 0 && rowLayout.childCount == 0 && card.tag == null && all.none { it.id == prefs.wallpaperId }) card.tag = TAG_FIRST
                 val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                 lp.marginEnd = gap
                 rowLayout.addView(card, lp)

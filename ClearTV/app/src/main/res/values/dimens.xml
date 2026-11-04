@@ -2,7 +2,7 @@
 <resources>
     <!-- Designed on a 960x540 dp canvas: 1080p TVs (320 dpi) and 4K TVs (640 dpi) both report it -->
     <dimen name="content_margin">48dp</dimen>
-    <dimen name="clock_size">88sp</dimen>
+    <dimen name="clock_size">82sp</dimen>
     <dimen name="date_size">22sp</dimen>
     <dimen name="section_title_size">17sp</dimen>
 </resources>

@@ -1,6 +1,5 @@
 package com.cleartv.launcher.ui
 
-import android.animation.LayoutTransition
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -154,9 +153,10 @@ class HomeActivity : Activity() {
     override fun onResume() {
         super.onResume()
         resumed = true
-        registerReceiver(tickReceiver, IntentFilter().apply {
+        val tickFilter = IntentFilter().apply {
             addAction(Intent.ACTION_TIME_TICK); addAction(Intent.ACTION_TIME_CHANGED); addAction(Intent.ACTION_TIMEZONE_CHANGED); addAction(Intent.ACTION_DATE_CHANGED)
-        })
+        }
+        if (Build.VERSION.SDK_INT >= 33) registerReceiver(tickReceiver, tickFilter, Context.RECEIVER_NOT_EXPORTED) else registerReceiver(tickReceiver, tickFilter)
         updateDate()
         applyClockMode()
         network.start { updateNetwork(it) }
@@ -366,9 +366,8 @@ class HomeActivity : Activity() {
     }
 
     private fun hideApp(entry: AppEntry) {
-        prefs.hidden = prefs.hidden + entry.packageName
         Logs.event("hide", "pkg" to entry.packageName)
-        rebuildFavorites()
+        prefs.hidden = prefs.hidden + entry.packageName   // listener -> rebuildFavorites()
         if (allApps.isOpen) allApps.update(visibleEntries())
         toast(getString(R.string.toast_hidden, entry.label))
     }
@@ -397,26 +396,35 @@ class HomeActivity : Activity() {
         move = MoveState(card, index, favorites.map { it.packageName })
         card.moving = true
         card.requestFocus()
-        appsRow.container.layoutTransition = if (motion.focusMs > 0) LayoutTransition().apply {
-            enableTransitionType(LayoutTransition.CHANGING)
-            setDuration(180)
-        } else null
         showHint(getString(R.string.move_hint))
         Logs.event("move_start", "index" to index, "pkg" to entry.packageName)
     }
 
+    /**
+     * Swaps the moving card with its neighbour by re-inserting the *neighbour*, so the focused card never
+     * leaves the hierarchy (removing a focused view would throw focus elsewhere). Both cards are then slid
+     * from their old positions with a translation animation; the layout itself changes instantly.
+     */
     private fun moveBy(delta: Int) {
         val m = move ?: return
-        val to = (m.index + delta).coerceIn(0, favorites.size - 1)
-        if (to == m.index) return
-        val entry = favorites.removeAt(m.index)
+        val from = m.index
+        val to = (from + delta).coerceIn(0, favorites.size - 1)
+        if (to == from) return
+        val neighbour = appsRow.childAt(to) ?: return
+        val entry = favorites.removeAt(from)
         favorites.add(to, entry)
-        val lp = m.card.layoutParams
-        appsRow.container.removeView(m.card)
-        appsRow.container.addView(m.card, to, lp)
+        val lp = neighbour.layoutParams
+        appsRow.container.removeView(neighbour)
+        appsRow.container.addView(neighbour, from, lp)
         m.index = to
-        m.card.requestFocus()
-        appsRow.post { appsRow.scrollToIndex(to) }
+        if (motion.focusMs > 0) {
+            val stride = (m.card.width + ((lp as? ViewGroup.MarginLayoutParams)?.marginEnd ?: 0)).toFloat()
+            m.card.translationX = -delta * stride
+            neighbour.translationX = delta * stride
+            m.card.animate().translationX(0f).setDuration(180).setInterpolator(Ui.standard).start()
+            neighbour.animate().translationX(0f).setDuration(180).setInterpolator(Ui.standard).start()
+        }
+        appsRow.post { appsRow.ensureVisible(m.card) }
     }
 
     private fun commitMove() {
@@ -442,7 +450,7 @@ class HomeActivity : Activity() {
 
     private fun exitMove(m: MoveState) {
         m.card.moving = false
-        appsRow.container.layoutTransition = null
+        m.card.translationX = 0f
         hideHint()
         move = null
     }
@@ -463,9 +471,9 @@ class HomeActivity : Activity() {
         inputsRow.visibility = if (show) View.VISIBLE else View.GONE
         inputsRow.clear()
         if (!show) return
-        val gap = Ui.dp(this, 14f)
+        val gap = Ui.dp(this, 12f)
         for (src in inputs) {
-            val card = AppCardView(this, AppCardView.Size.SMALL)
+            val card = AppCardView(this, AppCardView.Size.THUMB)
             card.motion = motion
             card.bindSpecial(src.label, if (src.hdmi) R.drawable.ic_hdmi else R.drawable.ic_input)
             card.setOnClickListener {

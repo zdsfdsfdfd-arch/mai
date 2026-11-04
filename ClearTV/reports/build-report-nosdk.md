@@ -1,6 +1,6 @@
 # Отчёт о сборке ClearTV без Android SDK (облачная сессия, Linux)
 
-Дата: 2026-11-04 18:12 UTC. Сборка выполнена скриптом `scripts/build-nosdk.sh` в контейнере без доступа к
+Дата: 2026-11-04 19:37 UTC. Сборка выполнена скриптом `scripts/build-nosdk.sh` в контейнере без доступа к
 `dl.google.com` (Android SDK, Google Maven), поэтому вместо Gradle + AGP + D8 использована цепочка
 kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробности: `docs/build-without-sdk.md`.
 
@@ -18,11 +18,11 @@ kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробн
 
 ## Результат
 
-- APK: `dist/ClearTV-0.1.0-debug.apk` — 1313906 байт
-- SHA-256: `c4c4d8cbe0be24fcb60a3ed89ee75bd952692a0ff8999a9fae9950eed59deb68`
+- APK: `dist/ClearTV-0.1.0-debug.apk` — 1318002 байт
+- SHA-256: `41d0537ecc90e7cf3d57eebf977d2b83130aba3091671381cd306078ff304269`
 - Подпись: v2 + v3 (debug-ключ `app/debug.keystore`, пароль `android`), `apksigner verify` — Verifies
 - minSdk 24, targetSdk 34, versionCode 1, versionName 0.1.0; dex версии 037 (без invokedynamic)
-- Классов в dex: 1132, методов: 13146
+- Классов в dex: 1134, методов: 13167
 
 ## DxCompat: методы kotlin-stdlib, заменённые заглушками (invokedynamic не поддерживается dx)
 
