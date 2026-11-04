@@ -14,3 +14,4 @@ reports/backup/
 reports/adb-log.txt
 # Scratch
 *.log
+*.idsig

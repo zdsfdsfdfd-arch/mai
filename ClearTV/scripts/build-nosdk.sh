@@ -81,7 +81,7 @@ if [ ! -f "$KEYSTORE" ]; then
     -dname "CN=ClearTV Debug,O=ClearTV,C=RU" -keyalg RSA -keysize 2048 -validity 10000
 fi
 OUT="$DIST/ClearTV-$VERSION_NAME-debug.apk"
-"$APKSIGNER" sign --ks "$KEYSTORE" --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" --ks-key-alias "$KEY_ALIAS" --out "$OUT" "$BUILD/apk/aligned.apk"
+"$APKSIGNER" sign --v4-signing-enabled false --ks "$KEYSTORE" --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" --ks-key-alias "$KEY_ALIAS" --out "$OUT" "$BUILD/apk/aligned.apk"
 "$APKSIGNER" verify --verbose "$OUT" | head -4
 (cd "$DIST" && sha256sum "$(basename "$OUT")" > "$(basename "$OUT").sha256")
 
