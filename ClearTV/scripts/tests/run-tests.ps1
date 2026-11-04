@@ -120,6 +120,15 @@ $env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-empty'
 $out = & (Join-Path $scripts 'restore.ps1') -Yes *>&1 | Out-String
 Check 'restore without journal: says nothing to restore' ($out -match 'восстанавливать нечего')
 
+Write-Host "== 9. run-all.ps1 (one-click flow) against the fake TV"
+$env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-runall'
+Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'installed') -ErrorAction SilentlyContinue
+& (Join-Path $scripts 'run-all.ps1') -Ip 192.168.1.50 *> (Join-Path $tmp 'run-all.log')
+$zips = @(Get-ChildItem $tmp -Filter 'ClearTV-reports-*.zip')
+Check 'run-all: reports zip produced' ($zips.Count -eq 1)
+Check 'run-all: device, inventory and verify reports inside' ((Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'device-report.md')) -and (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'inventory.md')) -and (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'verify-report.md')))
+Check 'run-all: ClearTV installed, HOME untouched' ((Test-Path (Join-Path $env:CLEARTV_FAKE_STATE 'installed')) -and ((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw).Trim() -eq 'com.stock.launcher/.HomeActivity'))
+
 Write-Host ""
 Write-Host "Passed: $passed  Failed: $failures   (logs: $tmp)"
 if ($failures -gt 0) { exit 1 } else { exit 0 }

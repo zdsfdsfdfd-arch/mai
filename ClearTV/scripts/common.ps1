@@ -191,7 +191,16 @@ function Select-Device {
     if ($ready.Count -eq 1) { $script:Serial = $ready[0].Serial; return $script:Serial }
     if ($ready.Count -gt 1) { throw "Подключено несколько устройств ($($ready.Serial -join ', ')): укажите -Serial." }
     $unauth = @($devices | Where-Object { $_.State -ne 'device' })
-    if ($unauth.Count -gt 0) { throw "Устройство найдено, но не авторизовано ($($unauth[0].Serial): $($unauth[0].State)). Подтвердите запрос отладки на экране телевизора и повторите." }
+    if ($unauth.Count -gt 0) {
+        Write-Warn "Устройство $($unauth[0].Serial) в состоянии '$($unauth[0].State)'. На экране телевизора подтвердите запрос «Разрешить отладку» (отметьте «Всегда»). Ожидание до 120 с..."
+        $deadline = (Get-Date).AddSeconds(120)
+        while ((Get-Date) -lt $deadline) {
+            Pause-Ms 3000
+            $ready = @(Get-Devices | Where-Object { $_.State -eq 'device' })
+            if ($ready.Count -ge 1) { $script:Serial = $ready[0].Serial; Write-Ok "Авторизовано: $($script:Serial)"; return $script:Serial }
+        }
+        throw "Устройство найдено, но не авторизовано ($($unauth[0].Serial): $($unauth[0].State)). Подтвердите запрос отладки на экране телевизора и запустите снова."
+    }
     throw "Устройства не найдены. Укажите адрес телевизора: -Ip 192.168.x.x (ADB по сети должен быть включён в настройках разработчика)."
 }
 
