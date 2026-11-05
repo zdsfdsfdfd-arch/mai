@@ -89,9 +89,71 @@ private fun stub(input: File, output: File, stubsFile: File) {
             }
         }
     }
-    stubsFile.appendText(stubs.joinToString("") { it + "\n" })
-    println("DxCompat: ${input.name}: $classes classes scanned, ${stubs.size} method(s) stubbed, $dropped multi-release entries dropped")
+    // A stub is just as fatal when the application reaches it indirectly. kotlin-stdlib multifile facades
+    // *extend* their part classes (ComparisonsKt -> ComparisonsKt___ComparisonsKt -> ComparisonsKt__ComparisonsKt),
+    // so the app calls ComparisonsKt.compareBy and the JVM resolves it to the stubbed part method; other methods
+    // may simply delegate. Record both kinds as aliases so the check below refuses them — ClearTV 0.1.2/0.1.3
+    // crashed on every start on a real TV through exactly this path while the check stayed green.
+    val aliases = stubAliases(output, stubs.toSet())
+    stubsFile.appendText((stubs + aliases).joinToString("") { it + "\n" })
+    println("DxCompat: ${input.name}: $classes classes scanned, ${stubs.size} method(s) stubbed, ${aliases.size} inherited/delegating alias(es) recorded, $dropped multi-release entries dropped")
     stubs.forEach { println("  stub: $it") }
+    aliases.forEach { println("  via:  $it") }
+}
+
+/**
+ * Names under which a stubbed method can be reached: the same name+descriptor on every subclass of the owner
+ * (inherited static/instance methods), plus methods whose body calls a stubbed or aliased method (delegation),
+ * iterated to a fixpoint.
+ */
+private fun stubAliases(jar: File, stubbed: Set<String>): List<String> {
+    val known = LinkedHashSet(stubbed)
+    val found = ArrayList<String>()
+    val classes = ArrayList<ByteArray>()
+    val superOf = HashMap<String, String>()
+    ZipInputStream(jar.inputStream().buffered()).use { zin ->
+        while (true) {
+            val e = zin.nextEntry ?: break
+            val b = zin.readBytes()
+            if (!e.name.endsWith(".class")) continue
+            classes += b
+            val cr = ClassReader(b)
+            cr.superName?.let { superOf[cr.className] = it }
+        }
+    }
+    // inherited: for every class, walk up the superclass chain; a stub declared on an ancestor is reachable here too
+    for ((cls, _) in superOf) {
+        var ancestor: String? = superOf[cls]
+        while (ancestor != null) {
+            for (entry in stubbed) {
+                val dot = entry.indexOf('.')
+                if (dot > 0 && entry.substring(0, dot) == ancestor) {
+                    val alias = cls + entry.substring(dot)
+                    if (known.add(alias)) found += alias
+                }
+            }
+            ancestor = superOf[ancestor]
+        }
+    }
+    // delegating: methods whose body calls anything known
+    repeat(4) {
+        var added = 0
+        for (bytes in classes) {
+            val cr = ClassReader(bytes)
+            cr.accept(object : ClassVisitor(API) {
+                override fun visitMethod(access: Int, name: String, desc: String, sig: String?, ex: Array<out String>?): MethodVisitor {
+                    val self = "${cr.className}.$name$desc"
+                    return object : MethodVisitor(API) {
+                        override fun visitMethodInsn(op: Int, owner: String, mname: String, mdesc: String, itf: Boolean) {
+                            if (self !in known && "$owner.$mname$mdesc" in known) { known += self; found += self; added++ }
+                        }
+                    }
+                }
+            }, ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES)
+        }
+        if (added == 0) return found
+    }
+    return found
 }
 
 private fun check(classesDir: File, stubsFile: File) {

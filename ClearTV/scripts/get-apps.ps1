@@ -115,9 +115,18 @@ foreach ($a in $apps) {
             try {
                 $url = [string]$a.url
                 if ($kind -eq 'page') {
-                    Write-Info "Читаю официальную страницу $($a.page)"
-                    $url = Select-ApkLink (Get-PageText ([string]$a.page)) ([string]$a.page) @($a.hosts)
-                    if (-not $url) { throw "на странице не нашлось ссылки на .apk с доменов $($a.hosts -join ', ')" }
+                    $pages = @(if ($a.pages) { @($a.pages) } else { @([string]$a.page) })
+                    foreach ($pg in $pages) {
+                        Write-Info "Читаю официальную страницу $pg"
+                        $html = Get-PageText ([string]$pg)
+                        $url = Select-ApkLink $html ([string]$pg) @($a.hosts)
+                        if ($url) { break }
+                        $rawDir = New-Dir (Join-Path $ReportsDir 'raw')
+                        $saved = Join-Path $rawDir ("get-apps-" + [string]$a.id + "-" + ([uri]$pg).AbsolutePath.Trim('/').Replace('/', '_') + ".html")
+                        Write-Utf8File $saved ([string]$html)
+                        Write-Info "ссылки .apk нет; страница сохранена для разбора: $saved"
+                    }
+                    if (-not $url) { throw "на страницах $($pages -join ', ') не нашлось ссылки на .apk с доменов $($a.hosts -join ', ')" }
                 }
                 Write-Info "Скачиваю $url"
                 Write-Info "Источник: $($a.source)"

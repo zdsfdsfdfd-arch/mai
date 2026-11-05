@@ -53,6 +53,9 @@ case "$cmd" in
       "df /data") echo "Filesystem 1K-blocks Used Available Use% Mounted on"; echo "/dev/block/dm-1 3000000 2600000 400000 87% /data" ;;
       "dumpsys wifi") echo "Wi-Fi is enabled" ;;
       "pm uninstall com.cleartv.launcher") rm -f "$STATE/installed"; echo "Success" ;;
+      "pm uninstall -k --user 0 "*) pkg="${rest##* }"; grep -qx "$pkg" "$STATE/uninstalled.txt" 2>/dev/null || echo "$pkg" >> "$STATE/uninstalled.txt"; echo "Success" ;;
+      "cmd package install-existing "*) pkg="${rest##* }"; if [ -f "$STATE/uninstalled.txt" ]; then grep -vx "$pkg" "$STATE/uninstalled.txt" > "$STATE/u.tmp"; mv -f "$STATE/u.tmp" "$STATE/uninstalled.txt"; fi; echo "Package $pkg installed for user: 0" ;;
+      "pm path "*) pkg="${rest##* }"; if grep -qx "$pkg" "$STATE/uninstalled.txt" 2>/dev/null; then :; else echo "package:/system/app/$pkg/base.apk"; fi ;;
       "dumpsys package com.cleartv.launcher") echo "  Package [com.cleartv.launcher] (1a2b3c):"; echo "    versionName=0.1.0" ;;
       "log -t ClearTV "*) msg="${rest#log -t ClearTV }"; msg="${msg//\"/}"; echo "11-04 12:00:00.000  1234  1234 I ClearTV : $msg" >> "$STATE/logcat.txt" ;;
       "am start "*"cleartv.open_settings true"*) touch "$STATE/settings_open"; echo "11-04 12:00:00.000  1234  1234 I ClearTV : EVT overlay name=settings open=true" >> "$STATE/logcat.txt"; echo "Starting: Intent { cmp=com.cleartv.launcher/.ui.HomeActivity (has extras) }" ;;

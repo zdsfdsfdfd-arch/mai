@@ -59,6 +59,7 @@ if (-not (Test-Path $Apk)) { throw "Файл не найден: $Apk" }
 
 Write-Step "Установка $(Split-Path -Leaf $Apk)"
 $wasInstalled = ((Get-ShellText "pm path $PackageName") -match 'package:')
+$homeBefore = Get-ResolvedHome
 $prevVersion = ''
 if ($wasInstalled -and ((Get-ShellText "dumpsys package $PackageName") -match 'versionName=(\S+)')) { $prevVersion = $Matches[1] }
 $r = Invoke-Adb install -r -t $Apk
@@ -73,6 +74,16 @@ $ver = ''; if ((Get-ShellText "dumpsys package $PackageName") -match 'versionNam
 Write-Ok "Установлено: $PackageName $ver ($($path.Trim()))"
 if ($wasInstalled) {
     Add-JournalEntry -Action 'update-apk' -Description "Обновление ClearTV $prevVersion -> $ver" -Command "adb install -r -t $Apk" -RestoreCommand "" -Previous $prevVersion -New $ver -Verify "pm path $PackageName" | Out-Null
+    # Android forgets the default HOME when the HOME app itself is updated: the next HOME press shows the chooser
+    # (ResolverActivity) — seen on a real Salute TV. The choice was made and journalled earlier; just put it back.
+    if ((Test-SameComponent $homeBefore $HomeComponent) -and -not (Test-SameComponent (Get-ResolvedHome) $HomeComponent)) {
+        $r = Invoke-Adb shell cmd package set-home-activity $HomeComponent
+        $homeAfter = Get-ResolvedHome
+        if (Test-SameComponent $homeAfter $HomeComponent) {
+            Add-JournalEntry -Action 'set-home-reapply' -Description "После обновления APK прошивка сбросила HOME; ClearTV назначен снова" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand "" -Previous 'chooser' -New $HomeComponent | Out-Null
+            Write-Ok "Главный экран после обновления возвращён ClearTV (прошивка сбрасывает выбор при обновлении HOME-приложения)"
+        } else { Write-Warn "После обновления HOME = $homeAfter; назначить снова: install.ps1 -SetHome ($($r.Output))" }
+    }
 } else {
     Add-JournalEntry -Action 'install-apk' -Description "Установка ClearTV $ver" -Command "adb install -r -t $Apk" -RestoreCommand "pm uninstall $PackageName" -Previous 'not installed' -New $ver -Verify "pm path $PackageName" | Out-Null
 }

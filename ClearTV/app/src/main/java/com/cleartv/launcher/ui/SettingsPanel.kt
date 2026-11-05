@@ -188,7 +188,13 @@ class SettingsPanel(private val home: HomeActivity, private val host: FrameLayou
             setOnClickListener { prefs.reducedMotion = !prefs.reducedMotion; setToggle(prefs.reducedMotion) }
         }
 
-        row(list).set(s.getString(R.string.settings_hidden), null, prefs.hidden.size.toString(), R.drawable.ic_eye_off)
+        row(list).apply {
+            set(s.getString(R.string.settings_only_preferred), s.getString(R.string.settings_only_preferred_sub), null, R.drawable.ic_apps)
+            setToggle(prefs.onlyPreferred)
+            setOnClickListener { prefs.onlyPreferred = !prefs.onlyPreferred; setToggle(prefs.onlyPreferred); refresh() }
+        }
+
+        row(list).set(s.getString(R.string.settings_hidden), null, home.invisibleEntries().size.toString(), R.drawable.ic_eye_off)
             .setOnClickListener { push { buildHidden() } }
 
         row(list).set(s.getString(R.string.settings_reset), null, null, R.drawable.ic_restore)
@@ -288,15 +294,21 @@ class SettingsPanel(private val home: HomeActivity, private val host: FrameLayou
 
     private fun buildHidden(): View {
         val list = list()
-        val hidden = prefs.hidden
-        if (hidden.isEmpty()) {
+        val invisible = home.invisibleEntries()
+        if (invisible.isEmpty()) {
             note(list, context.getString(R.string.hidden_empty))
         } else {
-            val labels = home.allEntries.associate { it.packageName to it.label }
-            hidden.sorted().forEach { pkg ->
-                row(list).set(labels[pkg] ?: pkg, pkg, context.getString(R.string.hidden_unhide), R.drawable.ic_apps)
-                    .setOnClickListener { prefs.hidden = prefs.hidden - pkg; refresh() }
+            val hidden = prefs.hidden
+            invisible.forEach { e ->
+                val why = if (e.packageName in hidden) context.getString(R.string.hidden_by_hand) else context.getString(R.string.hidden_by_list)
+                row(list).set(e.label, why, context.getString(R.string.hidden_unhide), R.drawable.ic_apps)
+                    .setOnClickListener {
+                        if (e.packageName in prefs.hidden) prefs.hidden = prefs.hidden - e.packageName
+                        else prefs.allowed = prefs.allowed + e.packageName
+                        refresh()
+                    }
             }
+            if (prefs.onlyPreferred) note(list, context.getString(R.string.hidden_list_note))
         }
         return scaffold(context.getString(R.string.settings_hidden), subPage = true, content = list)
     }

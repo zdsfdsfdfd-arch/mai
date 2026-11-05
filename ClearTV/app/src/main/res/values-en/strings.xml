@@ -61,6 +61,11 @@
     <string name="wallpaper_folder_hint">Your own images (JPG/PNG/WebP) can be copied to %1$s — for example with scripts\\install.ps1 -Wallpapers.</string>
     <string name="hidden_empty">No hidden apps</string>
     <string name="hidden_unhide">Show</string>
+    <string name="hidden_by_hand">Hidden by hand</string>
+    <string name="hidden_by_list">Not on my list</string>
+    <string name="hidden_list_note">"Only my apps" is on: YouTube, Netflix, HBO Max, Apple TV, Spotify, Happ, Twitch, Rutube, VK Video and Chrome are shown (those installed). Everything else is here.</string>
+    <string name="settings_only_preferred">Only my apps</string>
+    <string name="settings_only_preferred_sub">Show only the owner\'s list on the home screen; everything else is hidden</string>
     <string name="safe_mode_notice">ClearTV restarted in safe mode after repeated crashes: wallpaper, app order and animations were reset to defaults. The log is stored in files/crash.</string>
 
     <string name="wp_graphite">Graphite</string>

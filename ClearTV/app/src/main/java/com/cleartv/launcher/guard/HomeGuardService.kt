@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityEvent
 import com.cleartv.launcher.ClearTvApp
+import com.cleartv.launcher.data.HomeKeeper
 import com.cleartv.launcher.ui.HomeActivity
 import com.cleartv.launcher.util.Logs
 
@@ -21,6 +22,7 @@ class HomeGuardService : AccessibilityService() {
     private var homePackages: Set<String> = emptySet()
     private var homePackagesAt = 0L
     private var lastBounceAt = 0L
+    private var lastResolverAt = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -38,7 +40,14 @@ class HomeGuardService : AccessibilityService() {
         if (pkg == packageName) return
         val app = ClearTvApp.get(this)
         if (!app.prefs.homeGuard) return
+        if (app.prefs.safeMode || app.prefs.crashedRecently()) return   // a crashing ClearTV must never fight the TV
         val now = SystemClock.uptimeMillis()
+        if (pkg == "android" && event.className?.toString()?.contains("ResolverActivity") == true) {
+            // The firmware dropped the HOME choice (it does so when the HOME app is updated): the chooser is on screen.
+            // The keeper puts ClearTV back through the TV's own ADB, if the owner enabled it and approved the key.
+            if (app.prefs.keepHome && now - lastResolverAt > 30_000L) { lastResolverAt = now; HomeKeeper.runAsync(this, "resolver", interactive = false) }
+            return
+        }
         if (now - homePackagesAt > 60_000L) {
             homePackages = app.apps.homeCandidates().map { it.packageName }.toSet() - packageName
             homePackagesAt = now

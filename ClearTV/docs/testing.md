@@ -9,12 +9,13 @@
 |---|---|
 | Компиляция всех исходников Kotlin против API 34 с заглушками Android `java.*` (только API, существующие на Android) | OK, предупреждений об отсутствующих API нет |
 | Ресурсы: `aapt2 compile/link`, манифест, 18 векторных иконок, 2 локали | OK |
-| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1174 классов, 13 492 методов (сборка 0.1.3) |
+| DxCompat: контрольный класс с `compareBy({…}, {…})` (фасад stdlib, унаследованный метод-заглушка) отклоняется проверкой, exit 2 | OK (0.1.4; в 0.1.2–0.1.3 проверка это пропускала — сборки падали на ТВ) |
+| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1175 классов, 13 500 методов (сборка 0.1.4) |
 | Подпись и выравнивание: `zipalign -c`, `apksigner verify` (v2, v3) | OK |
 | `aapt2 dump badging`: HOME/LEANBACK/LAUNCHER-активности, баннер, иконки 160–640 dpi, minSdk 24 | OK |
 | JUnit (модуль `core`, через `gradlew :core:test`, Gradle 8.14.3, Kotlin 2.0.21) | 13 тестов, 0 падений |
 | Встроенный ADB-клиент против поддельного adbd (`tools/adbtest/run.sh`: CNXN/AUTH TOKEN→SIGNATURE→RSAPUBLICKEY, shell, отказ потока) | OK, оба сценария (неизвестный ключ с подтверждением, известный ключ без запроса) |
-| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 98 проверок, 0 падений; см. ниже |
+| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 101 проверка, 0 падений; см. ниже |
 | Генерация растровых ассетов (иконки, баннер, 4 обоев) и визуальный просмотр баннера/обоев | OK |
 
 Тесты скриптов покрывают: разбор `getprop`, списков пакетов, `dumpsys package packages`, `meminfo`, `gfxinfo`,

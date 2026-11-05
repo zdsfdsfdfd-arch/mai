@@ -59,9 +59,11 @@
         "githubusercontent.com"
       ],
       "packages": [
+        "su.happ.proxyutility",
         "com.happproxy"
       ],
       "skip_if_installed": [
+        "su.happ.proxyutility",
         "com.happproxy"
       ],
       "source": "README официального репозитория Happ-proxy/happ-android («Download APK»); тот же файл указан в его release-манифесте",
@@ -85,7 +87,12 @@
         "ru.rutube.tv"
       ],
       "source": "Официальная страница RUTUBE для Android TV: ссылка на APK берётся прямо со страницы (только домен rutube.ru)",
-      "note": "RUTUBE сам раздаёт APK для Android TV 7.0+; если страница изменится, скрипт напечатает её адрес — скачайте файл вручную и положите в папку apps."
+      "note": "RUTUBE сам раздаёт APK для Android TV 7.0+. Если ссылка на странице не найдена, скрипт сохраняет страницу в reports\\raw для разбора и печатает адрес — скачайте файл вручную и положите в папку apps.",
+      "pages": [
+        "https://rutube.ru/androidtv/",
+        "https://rutube.ru/app/",
+        "https://rutube.ru/smarttv/"
+      ]
     },
     {
       "id": "vk",

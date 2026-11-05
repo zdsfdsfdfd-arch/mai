@@ -1,6 +1,6 @@
 # Отчёт о сборке ClearTV без Android SDK (облачная сессия, Linux)
 
-Дата: 2026-11-05 03:26 UTC (сборка 0.1.3; предыдущие: 0.1.2 `ede459cd…c15d9c`, 0.1.1 `363ce3ad…958d8`, 0.1.0 `5085922f…3255d6`).
+Дата: 2026-11-05 03:52 UTC (сборка 0.1.4; предыдущие: 0.1.3 `3159ad15…beef9`, 0.1.2 `ede459cd…c15d9c`, 0.1.1 `363ce3ad…958d8`, 0.1.0 `5085922f…3255d6`).
 `dl.google.com` (Android SDK, Google Maven), поэтому вместо Gradle + AGP + D8 использована цепочка
 kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробности: `docs/build-without-sdk.md`.
 
@@ -18,11 +18,11 @@ kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробн
 
 ## Результат
 
-- APK: `dist/ClearTV-0.1.3-debug.apk` — 1359310 байт
-- SHA-256: `3159ad15a5ff936f42226245cf97fd31a2e30a4f073967f50fe0f17fc7ebeef9`
+- APK: `dist/ClearTV-0.1.4-debug.apk` — 1363406 байт
+- SHA-256: `dcf093ab90e36bb59b6728dbb33ee8634dc6304ec62a95af24826cf8d159a0c0`
 - Подпись: v2 + v3 (debug-ключ `app/debug.keystore`, пароль `android`), `apksigner verify` — Verifies
-- minSdk 24, targetSdk 34, versionCode 4, versionName 0.1.3; dex версии 037 (без invokedynamic)
-- Классов в dex: 1174, методов: 13492
+- minSdk 24, targetSdk 34, versionCode 5, versionName 0.1.4; dex версии 037 (без invokedynamic)
+- Классов в dex: 1175, методов: 13500
 
 ## DxCompat: методы kotlin-stdlib, заменённые заглушками (invokedynamic не поддерживается dx)
 
@@ -35,7 +35,11 @@ kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробн
     - kotlin/streams/jdk8/StreamsKt.asStream(Lkotlin/sequences/Sequence;)Ljava/util/stream/Stream;
 
 Проверка `DxCompat check`: классы приложения не ссылаются ни на один из этих методов и не содержат
-invokedynamic. В сборке через Gradle/D8 (`scripts/build.ps1`) заглушки не нужны и не применяются.
+invokedynamic. С 0.1.4 к списку добавляются 17 псевдонимов: те же методы на фасадах stdlib, которые *наследуют*
+части (`ComparisonsKt` → `ComparisonsKt___ComparisonsKt` → `ComparisonsKt__ComparisonsKt`), и методы, делегирующие
+заглушкам. Именно через фасад `ComparisonsKt.compareBy` сборки 0.1.2–0.1.3 доходили до заглушки и падали на
+телевизоре при каждом запуске, пока проверка оставалась зелёной. Контрольный класс с `compareBy({…}, {…})`
+теперь отклоняется проверкой (exit 2). В сборке через Gradle/D8 (`scripts/build.ps1`) заглушки не нужны и не применяются.
 
 ## Что НЕ проверено этой сборкой
 

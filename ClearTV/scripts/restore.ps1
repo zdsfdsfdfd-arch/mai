@@ -67,6 +67,10 @@ foreach ($e in $pending) {
     } elseif ($e.Action -eq 'install-apk') {
         $ok = ((Get-ShellText "pm path $PackageName") -notmatch 'package:')
         if ($ok) { Write-Ok "ClearTV удалён" } else { Write-Fail "ClearTV всё ещё установлен" }
+    } elseif ($e.Action -eq 'uninstall-user-app') {
+        $pkg = ($e.RestoreCommand -replace '^cmd package install-existing\s+', '').Trim()
+        $ok = ((Get-ShellText "pm path $pkg") -match 'package:')
+        if ($ok) { Write-Ok "$pkg установлено снова" } else { Write-Fail "$pkg не вернулось (install-existing)" }
     } elseif ($e.Action -eq 'disable-package') {
         $pkg = ($e.RestoreCommand -replace '^pm enable\s+', '').Trim()
         $ok = ((Get-ShellText 'pm list packages -d') -notmatch ("(?m)^package:" + [regex]::Escape($pkg) + '\s*$'))

@@ -32,7 +32,12 @@ function Add-Result([string]$Name, [string]$Status, [string]$Details, $Evidence)
     $script:results += [pscustomobject]@{ Test = $Name; Status = $Status; Details = $Details; Evidence = $Evidence; Time = (Get-Date).ToString('HH:mm:ss') }
     switch ($Status) { 'PASS' { Write-Ok "$Name — $Details" } 'FAIL' { Write-Fail "$Name — $Details" } default { Write-Warn "$Name — ${Status}: $Details" } }
 }
-function Start-ClearTv { Invoke-Adb shell am start -n $HomeComponent | Out-Null; Pause-Ms 1500 }
+function Start-ClearTv {
+    Invoke-Adb shell am start -n $HomeComponent | Out-Null; Pause-Ms 1500
+    if (-not (Test-OnClearTv)) { Invoke-Adb shell am start -W -a android.intent.action.MAIN -c android.intent.category.HOME -n $HomeComponent | Out-Null; Pause-Ms 1500 }
+}
+# HOME intent to ClearTV itself: closes overlays, scrolls the row to the start and focuses the first card (deterministic start for key tests)
+function Start-Home { Invoke-Adb shell am start -a android.intent.action.MAIN -c android.intent.category.HOME -n $HomeComponent | Out-Null; Pause-Ms 1200 }
 function Test-OnClearTv { $r = Get-ResumedActivity; return ($r -and ($r -match [regex]::Escape($PackageName))) }
 function Wait-Event([string]$Marker, [string]$Name, [int]$TimeoutSec = 8, [scriptblock]$Where) {
     $deadline = (Get-Date).AddSeconds($TimeoutSec)
@@ -147,8 +152,8 @@ else { Add-Result 'settings_panel' 'FAIL' 'не открылась ни пуль
 
 # 7. all apps
 Write-Step "7. Экран «Все приложения» (кнопка ▼ с дока)"
+Start-Home                                       # focus back in the dock (after test 6 it sits on the Settings button)
 $marker = Send-Marker
-Send-Key 'KEYCODE_BACK' 300; Send-Key 'KEYCODE_BACK' 300
 Send-Key 'KEYCODE_DPAD_DOWN' 1200
 $open = Wait-Event $marker 'overlay' 4 { $_.Fields['name'] -eq 'allapps' -and $_.Fields['open'] -eq 'true' }
 Send-Key 'KEYCODE_BACK' 800
@@ -159,9 +164,9 @@ if ($open -and $closed) { Add-Result 'all_apps' 'PASS' "показано при�
 Write-Step "8. Перестановка плиток (длинное нажатие OK → Переместить → ▶ → OK)"
 if ($favCount -lt 2) { Add-Result 'reorder' 'SKIP' 'меньше двух приложений на главном экране' '' }
 else {
+    Start-Home
     $marker = Send-Marker
-    Send-Key 'KEYCODE_BACK' 300; Send-Key 'KEYCODE_BACK' 300
-    foreach ($i in 1..($favCount + 3)) { Send-Key 'KEYCODE_DPAD_LEFT' 150 }
+    foreach ($i in 1..3) { Send-Key 'KEYCODE_DPAD_LEFT' 150 }
     Send-Key 'KEYCODE_DPAD_CENTER' -LongPress 1200
     Send-Key 'KEYCODE_DPAD_DOWN' 500       # Открыть → Переместить
     Send-Key 'KEYCODE_DPAD_CENTER' 800
@@ -194,6 +199,7 @@ Send-Key 'KEYCODE_HOME' 2000
 $resumed = Get-ResumedActivity
 $homeNow = Get-ResolvedHome
 if ($resumed -match [regex]::Escape($PackageName)) { Add-Result 'home_key' 'PASS' "HOME открывает ClearTV (HOME=$homeNow)" $resumed }
+elseif ($resumed -match 'ResolverActivity') { Add-Result 'home_key' 'FAIL' "кнопка HOME показывает выбор лаунчера (прошивка сбросила HOME после обновления APK; install.ps1 назначает ClearTV снова) — сейчас HOME=$homeNow" $resumed }
 elseif ($isDefaultHome) { Add-Result 'home_key' 'FAIL' "ClearTV назначен HOME, но на экране $resumed" $resumed }
 else { Add-Result 'home_key' 'SKIP' "ClearTV не назначен главным экраном (HOME=$homeNow); на экране $resumed. Назначить: install.ps1 -SetHome" $resumed }
 Start-ClearTv

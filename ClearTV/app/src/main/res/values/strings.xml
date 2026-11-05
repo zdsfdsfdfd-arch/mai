@@ -62,6 +62,11 @@
     <string name="wallpaper_folder_hint">Свои изображения (JPG/PNG/WebP) можно скопировать в папку %1$s — например, командой scripts\\install.ps1 -Wallpapers.</string>
     <string name="hidden_empty">Скрытых приложений нет</string>
     <string name="hidden_unhide">Показать</string>
+    <string name="hidden_by_hand">Скрыто вручную</string>
+    <string name="hidden_by_list">Не входит в мой список</string>
+    <string name="hidden_list_note">Включён режим «Только мои приложения»: показываются YouTube, Netflix, HBO Max, Apple TV, Spotify, Happ, Twitch, Rutube, VK Видео и Chrome (те, что установлены). Остальное — здесь.</string>
+    <string name="settings_only_preferred">Только мои приложения</string>
+    <string name="settings_only_preferred_sub">На экране — только приложения из списка владельца; остальное скрыто</string>
     <string name="safe_mode_notice">ClearTV перезапущен в безопасном режиме после нескольких сбоев подряд: обои, порядок приложений и анимация возвращены к значениям по умолчанию. Журнал сохранён в files/crash.</string>
 
     <string name="wp_graphite">Графит</string>

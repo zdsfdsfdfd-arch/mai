@@ -71,6 +71,7 @@
         "happ"
       ],
       "packages": [
+        "su.happ.proxyutility",
         "com.happproxy"
       ]
     },

@@ -42,6 +42,7 @@ param(
     [switch]$HomeGuard,
     [switch]$LowerStorageThreshold,
     [switch]$DisableAutoUpdates,
+    [switch]$RemoveOtherApps,
     [switch]$DryRun,
     [switch]$Yes,
     [switch]$AutoInstallTools
@@ -93,7 +94,24 @@ foreach ($row in $rows) {
     $block = Test-NeverTouch $row
     if ($block) { Write-Info "пропуск $($row.Package): $block"; continue }
     if (-not $row.DisableCommand -or $row.DisableCommand -notmatch '^pm disable-user') { continue }   # only reversible disable
-    $plan += [pscustomobject]@{ Package = $row.Package; Known = $row.Known; Why = $why; Breaks = $row.Breaks; Command = $row.DisableCommand; Restore = $row.RestoreCommand }
+    $plan += [pscustomobject]@{ Package = $row.Package; Known = $row.Known; Why = $why; Breaks = $row.Breaks; Command = $row.DisableCommand; Restore = $row.RestoreCommand; Kind = 'disable' }
+}
+if ($RemoveOtherApps) {
+    # The owner wants only their list on the TV. Apps the user installed (pm -3) that are not on the list are
+    # uninstalled for the user (-k keeps data; cmd package install-existing brings them back). Sber's own
+    # updatable apps (in the knowledge base) and anything the platform re-installs at boot are left alone — ClearTV
+    # hides them instead; system packages are never touched.
+    $reboot = @($kb.platform.reenabled_at_boot)
+    foreach ($row in $rows) {
+        if ($row.Category -ne 'OPTIONAL' -or $row.System) { continue }
+        if ($row.Known) { continue }
+        if ($reboot -contains $row.Package) { continue }
+        if ($Exclude -contains $row.Package) { continue }
+        $block = Test-NeverTouch $row
+        if ($block) { Write-Info "пропуск $($row.Package): $block"; continue }
+        if ($row.DisableCommand -notmatch '^pm uninstall -k --user 0') { continue }
+        $plan += [pscustomobject]@{ Package = $row.Package; Known = ''; Why = 'не входит в список владельца (-RemoveOtherApps)'; Breaks = 'приложение исчезнет; данные сохранятся (-k), вернуть: cmd package install-existing'; Command = $row.DisableCommand; Restore = $row.RestoreCommand; Kind = 'uninstall' }
+    }
 }
 foreach ($i in $Include) { if ($rows.Package -notcontains $i) { Write-Warn "-Include ${i}: пакет не установлен" } elseif ($plan.Package -notcontains $i) { Write-Warn "-Include ${i}: не входит в OPTIONAL/PROMOTIONAL, не трогаю" } }
 
@@ -142,6 +160,13 @@ $done = @(); $failed = @()
 Write-Step "Отключение"
 foreach ($p in $plan) {
     $r = Invoke-AdbShell $p.Command
+    if ($p.Kind -eq 'uninstall') {
+        if ($r.Output -match 'Success') {
+            Add-JournalEntry -Action 'uninstall-user-app' -Description "Удалено для пользователя $($p.Package) (не в списке владельца)" -Command $p.Command -RestoreCommand $p.Restore -Previous 'installed' -New 'uninstalled-user' -Verify "pm path $($p.Package)" | Out-Null
+            Write-Ok "$($p.Package) удалено (данные сохранены)"; $done += $p.Package
+        } else { Write-Warn "$($p.Package): $($r.Output -replace "`n", ' ')"; $failed += "$($p.Package): $($r.Output)" }
+        continue
+    }
     if ($r.Output -match 'new state: disabled') {
         Add-JournalEntry -Action 'disable-package' -Description "Отключён $($p.Package) ($($p.Known))" -Command $p.Command -RestoreCommand $p.Restore -Previous 'enabled' -New 'disabled-user' -Verify "pm list packages -d" | Out-Null
         $problem = Test-DeviceHealth $homeNow

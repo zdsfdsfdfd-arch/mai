@@ -203,6 +203,19 @@ Check 'restore after clean: packages enabled, settings and appops back' (($disab
 $jc = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json)
 Check 'restore after clean: all entries marked restored' (@($jc | Where-Object { -not $_.Restored -and $_.RestoreCommand }).Count -eq 0)
 
+Write-Host "== 9c. clean.ps1 -RemoveOtherApps: only user-installed extras, never Sber platform apps; restore brings them back"
+$env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-remove'
+Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt'), (Join-Path $env:CLEARTV_FAKE_STATE 'uninstalled.txt') -ErrorAction SilentlyContinue
+& (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -DryRun -RemoveOtherApps *> (Join-Path $tmp 'clean-remove-dry.log')
+$planMd = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'clean-plan.md') -Raw
+Check 'remove dry-run: user game planned for uninstall, Sber startube/music and system apps not' (($planMd -match 'pm uninstall -k --user 0 com.example.usergame') -and ($planMd -notmatch 'ru.sberdevices.startube') -and ($planMd -notmatch 'com.example.mediaapp'))
+& (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -Yes -RemoveOtherApps *> (Join-Path $tmp 'clean-remove.log')
+$un = @(Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'uninstalled.txt') -ErrorAction SilentlyContinue)
+Check 'remove: user game uninstalled for user 0, journaled with install-existing rollback' (($un -contains 'com.example.usergame') -and (@(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json | Where-Object { $_.Action -eq 'uninstall-user-app' -and $_.RestoreCommand -match 'install-existing com.example.usergame' }).Count -eq 1))
+& (Join-Path $scripts 'restore.ps1') -Ip 192.168.1.50 -Yes *> (Join-Path $tmp 'clean-remove-restore.log')
+$un = @(Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'uninstalled.txt') -ErrorAction SilentlyContinue | Where-Object { $_ })
+Check 'remove: restore reinstalls the user app' ($un.Count -eq 0)
+
 Write-Host "== 9. run-all.ps1 (one-click flow) against the fake TV"
 $env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-runall'
 Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'installed') -ErrorAction SilentlyContinue

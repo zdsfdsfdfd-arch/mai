@@ -346,9 +346,23 @@ class HomeActivity : Activity() {
         }
     }
 
-    private fun visibleEntries(): List<AppEntry> {
+    /**
+     * What the home row and the grid may show: never a hidden app; and, while "only my apps" is on, only the
+     * owner's preferred apps (res/values/favorites.xml) plus apps re-admitted from Settings → Hidden apps.
+     */
+    fun visibleEntries(): List<AppEntry> {
         val hidden = prefs.hidden
-        return allEntries.filter { it.packageName !in hidden }
+        val notHidden = allEntries.filter { it.packageName !in hidden }
+        if (!prefs.onlyPreferred) return notHidden
+        val keep = try { PreferredApps.pick(this, notHidden).map { it.packageName }.toSet() } catch (t: Throwable) { Logs.e("preferred pick failed", t); emptySet() }
+        val allowed = prefs.allowed
+        return notHidden.filter { it.packageName in keep || it.packageName in allowed }
+    }
+
+    /** Apps the owner does not see right now (hidden by hand or filtered by "only my apps"), for Settings → Hidden apps. */
+    fun invisibleEntries(): List<AppEntry> {
+        val visible = visibleEntries().map { it.packageName }.toSet()
+        return allEntries.filter { it.packageName !in visible }.sortedWith(Comparator { a, b -> a.label.compareTo(b.label, ignoreCase = true) })
     }
 
     private fun rebuildFavorites() {
@@ -377,10 +391,21 @@ class HomeActivity : Activity() {
 
     /** Preferred apps first (in the owner's order), then what the owner installed, then the firmware's TV apps, then utilities. */
     private fun defaultFavorites(visible: List<AppEntry>): List<String> {
-        val preferred = PreferredApps.pick(this, visible)
-        val rest = visible.filter { it.packageName !in preferredNow }
-            .sortedWith(compareBy<AppEntry>({ rank(it) }, { it.label.lowercase() }))
-        return (preferred + rest).map { it.packageName }.take(DEFAULT_FAVORITES)
+        return try {
+            val preferred = PreferredApps.pick(this, visible)
+            // An explicit Comparator on purpose: stdlib's compareBy(vararg) is a lambda-backed facade method that the
+            // dx-compatible build has to stub, and 0.1.2/0.1.3 crashed on every start here (see field report).
+            val byRankThenName = Comparator<AppEntry> { a, b ->
+                val r = rank(a) - rank(b)
+                if (r != 0) r else a.label.compareTo(b.label, ignoreCase = true)
+            }
+            val rest = visible.filter { it.packageName !in preferredNow }.sortedWith(byRankThenName)
+            (preferred + rest).map { it.packageName }.take(DEFAULT_FAVORITES)
+        } catch (t: Throwable) {
+            // Never let the row order take the home screen down: fall back to the plain discovery order.
+            Logs.e("default favourites failed, using discovery order", t)
+            visible.map { it.packageName }.take(DEFAULT_FAVORITES)
+        }
     }
 
     private fun rank(e: AppEntry): Int = when {
@@ -702,6 +727,7 @@ class HomeActivity : Activity() {
             Prefs.K_LABELS -> forEachCard { it.showLabel(prefs.showLabels) }
             Prefs.K_INPUTS -> loadInputs()
             Prefs.K_HIDDEN -> if (!applyingDefaults) rebuildFavorites()
+            Prefs.K_ONLY_PREFERRED, Prefs.K_ALLOWED -> { rebuildFavorites(); if (allApps.isOpen) allApps.update(visibleEntries()) }
             Prefs.K_REDUCED_MOTION -> {
                 motion = Ui.motion(prefs)
                 appsRow.smooth = motion.smoothScroll

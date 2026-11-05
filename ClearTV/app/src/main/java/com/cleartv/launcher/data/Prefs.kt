@@ -28,6 +28,16 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(K_FAV_TOUCHED, false)
         set(value) = sp.edit().putBoolean(K_FAV_TOUCHED, value).apply()
 
+    /** Show only the owner's preferred apps (res/values/favorites.xml); everything else waits in Settings → Hidden apps. */
+    var onlyPreferred: Boolean
+        get() = sp.getBoolean(K_ONLY_PREFERRED, true)
+        set(value) = sp.edit().putBoolean(K_ONLY_PREFERRED, value).apply()
+
+    /** Apps the owner re-admitted while "only my apps" is on. */
+    var allowed: Set<String>
+        get() = StringSetCodec.decode(sp.getString(K_ALLOWED, null))
+        set(value) = sp.edit().putString(K_ALLOWED, StringSetCodec.encode(value)).apply()
+
     var hidden: Set<String>
         get() = StringSetCodec.decode(sp.getString(K_HIDDEN, null))
         set(value) = sp.edit().putString(K_HIDDEN, StringSetCodec.encode(value)).apply()
@@ -98,6 +108,12 @@ class Prefs(context: Context) {
     /** Back to the automatic row order (preferred apps first); hidden apps are kept. */
     fun autoLayout() { sp.edit().remove(K_FAVORITES).remove(K_FAV_TOUCHED).apply() }
 
+    /** True when the process crashed within [withinMs]: the guard and the keeper stand down so a broken build cannot fight the TV. */
+    fun crashedRecently(withinMs: Long = 2 * 60 * 1000L): Boolean {
+        val last = crashHistory.maxOrNull() ?: return false
+        return System.currentTimeMillis() - last < withinMs
+    }
+
     fun addListener(onChange: (String) -> Unit): SharedPreferences.OnSharedPreferenceChangeListener {
         val l = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> if (key != null) onChange(key) }
         listeners += l // keep a strong reference: SharedPreferences stores listeners weakly
@@ -114,6 +130,7 @@ class Prefs(context: Context) {
         append("favorites=").append(favorites?.size ?: -1)
         append(" favoritesTouched=").append(favoritesTouched)
         append(" hidden=").append(hidden.size)
+        append(" onlyPreferred=").append(onlyPreferred).append(" allowed=").append(allowed.size)
         append(" wallpaper=").append(wallpaperId)
         append(" clock=").append(clockMode.storageKey)
         append(" labels=").append(showLabels)
@@ -131,6 +148,8 @@ class Prefs(context: Context) {
         const val K_FAVORITES = "favorites"
         const val K_FAV_TOUCHED = "favorites_touched"
         const val K_HIDDEN = "hidden"
+        const val K_ONLY_PREFERRED = "only_preferred"
+        const val K_ALLOWED = "allowed"
         const val K_WALLPAPER = "wallpaper"
         const val K_CLOCK = "clock_mode"
         const val K_LABELS = "show_labels"

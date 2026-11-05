@@ -36,6 +36,7 @@ object HomeKeeper {
     fun run(context: Context, reason: String, interactive: Boolean): Outcome {
         val app = ClearTvApp.get(context)
         if (!app.prefs.keepHome) return remember(Outcome(Status.DISABLED), reason)
+        if (!interactive && (app.prefs.safeMode || app.prefs.crashedRecently())) return remember(Outcome(Status.DISABLED, "recent_crash"), reason)
         if (app.apps.isDefaultHome()) return remember(Outcome(Status.ALREADY_HOME), reason)
         val now = System.currentTimeMillis()
         if (!interactive && now - lastRunAt < MIN_INTERVAL_MS) return remember(Outcome(Status.FAILED, "rate_limited"), reason)

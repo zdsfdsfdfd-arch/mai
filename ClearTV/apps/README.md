@@ -7,7 +7,7 @@
 |---|---|---|
 | YouTube | GitHub Releases проекта SmartTube (ссылка из его README) | SmartTube — открытый клиент YouTube для Android TV; официального YouTube на Салют ТВ нет (нет сервисов Google) |
 | Twitch | GitHub Releases проекта Xtra (тег `latest`) | Xtra — открытый клиент Twitch с поддержкой Android TV; официальный Twitch есть только в Google Play |
-| Happ | GitHub Releases Happ-proxy/happ-android (ссылка из README) | официальная сборка Happ; серверы не входят |
+| Happ | GitHub Releases Happ-proxy/happ-android (ссылка из README) | официальная сборка Happ (пакет `su.happ.proxyutility`); серверы не входят |
 | RUTUBE | официальная страница rutube.ru/androidtv (ссылка на .apk берётся со страницы, только домен rutube.ru) | официальное приложение RUTUBE для Android TV |
 | VK Видео | — | уже стоит на телевизоре |
 | Netflix, HBO Max, Apple TV, Spotify, Chrome | — | официально вне магазинов не раздаются; на Салют ТВ легального способа нет, APK-агрегаторы не используются |
