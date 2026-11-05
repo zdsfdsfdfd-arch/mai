@@ -60,6 +60,8 @@
 
     <string name="wallpaper_pick_file">Выбрать файл…</string>
     <string name="wallpaper_folder_hint">Свои изображения (JPG/PNG/WebP) можно скопировать в папку %1$s — например, командой scripts\\install.ps1 -Wallpapers.</string>
+    <string name="web_card_subtitle">веб-версия в браузере</string>
+    <string name="toast_web_no_browser">На телевизоре нет браузера для открытия сайта</string>
     <string name="hidden_empty">Скрытых приложений нет</string>
     <string name="hidden_unhide">Показать</string>
     <string name="hidden_by_hand">Скрыто вручную</string>

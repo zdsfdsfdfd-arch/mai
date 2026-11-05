@@ -59,6 +59,8 @@
 
     <string name="wallpaper_pick_file">Choose a file…</string>
     <string name="wallpaper_folder_hint">Your own images (JPG/PNG/WebP) can be copied to %1$s — for example with scripts\\install.ps1 -Wallpapers.</string>
+    <string name="web_card_subtitle">web version in the browser</string>
+    <string name="toast_web_no_browser">No browser on this TV to open the site</string>
     <string name="hidden_empty">No hidden apps</string>
     <string name="hidden_unhide">Show</string>
     <string name="hidden_by_hand">Hidden by hand</string>

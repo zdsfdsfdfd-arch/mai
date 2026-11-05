@@ -353,10 +353,12 @@ class HomeActivity : Activity() {
     fun visibleEntries(): List<AppEntry> {
         val hidden = prefs.hidden
         val notHidden = allEntries.filter { it.packageName !in hidden }
-        if (!prefs.onlyPreferred) return notHidden
         val keep = try { PreferredApps.pick(this, notHidden).map { it.packageName }.toSet() } catch (t: Throwable) { Logs.e("preferred pick failed", t); emptySet() }
+        // A web card stands in for a service only while no real app for it is installed (the rule picks the app first).
+        val base = notHidden.filter { !it.isWeb || it.packageName in keep }
+        if (!prefs.onlyPreferred) return base
         val allowed = prefs.allowed
-        return notHidden.filter { it.packageName in keep || it.packageName in allowed }
+        return base.filter { it.packageName in keep || it.packageName in allowed }
     }
 
     /** Apps the owner does not see right now (hidden by hand or filtered by "only my apps"), for Settings → Hidden apps. */
@@ -484,7 +486,8 @@ class HomeActivity : Activity() {
 
     fun launch(entry: AppEntry) {
         try {
-            HomeGuardService.noteUserLaunch(entry.packageName)
+            HomeGuardService.noteUserLaunch(if (entry.isWeb) entry.component.packageName else entry.packageName)
+            if (entry.isWeb && !repo.resolves(repo.launchIntent(entry))) { toast(getString(R.string.toast_web_no_browser)); return }
             startActivity(repo.launchIntent(entry))
             Logs.event("launch", "pkg" to entry.packageName, "ok" to true)
         } catch (t: Throwable) {
@@ -509,8 +512,10 @@ class HomeActivity : Activity() {
             item(R.string.menu_add_fav) { setFavorite(entry, true) }
         }
         item(R.string.menu_hide) { hideApp(entry) }
-        item(R.string.menu_info) { openAppInfo(entry) }
-        if (!entry.system) item(R.string.menu_uninstall) { uninstall(entry) }
+        if (!entry.isWeb) {
+            item(R.string.menu_info) { openAppInfo(entry) }
+            if (!entry.system) item(R.string.menu_uninstall) { uninstall(entry) }
+        }
 
         Ui.dialog(this).setTitle(entry.label).setItems(labels.toTypedArray()) { _, which -> actions[which]() }.show()
     }

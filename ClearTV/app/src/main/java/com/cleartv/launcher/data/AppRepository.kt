@@ -13,8 +13,11 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Build
 import android.util.LruCache
+import com.cleartv.launcher.R
+import com.cleartv.launcher.ui.Fonts
 import com.cleartv.launcher.util.Logs
 import java.text.Collator
 import java.util.Locale
@@ -61,6 +64,7 @@ class AppRepository(private val context: Context) {
         query(Intent.CATEGORY_LEANBACK_LAUNCHER, leanback = true)
         query(Intent.CATEGORY_LAUNCHER, leanback = false)
         queryVendorEntries(result, self)
+        appendWebFallbacks(result)
 
         val collator = Collator.getInstance(Locale.getDefault())
         val comparator = Comparator<AppEntry> { a, b -> collator.compare(a.label, b.label) }
@@ -102,12 +106,31 @@ class AppRepository(private val context: Context) {
         }
     }
 
+    /**
+     * Web versions of services whose app cannot be installed on this TV (res/values/favorites.xml → web_fallbacks).
+     * They exist only when a browser can open https addresses; the home screen shows one only while the preferred
+     * rule for that service finds no real app.
+     */
+    private fun appendWebFallbacks(result: LinkedHashMap<String, AppEntry>) {
+        val browser = try { pm.resolveActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.example.com/")), PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo } catch (t: Throwable) { null } ?: return
+        val component = ComponentName(browser.packageName, browser.name)
+        for (line in context.resources.getStringArray(R.array.web_fallbacks)) {
+            val parts = line.split('=')
+            if (parts.size < 4) continue
+            val id = "web:" + parts[0].trim()
+            val color = try { Color.parseColor("#" + parts[3].trim()) } catch (t: Throwable) { FALLBACK }
+            result[id] = AppEntry(packageName = id, component = component, label = parts[1].trim(), leanback = false, system = false,
+                entry = AppEntry.WEB, url = parts[2].trim(), color = color)
+        }
+    }
+
     private val accents = HashMap<String, Int>()
 
     /** Dominant colour of the app's card, known once its artwork has been rendered. */
     fun accent(entry: AppEntry): Int? = synchronized(accents) { accents[entry.packageName] }
 
     fun launchIntent(entry: AppEntry): Intent {
+        if (entry.isWeb) return Intent(Intent.ACTION_VIEW, Uri.parse(entry.url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         val intent = pm.getLeanbackLaunchIntentForPackage(entry.packageName)
             ?: pm.getLaunchIntentForPackage(entry.packageName)
             ?: Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(entry.component)
@@ -133,6 +156,11 @@ class AppRepository(private val context: Context) {
     private fun render(entry: AppEntry, w: Int, h: Int): Bitmap {
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
+        if (entry.isWeb) {
+            renderWebCard(canvas, entry, w, h)
+            synchronized(accents) { accents[entry.packageName] = entry.color ?: FALLBACK }
+            return bitmap
+        }
         val banner = loadBanner(entry)
         if (banner != null && banner.intrinsicWidth > 0 && banner.intrinsicHeight > 0) {
             drawCenterCrop(canvas, banner, w, h)
@@ -154,6 +182,29 @@ class AppRepository(private val context: Context) {
             icon.draw(canvas)
         }
         return bitmap
+    }
+
+    /** Brand-coloured card with the service name and an honest "web version" line; no logos are copied. */
+    private fun renderWebCard(canvas: Canvas, entry: AppEntry, w: Int, h: Int) {
+        val base = entry.color ?: FALLBACK
+        val hsv = FloatArray(3)
+        Color.colorToHSV(base, hsv)
+        hsv[2] = (hsv[2] * 0.62f).coerceIn(0.16f, 0.6f)
+        canvas.drawColor(Color.HSVToColor(hsv))
+        val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(34, 255, 255, 255) }
+        canvas.drawRoundRect(RectF(-w * 0.2f, -h * 0.9f, w * 0.8f, h * 0.55f), h * 0.6f, h * 0.6f, glow)
+        val title = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE; textSize = h * 0.24f; textAlign = Paint.Align.CENTER
+            typeface = try { Fonts.text(context, 600, entry.label) } catch (t: Throwable) { null }
+        }
+        var size = h * 0.24f
+        while (size > h * 0.12f && title.measureText(entry.label) > w * 0.86f) { size -= h * 0.02f; title.textSize = size }
+        canvas.drawText(entry.label, w / 2f, h * 0.56f, title)
+        val sub = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.argb(190, 255, 255, 255); textSize = h * 0.10f; textAlign = Paint.Align.CENTER
+            typeface = try { Fonts.text(context, 500, "Я") } catch (t: Throwable) { null }
+        }
+        canvas.drawText(context.getString(R.string.web_card_subtitle), w / 2f, h * 0.80f, sub)
     }
 
     private fun loadBanner(entry: AppEntry): Drawable? = try {

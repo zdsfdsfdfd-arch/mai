@@ -9,14 +9,27 @@
     -->
     <string-array name="preferred_apps" translatable="false">
         <item>youtube|ютуб|smarttube=com.google.android.youtube.tv,com.google.android.youtube,org.smarttube.stable,org.smarttube.beta,app.smarttube,app.smarttube.fdroid,com.teamsmart.videomanager.tv,com.liskovsoft.smarttubetv.beta,ru.sberdevices.startube</item>
-        <item>netflix=com.netflix.ninja,com.netflix.mediaclient</item>
-        <item>hbo max|hbo=com.wbd.stream,com.hbo.hbonow,eu.hbogo.androidtv,com.hbo.go</item>
-        <item>apple tv=com.apple.atve.androidtv.appletv,com.apple.atve.sony.appletv,com.apple.atve.amazon.appletv</item>
-        <item>spotify=com.spotify.tv.android,com.spotify.music,com.spotify.lite</item>
+        <item>netflix=com.netflix.ninja,com.netflix.mediaclient,web:netflix</item>
+        <item>hbo max|hbo=com.wbd.stream,com.hbo.hbonow,eu.hbogo.androidtv,com.hbo.go,web:hbomax</item>
+        <item>apple tv=com.apple.atve.androidtv.appletv,com.apple.atve.sony.appletv,com.apple.atve.amazon.appletv,web:appletv</item>
+        <item>spotify=com.spotify.tv.android,com.spotify.music,com.spotify.lite,web:spotify</item>
         <item>happ=su.happ.proxyutility,com.happproxy</item>
-        <item>twitch=tv.twitch.android.app,tv.twitch.android.viewer</item>
+        <item>twitch=tv.twitch.android.app,tv.twitch.android.viewer,web:twitch</item>
         <item>rutube=ru.rutube.app,ru.rutube.tv</item>
         <item>vk видео|вк видео|vk video=com.vk.tv,com.vk.vkvideo</item>
-        <item>chrome=com.android.chrome,com.chrome.beta</item>
+        <item>chrome|браузер|browser=com.android.chrome,com.chrome.beta,ru.sberdevices.starbrowser</item>
+    </string-array>
+
+    <!--
+      Web versions shown as cards while the real app is not installed: id=label=url=brand colour. The card opens the
+      address in the TV's browser. Whether the service plays in that browser (DRM, region, account) is up to the
+      service; the card never pretends otherwise — its artwork says "web version".
+    -->
+    <string-array name="web_fallbacks" translatable="false">
+        <item>netflix=Netflix=https://www.netflix.com/=E50914</item>
+        <item>spotify=Spotify=https://open.spotify.com/=1DB954</item>
+        <item>hbomax=HBO Max=https://www.max.com/=5A3FFF</item>
+        <item>appletv=Apple TV=https://tv.apple.com/=3A3A3C</item>
+        <item>twitch=Twitch=https://www.twitch.tv/=9146FF</item>
     </string-array>
 </resources>

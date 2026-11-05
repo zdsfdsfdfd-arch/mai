@@ -32,6 +32,11 @@
             <action android:name="android.intent.action.MAIN" />
         </intent>
         <intent><action android:name="android.settings.WIFI_SETTINGS" /></intent>
+        <!-- Web cards (Netflix, Spotify, ... while the app is absent) open https addresses in the TV's browser -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="content" android:host="android.media.tv" />

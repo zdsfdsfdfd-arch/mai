@@ -37,7 +37,7 @@
         "tv.twitch.android.app"
       ],
       "source": "Twitch Interactive распространяет приложение только через Google Play и Amazon Appstore; прямого APK на twitch.tv нет",
-      "note": "Нужен официальный APK Twitch для Android TV (пакет tv.twitch.android.app): скачайте его на ПК и положите в папку apps — установится и встанет на главный экран. Сторонние клиенты (Xtra) больше не ставятся и удаляются с телевизора."
+      "note": "Нужен официальный APK Twitch для Android TV (пакет tv.twitch.android.app): скачайте его на ПК и положите в папку apps — установится и встанет на главный экран. Сторонние клиенты (Xtra) больше не ставятся и удаляются с телевизора. Пока официального приложения нет, на экране карточка «Twitch — веб-версия в браузере» (twitch.tv)."
     },
     {
       "id": "happ",
@@ -101,10 +101,25 @@
     {
       "id": "netflix",
       "name": "Netflix",
-      "kind": "manual",
-      "page": "https://help.netflix.com/en/node/14361",
-      "source": "справка Netflix направляет только в магазины устройств",
-      "note": "Netflix не публикует APK для установки вне магазинов и требует сертифицированное устройство (Widevine). На Салют ТВ официального способа нет; сторонние APK не используем."
+      "kind": "page",
+      "page": "https://help.netflix.com/en/node/57688",
+      "source": "справочная страница Netflix для устройств без Google Play (если на ней есть ссылка на APK с домена netflix.com)",
+      "note": "Если Netflix не раздаёт APK на своей странице, на экране остаётся карточка «Netflix — веб-версия в браузере». Сервис не работает в России и проверяет сертификацию устройства: нужен зарубежный аккаунт и VPN, качество может быть ограничено.",
+      "fallback_page": "https://help.netflix.com/en/node/57688",
+      "hosts": [
+        "netflix.com",
+        "nflxext.com",
+        "nflximg.net"
+      ],
+      "file": "Netflix-official.apk",
+      "packages": [
+        "com.netflix.ninja",
+        "com.netflix.mediaclient"
+      ],
+      "skip_if_installed": [
+        "com.netflix.ninja",
+        "com.netflix.mediaclient"
+      ]
     },
     {
       "id": "hbomax",
@@ -112,7 +127,7 @@
       "kind": "manual",
       "page": "",
       "source": "распространяется только через магазины приложений",
-      "note": "Официального APK нет; на Салют ТВ установить легально и надёжно нечем."
+      "note": "Официального APK нет; на Салют ТВ установить легально и надёжно нечем. На экране остаётся карточка «веб-версия в браузере» (tv.apple.com / max.com): воспроизведение зависит от браузера, региона и аккаунта."
     },
     {
       "id": "appletv",
@@ -120,15 +135,31 @@
       "kind": "manual",
       "page": "",
       "source": "приложение Apple TV выходит только на сертифицированных платформах",
-      "note": "Только Google TV, Fire TV, консоли и телевизоры партнёров; на Салют ТВ недоступно."
+      "note": "Только Google TV, Fire TV, консоли и телевизоры партнёров; на Салют ТВ недоступно. На экране остаётся карточка «веб-версия в браузере» (tv.apple.com / max.com): воспроизведение зависит от браузера, региона и аккаунта."
     },
     {
       "id": "spotify",
       "name": "Spotify",
-      "kind": "manual",
+      "kind": "page",
       "page": "https://www.spotify.com/download/android/",
-      "source": "страница загрузки Spotify ведёт в Google Play; прямой APK не документирован",
-      "note": "Spotify приостановил работу в России в 2022 году; официальной ссылки на APK нет."
+      "source": "страница загрузки Spotify для Android (если на ней есть прямая ссылка на APK с домена spotify.com/scdn.co)",
+      "note": "Мобильная версия Spotify пультом управляется неудобно; без ссылки на экране остаётся карточка «Spotify — веб-версия в браузере». Сервис приостановил работу в России: нужен зарубежный аккаунт и VPN.",
+      "fallback_page": "https://www.spotify.com/download/android/",
+      "hosts": [
+        "spotify.com",
+        "scdn.co"
+      ],
+      "file": "Spotify-official.apk",
+      "packages": [
+        "com.spotify.tv.android",
+        "com.spotify.music",
+        "com.spotify.lite"
+      ],
+      "skip_if_installed": [
+        "com.spotify.tv.android",
+        "com.spotify.music",
+        "com.spotify.lite"
+      ]
     },
     {
       "id": "chrome",
@@ -136,7 +167,7 @@
       "kind": "manual",
       "page": "",
       "source": "Google распространяет Chrome только через Google Play",
-      "note": "На телевизоре есть браузер Сбера (ru.sberdevices.starbrowser), он уже в ряду."
+      "note": "Google распространяет Chrome только через Google Play. Правило «Chrome» в ClearTV принимает браузер Сбера (ru.sberdevices.starbrowser): карточка браузера есть в ряду."
     }
   ],
   "retired": [
