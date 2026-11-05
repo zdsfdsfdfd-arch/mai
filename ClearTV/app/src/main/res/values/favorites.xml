@@ -8,13 +8,13 @@
       Mirrored for the PC scripts in scripts/data/preferred-apps.json (clean.ps1 never touches these).
     -->
     <string-array name="preferred_apps" translatable="false">
-        <item>youtube|ютуб=com.google.android.youtube.tv,com.google.android.youtube,com.teamsmart.videomanager.tv,com.liskovsoft.smarttubetv.beta,ru.sberdevices.startube</item>
+        <item>youtube|ютуб|smarttube=com.google.android.youtube.tv,com.google.android.youtube,org.smarttube.stable,org.smarttube.beta,app.smarttube,app.smarttube.fdroid,com.teamsmart.videomanager.tv,com.liskovsoft.smarttubetv.beta,ru.sberdevices.startube</item>
         <item>netflix=com.netflix.ninja,com.netflix.mediaclient</item>
         <item>hbo max|hbo=com.wbd.stream,com.hbo.hbonow,eu.hbogo.androidtv,com.hbo.go</item>
         <item>apple tv=com.apple.atve.androidtv.appletv,com.apple.atve.sony.appletv,com.apple.atve.amazon.appletv</item>
         <item>spotify=com.spotify.tv.android,com.spotify.music,com.spotify.lite</item>
         <item>happ=com.happproxy</item>
-        <item>twitch=tv.twitch.android.app,tv.twitch.android.viewer</item>
+        <item>twitch|xtra=tv.twitch.android.app,tv.twitch.android.viewer,com.github.andreyasadchy.xtra</item>
         <item>rutube=ru.rutube.app,ru.rutube.tv</item>
         <item>vk видео|вк видео|vk video=com.vk.tv,com.vk.vkvideo</item>
         <item>chrome=com.android.chrome,com.chrome.beta</item>

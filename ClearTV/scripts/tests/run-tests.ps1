@@ -47,6 +47,12 @@ Check 'Test-SameComponent: short "pkg/.ui.HomeActivity" equals the full name' ((
 Check 'Test-ConnectivityDumpOnline (Android 13 active default network)' ((Test-ConnectivityDumpOnline "NetworkProviders for:`n  4: WifiNetworkFactory`n`nActive default network: 102`n") -eq $true)
 Check 'Test-ConnectivityDumpOnline (Android 13 offline / legacy / unknown)' (((Test-ConnectivityDumpOnline "Active default network: none`n") -eq $false) -and ((Test-ConnectivityDumpOnline "NetworkAgentInfo{ ni{[type: WIFI[], state: CONNECTED/CONNECTED]} }") -eq $true) -and ($null -eq (Test-ConnectivityDumpOnline "")))
 Check 'Get-PreferredAppPackages: owner list loaded (VK Video, YouTube)' ((@(Get-PreferredAppPackages) -contains 'com.vk.tv') -and (@(Get-PreferredAppPackages) -contains 'com.google.android.youtube.tv'))
+Check 'Select-ApkLink: relative link on the official domain, foreign hosts ignored' (((Select-ApkLink '<a href="https://cdn.evil.example/x.apk">bad</a> <a class="btn" href="/static/apps/rutube-tv.apk?v=3">APK</a>' 'https://rutube.ru/androidtv/' @('rutube.ru')) -eq 'https://rutube.ru/static/apps/rutube-tv.apk?v=3') -and ($null -eq (Select-ApkLink '<a href="https://cdn.evil.example/x.apk">bad</a>' 'https://rutube.ru/androidtv/' @('rutube.ru'))))
+Check 'Test-HostAllowed: exact host and subdomains only' ((Test-HostAllowed 'objects.githubusercontent.com' @('github.com', 'githubusercontent.com')) -and -not (Test-HostAllowed 'github.com.evil.example' @('github.com')))
+$src = @(Get-AppSources)
+Check 'app-sources.json: 10 owner apps, only official hosts, every direct entry has url/file/hosts' ($src.Count -eq 10 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -and $_.file -and $_.hosts }).Count -eq 3 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -notmatch '^https://github\.com/' }).Count -eq 0)
+$plan = & (Join-Path $scripts 'get-apps.ps1') -ListOnly -Folder (Join-Path $tmp 'apps-plan') *>&1 | Out-String
+Check 'get-apps -ListOnly: plans SmartTube/Xtra/Happ/RUTUBE, explains Netflix/HBO/Apple/Spotify/Chrome, no network' (($plan -match 'smarttube_stable\.apk') -and ($plan -match 'Happ\.apk') -and ($plan -match 'rutube\.ru/androidtv') -and ($plan -match 'Netflix') -and ($plan -match 'официального APK нет|не публикует APK'))
 $ev = ConvertFrom-LogcatEvents "I ClearTV : EVT focus row=apps index=0 pkg=a`nI ClearTV : MARK abc`nI ClearTV : EVT launch pkg=com.x ok=true`n" 'MARK abc'
 Check 'ConvertFrom-LogcatEvents after marker' ($ev.Count -eq 1 -and $ev[0].Name -eq 'launch' -and $ev[0].Fields['ok'] -eq 'true')
 $pk = ConvertFrom-DumpsysPackages (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_package_packages.txt') -Raw)
@@ -201,7 +207,8 @@ Write-Host "== 9. run-all.ps1 (one-click flow) against the fake TV"
 $env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-runall'
 Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'installed') -ErrorAction SilentlyContinue
 Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt') -ErrorAction SilentlyContinue
-& (Join-Path $scripts 'run-all.ps1') -Ip 192.168.1.50 -SafeOnly *> (Join-Path $tmp 'run-all.log')
+& (Join-Path $scripts 'run-all.ps1') -Ip 192.168.1.50 -SafeOnly -NoDownload *> (Join-Path $tmp 'run-all.log')
+Check 'run-all: install-apps step skipped with a reason when apps folder is empty' ((Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'run-all-summary.txt') -Raw) -match 'нет APK')
 $zips = @(Get-ChildItem $tmp -Filter 'ClearTV-reports-*.zip')
 Check 'run-all: reports zip produced' ($zips.Count -eq 1)
 Check 'run-all: device, inventory and verify reports inside' ((Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'device-report.md')) -and (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'inventory.md')) -and (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'verify-report.md')))
@@ -209,7 +216,7 @@ Check 'run-all (safe): ClearTV installed, HOME untouched, nothing disabled' ((Te
 
 Write-Host "== 9b. run-all.ps1 -Full: gate on verify, then set-home + clean"
 $env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-full'
-& (Join-Path $scripts 'run-all.ps1') -Ip 192.168.1.50 -Full *> (Join-Path $tmp 'run-all-full.log')
+& (Join-Path $scripts 'run-all.ps1') -Ip 192.168.1.50 -Full -NoDownload *> (Join-Path $tmp 'run-all-full.log')
 $fullLog = Get-Content (Join-Path $tmp 'run-all-full.log') -Raw
 Check 'run-all -Full: refused because dpad test fails on the fake TV (gate works)' (($fullLog -match 'не пройдена') -and ((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw).Trim() -eq 'com.stock.launcher/.HomeActivity'))
 

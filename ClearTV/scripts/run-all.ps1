@@ -13,6 +13,7 @@
 param(
     [string]$Ip,
     [switch]$Full,
+    [switch]$NoDownload,
     [switch]$SafeOnly,
     [switch]$Yes
 )
@@ -32,13 +33,14 @@ $steps = @(
     @{ Name = 'Установка ClearTV'; File = 'install.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } }
 )
 $appsDir = Join-Path $root 'apps'
-if (@(Get-ChildItem $appsDir -Filter '*.apk' -Recurse -File -ErrorAction SilentlyContinue).Count -gt 0) {
-    $steps += @{ Name = 'Приложения из папки apps'; File = 'install-apps.ps1'; Params = @{ Ip = $Ip; Yes = $true } }
-}
+if (-not $NoDownload) { $steps += @{ Name = 'Загрузка приложений владельца (официальные источники)'; File = 'get-apps.ps1'; Params = @{ Ip = $Ip; Yes = $true } } }
+$steps += @{ Name = 'Установка приложений из папки apps'; File = 'install-apps.ps1'; Params = @{ Ip = $Ip; Yes = $true }
+             Condition = { @(Get-ChildItem $appsDir -Filter '*.apk' -Recurse -File -ErrorAction SilentlyContinue).Count -gt 0 }; SkipText = 'в папке apps нет APK — пропущено' }
 $steps += @{ Name = 'Проверка на телевизоре'; File = 'verify.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } }
 
 $summary = @()
 foreach ($s in $steps) {
+    if ($s.Condition -and -not (& $s.Condition)) { $summary += "{0}: {1}" -f $s.Name, $s.SkipText; continue }
     Write-Host ""
     Write-Host ("#" * 70) -ForegroundColor Cyan
     Write-Host ("# " + $s.Name) -ForegroundColor Cyan

@@ -66,7 +66,7 @@ ClearTV/
    ```powershell
    .\scripts\build.ps1 -InstallSdk
    ```
-   Можно пропустить и использовать готовый `dist\ClearTV-0.1.2-debug.apk` (собран без SDK, см. `reports\build-report-nosdk.md`).
+   Можно пропустить и использовать готовый `dist\ClearTV-0.1.3-debug.apk` (собран без SDK, см. `reports\build-report-nosdk.md`).
 4. Установка и запуск вручную (ClearTV появится и в списке приложений штатного лаунчера):
    ```powershell
    .\scripts\install.ps1 -Ip 192.168.1.50
@@ -109,9 +109,14 @@ Rutube, VK Видео, Chrome. Пока порядок ряда автомати
 утилиты — последними. Как только приложение из списка установлено, оно появляется на главном экране само.
 `clean.ps1` эти пакеты никогда не отключает.
 
-Чего нет на телевизоре — положите APK в папку `apps\` и запустите `APPS.cmd` (или `FULL.cmd`/`START.cmd`:
-они установят содержимое папки сами). Проект APK не скачивает; подробности и честное предупреждение о
-совместимости Netflix/HBO Max/Apple TV — в `apps/README.md`.
+Чего нет на телевизоре, `FULL.cmd`/`START.cmd` скачивают сами — но только из официальных источников самих
+разработчиков (`scripts/data/app-sources.json`, шаг `get-apps.ps1`): SmartTube (открытый клиент YouTube для
+Android TV — официального YouTube на Салют ТВ нет), Xtra (открытый клиент Twitch), Happ и RUTUBE. Скрипт проверяет,
+что итоговый адрес принадлежит домену разработчика и что файл — APK, записывает SHA-256 в
+`reports/apps-download.md`, затем `install-apps.ps1` ставит их. Netflix, HBO Max, Apple TV, Spotify и Chrome
+официально вне магазинов не раздаются — для них печатается честное пояснение, APK-агрегаторы не используются.
+Свои файлы можно положить в `apps\` вручную (`APPS.cmd`); отключить загрузку — `run-all.ps1 -NoDownload`.
+Подробности — `apps/README.md`.
 
 ## Полная настройка «как на ролике» (FULL.cmd)
 

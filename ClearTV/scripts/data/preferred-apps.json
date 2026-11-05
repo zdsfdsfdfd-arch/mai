@@ -5,11 +5,16 @@
       "name": "YouTube",
       "keywords": [
         "youtube",
-        "ютуб"
+        "ютуб",
+        "smarttube"
       ],
       "packages": [
         "com.google.android.youtube.tv",
         "com.google.android.youtube",
+        "org.smarttube.stable",
+        "org.smarttube.beta",
+        "app.smarttube",
+        "app.smarttube.fdroid",
         "com.teamsmart.videomanager.tv",
         "com.liskovsoft.smarttubetv.beta",
         "ru.sberdevices.startube"
@@ -72,11 +77,13 @@
     {
       "name": "Twitch",
       "keywords": [
-        "twitch"
+        "twitch",
+        "xtra"
       ],
       "packages": [
         "tv.twitch.android.app",
-        "tv.twitch.android.viewer"
+        "tv.twitch.android.viewer",
+        "com.github.andreyasadchy.xtra"
       ]
     },
     {

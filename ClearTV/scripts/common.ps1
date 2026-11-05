@@ -304,6 +304,30 @@ function Test-ConnectivityDumpOnline([string]$Text) {
     return $null
 }
 
+function Test-HostAllowed([string]$HostName, [string[]]$Hosts) {
+    if (-not $HostName) { return $false }
+    foreach ($h in @($Hosts)) { if ($HostName -eq $h -or $HostName.EndsWith('.' + $h)) { return $true } }
+    return $false
+}
+function Select-ApkLink([string]$Html, [string]$BaseUrl, [string[]]$Hosts) {
+    # First .apk link on an official page whose host is in $Hosts (relative links are resolved against $BaseUrl).
+    if ([string]::IsNullOrWhiteSpace($Html)) { return $null }
+    $candidates = @()
+    foreach ($m in [regex]::Matches($Html, '(?i)(?:href|src|data-href|data-url|content)\s*=\s*["'']([^"''\s<>]+\.apk(?:\?[^"''\s<>]*)?)["'']')) { $candidates += $m.Groups[1].Value }
+    foreach ($m in [regex]::Matches($Html, '(?i)https?://[^\s"''<>]+\.apk(?:\?[^\s"''<>]*)?')) { $candidates += $m.Value }
+    foreach ($raw in $candidates) {
+        $link = [System.Net.WebUtility]::HtmlDecode($raw)
+        try { $uri = New-Object System.Uri((New-Object System.Uri($BaseUrl)), $link) } catch { continue }
+        if (Test-HostAllowed $uri.Host $Hosts) { return $uri.AbsoluteUri }
+    }
+    return $null
+}
+function Get-AppSources {
+    $data = Read-JsonFile (Join-Path (Join-Path $PSScriptRoot 'data') 'app-sources.json')
+    if (-not $data) { return @() }
+    return @($data.apps)
+}
+
 function Get-PreferredAppPackages {
     $data = Read-JsonFile (Join-Path (Join-Path $PSScriptRoot 'data') 'preferred-apps.json')
     if (-not $data) { return @() }

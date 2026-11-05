@@ -9,12 +9,12 @@
 |---|---|
 | Компиляция всех исходников Kotlin против API 34 с заглушками Android `java.*` (только API, существующие на Android) | OK, предупреждений об отсутствующих API нет |
 | Ресурсы: `aapt2 compile/link`, манифест, 18 векторных иконок, 2 локали | OK |
-| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1174 классов, 13 492 методов (сборка 0.1.2) |
+| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1174 классов, 13 492 методов (сборка 0.1.3) |
 | Подпись и выравнивание: `zipalign -c`, `apksigner verify` (v2, v3) | OK |
 | `aapt2 dump badging`: HOME/LEANBACK/LAUNCHER-активности, баннер, иконки 160–640 dpi, minSdk 24 | OK |
 | JUnit (модуль `core`, через `gradlew :core:test`, Gradle 8.14.3, Kotlin 2.0.21) | 13 тестов, 0 падений |
 | Встроенный ADB-клиент против поддельного adbd (`tools/adbtest/run.sh`: CNXN/AUTH TOKEN→SIGNATURE→RSAPUBLICKEY, shell, отказ потока) | OK, оба сценария (неизвестный ключ с подтверждением, известный ключ без запроса) |
-| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 92 проверки, 0 падений; см. ниже |
+| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 98 проверок, 0 падений; см. ниже |
 | Генерация растровых ассетов (иконки, баннер, 4 обоев) и визуальный просмотр баннера/обоев | OK |
 
 Тесты скриптов покрывают: разбор `getprop`, списков пакетов, `dumpsys package packages`, `meminfo`, `gfxinfo`,
@@ -47,6 +47,9 @@ SaluteTV `at30a6`, Android 13 (API 33), StarOS, Amlogic T5W, 2 ГБ RAM, 1920×1
 
 ## Не выполнено (невозможно в облачной среде)
 
+- Само скачивание APK в `get-apps.ps1`: сеть контейнера закрыта для github.com (кроме git), rutube.ru и прочих.
+  Проверены разбор каталога, план `-ListOnly`, выбор ссылки со страницы и проверка доменов (юнит-тесты);
+  реальная загрузка впервые выполнится на ПК у телевизора и будет записана в `reports/apps-download.md`.
 - Запуск ClearTV на устройстве или эмуляторе: нет образов эмулятора (dl.google.com закрыт) и нет KVM.
 - Сборка через Gradle/AGP: AGP и AndroidX лежат только на Google Maven. `build.ps1` выполняет её на вашем ПК.
 - Любые измерения RAM/CPU/FPS, поведение прошивки Салют ТВ при смене HOME, HDMI, пульт, перезагрузка.
@@ -68,7 +71,7 @@ SaluteTV `at30a6`, Android 13 (API 33), StarOS, Amlogic T5W, 2 ГБ RAM, 1920×1
 | Плавность | `frame_stats` | `dumpsys gfxinfo` после серии нажатий |
 | Восстановление после аварийного завершения | `crash_recovery` | `am crash` (API 26+) / `force-stop`, затем HOME |
 | Панель настроек, «Все приложения» | `settings_panel`, `all_apps` | пультом ▲ ▶▶▶ OK (на пультах Сбера нет MENU), запасные пути MENU и `am start --ez cleartv.open_settings true`; BACK; события `EVT overlay` |
-| Приложения владельца (`apps\*.apk`) | `install-apps.ps1` (шаг run-all, если в папке есть APK) | `adb install -r -t`, журнал `install-app`; ряд ClearTV обновляется сам |
+| Приложения владельца (`apps\*.apk`) | `get-apps.ps1` (официальные источники из `scripts/data/app-sources.json`) → `install-apps.ps1` (шаг run-all, если в папке есть APK) | загрузка только с доменов разработчика, проверка zip/AndroidManifest, SHA-256 в `reports/apps-download.md`; `adb install -r -t`, журнал `install-app`; ряд ClearTV обновляется сам |
 
 Результат — `reports/verify-report.md` с колонкой доказательств (строки logcat, вывод `am start`).
 

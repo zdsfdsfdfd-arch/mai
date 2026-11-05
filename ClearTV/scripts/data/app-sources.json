@@ -1,0 +1,145 @@
+{
+  "about": "Откуда get-apps.ps1 берёт установщики приложений владельца. Только официальные источники самих разработчиков (их GitHub Releases или их сайт); никаких APK-агрегаторов. kind: direct — постоянная ссылка на файл; page — официальная страница, с которой скрипт берёт ссылку на .apk (только с разрешённых доменов); manual — официального способа установить APK нет, выводится честное пояснение; none — уже есть на телевизоре. Проверено 2026-11-05: README yuliskov/SmartTube, README Happ-proxy/happ-android и его файл release, workflow crackededed/Xtra, страницы rutube.ru/androidtv и happ.su (поиск). Хэши не закреплены: ссылки указывают на последнюю версию, скрипт записывает SHA-256 скачанного файла в reports/apps-download.md.",
+  "apps": [
+    {
+      "id": "youtube",
+      "name": "YouTube → SmartTube",
+      "kind": "direct",
+      "url": "https://github.com/yuliskov/SmartTube/releases/download/latest/smarttube_stable.apk",
+      "fallback_page": "https://github.com/yuliskov/SmartTube/releases",
+      "file": "SmartTube-stable.apk",
+      "hosts": [
+        "github.com",
+        "githubusercontent.com"
+      ],
+      "packages": [
+        "org.smarttube.stable"
+      ],
+      "skip_if_installed": [
+        "com.google.android.youtube.tv",
+        "org.smarttube.stable",
+        "org.smarttube.beta",
+        "app.smarttube",
+        "app.smarttube.fdroid"
+      ],
+      "source": "README проекта yuliskov/SmartTube: ссылка «latest stable download» (GitHub Releases, тег latest)",
+      "note": "Официального YouTube для Салют ТВ нет (нет сервисов Google). SmartTube — открытый клиент YouTube для Android TV (GPL); автор просит качать только с GitHub, не с APK-сайтов."
+    },
+    {
+      "id": "twitch",
+      "name": "Twitch → Xtra",
+      "kind": "direct",
+      "url": "https://github.com/crackededed/Xtra/releases/download/latest/app-release.apk",
+      "fallback_page": "https://github.com/crackededed/Xtra/releases/tag/latest",
+      "file": "Xtra-twitch.apk",
+      "hosts": [
+        "github.com",
+        "githubusercontent.com"
+      ],
+      "packages": [
+        "com.github.andreyasadchy.xtra"
+      ],
+      "skip_if_installed": [
+        "tv.twitch.android.app",
+        "tv.twitch.android.viewer",
+        "com.github.andreyasadchy.xtra"
+      ],
+      "source": "README и workflow android.yml проекта crackededed/Xtra: релиз с тегом latest собирается из app/build/outputs/apk/release/*.apk",
+      "note": "Официальный Twitch для Android TV распространяется только через Google Play. Xtra — открытый клиент Twitch (AGPL) с поддержкой Android TV (LEANBACK_LAUNCHER в манифесте); не является приложением Twitch Interactive."
+    },
+    {
+      "id": "happ",
+      "name": "Happ",
+      "kind": "direct",
+      "url": "https://github.com/Happ-proxy/happ-android/releases/latest/download/Happ.apk",
+      "fallback_page": "https://www.happ.su/main/faq/android-tv",
+      "file": "Happ.apk",
+      "hosts": [
+        "github.com",
+        "githubusercontent.com"
+      ],
+      "packages": [
+        "com.happproxy"
+      ],
+      "skip_if_installed": [
+        "com.happproxy"
+      ],
+      "source": "README официального репозитория Happ-proxy/happ-android («Download APK»); тот же файл указан в его release-манифесте",
+      "note": "Официальная сборка Happ. Серверов в комплекте нет — нужна ваша подписка или конфигурация; версия для Android TV совпадает с мобильной (FAQ happ.su)."
+    },
+    {
+      "id": "rutube",
+      "name": "RUTUBE",
+      "kind": "page",
+      "page": "https://rutube.ru/androidtv/",
+      "hosts": [
+        "rutube.ru"
+      ],
+      "file": "Rutube-AndroidTV.apk",
+      "packages": [
+        "ru.rutube.app",
+        "ru.rutube.tv"
+      ],
+      "skip_if_installed": [
+        "ru.rutube.app",
+        "ru.rutube.tv"
+      ],
+      "source": "Официальная страница RUTUBE для Android TV: ссылка на APK берётся прямо со страницы (только домен rutube.ru)",
+      "note": "RUTUBE сам раздаёт APK для Android TV 7.0+; если страница изменится, скрипт напечатает её адрес — скачайте файл вручную и положите в папку apps."
+    },
+    {
+      "id": "vk",
+      "name": "VK Видео",
+      "kind": "none",
+      "packages": [
+        "com.vk.tv"
+      ],
+      "skip_if_installed": [
+        "com.vk.tv",
+        "com.vk.vkvideo"
+      ],
+      "source": "уже установлено на телевизоре (отчёт diagnose)",
+      "note": "Стоит на телевизоре (com.vk.tv) и доступно в каталоге Сбера."
+    },
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "kind": "manual",
+      "page": "https://help.netflix.com/en/node/14361",
+      "source": "справка Netflix направляет только в магазины устройств",
+      "note": "Netflix не публикует APK для установки вне магазинов и требует сертифицированное устройство (Widevine). На Салют ТВ официального способа нет; сторонние APK не используем."
+    },
+    {
+      "id": "hbomax",
+      "name": "HBO Max",
+      "kind": "manual",
+      "page": "",
+      "source": "распространяется только через магазины приложений",
+      "note": "Официального APK нет; на Салют ТВ установить легально и надёжно нечем."
+    },
+    {
+      "id": "appletv",
+      "name": "Apple TV",
+      "kind": "manual",
+      "page": "",
+      "source": "приложение Apple TV выходит только на сертифицированных платформах",
+      "note": "Только Google TV, Fire TV, консоли и телевизоры партнёров; на Салют ТВ недоступно."
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "kind": "manual",
+      "page": "https://www.spotify.com/download/android/",
+      "source": "страница загрузки Spotify ведёт в Google Play; прямой APK не документирован",
+      "note": "Spotify приостановил работу в России в 2022 году; официальной ссылки на APK нет."
+    },
+    {
+      "id": "chrome",
+      "name": "Chrome",
+      "kind": "manual",
+      "page": "",
+      "source": "Google распространяет Chrome только через Google Play",
+      "note": "На телевизоре есть браузер Сбера (ru.sberdevices.starbrowser), он уже в ряду."
+    }
+  ]
+}
