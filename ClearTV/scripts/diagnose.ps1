@@ -166,7 +166,7 @@ $override = ''; if ($wmSize -match 'Override size:\s*(\S+)') { $override = $Matc
 $density = ''; if ($wmDensity -match 'Physical density:\s*(\d+)') { $density = $Matches[1] }
 $refresh = ''; if ($display -match 'refreshRate[= ]+([\d.]+)') { $refresh = $Matches[1] }
 $inputs = @(ConvertFrom-TvInputDump $tvInput)
-$cecEnabled = ($hdmi -match 'mHdmiControlEnabled[:=]\s*true|HDMI control enabled: true|hdmi_control_enabled[:=]\s*1')
+$cecEnabled = Test-HdmiCecEnabled $hdmi
 $inputDevices = @([regex]::Matches($input, '(?m)^\s*\d+:\s+(.+?)\s*$') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
 $remoteLike = @($inputDevices | Where-Object { $_ -match '(?i)remote|rc|ir|bluetooth|bt|keypad|key' })
 $serviceCount = ([regex]::Matches($services, '(?m)^\d+\s')).Count

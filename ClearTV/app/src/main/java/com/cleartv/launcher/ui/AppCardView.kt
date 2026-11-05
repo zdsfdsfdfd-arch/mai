@@ -137,7 +137,6 @@ class AppCardView(context: Context, val size: Size) : FrameLayout(context) {
         } else {
             animate().scaleX(target).scaleY(target).setDuration(motion.focusMs).setInterpolator(Ui.standard).start()
         }
-        image.translationZ = if (focused) Ui.dpF(context, 6f) else 0f
         label.setTextColor(if (focused) colorPrimary else colorSecondary)
         label.alpha = if (focused) 1f else 0.85f
         animateRing(if (focused) 1f else 0f)

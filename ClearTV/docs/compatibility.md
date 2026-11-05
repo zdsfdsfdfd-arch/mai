@@ -11,7 +11,7 @@
 | Android | 7.0 (API 24) и новее; собрано под API 34 | `device-report.md` → Android / API |
 | Экран | любое разрешение; дизайн на канве 960×540 dp | `device-report.md` → Экран |
 | RAM | от 1 ГБ; целевой PSS ClearTV ≤ 120 МБ | `verify.ps1` → ram_usage |
-| Пульт | стандартные клавиши D-pad, OK, Назад, HOME; MENU — желательно | `verify.ps1` → dpad_navigation, settings_panel |
+| Пульт | стандартные клавиши D-pad, OK, Назад, HOME. MENU не нужна: на пульте Салют ТВ её нет, настройки открываются кнопкой «Настройки» (▲ с дока, ▶ до конца, OK) | `verify.ps1` → dpad_navigation, settings_panel |
 | Leanback | не обязателен (`required=false`), но определяет наличие TV-баннеров у приложений | `device-report.md` → Leanback |
 
 ## Механизмы замены главного экрана
@@ -83,10 +83,12 @@
 
 | Пункт | Результат на устройстве |
 |---|---|
-| Модель / Android / API | |
-| Текущий HOME и поддержка `set-home-activity` | |
-| HDMI-входов в `TvInputManager` / обработчик найден | |
-| Кнопка MENU на пульте есть | |
-| PSS ClearTV, рывки кадров (%) | |
-| Поведение после перезагрузки | |
-| Голосовой помощник доступен при ClearTV как HOME | |
+| Модель / Android / API | SaluteTV at30a6 (CVTE, Amlogic T5W), Android 13 / API 33, StarOS `eng.tuz_st.20260618.152406` |
+| Текущий HOME и поддержка `set-home-activity` | `ru.sberdevices.starlauncher/.ui.mainscreen.MainActivity`; `cmd package set-home-activity` есть в `cmd package help`; `cmd role` на этой сборке недоступен |
+| HDMI-входов в `TvInputManager` / обработчик найден | 3 HDMI + 1 AV (`com.droidlogic.tvinput`), тюнеры Dtvkit/ADTV отдельно; обработчик `ru.sberdevices.tvinputs/.main.activity.InputPlaybackActivity` — работает |
+| Кнопка MENU на пульте есть | нет; `input keyevent KEYCODE_MENU` до приложения не доходит — настройки открываются кнопкой на экране |
+| PSS ClearTV, рывки кадров (%) | 56,1 МБ; 57 % рывков в 0.1.0 (GPU ~15 мс/кадр) — переделано в 0.1.1, ждёт повторного замера |
+| Поведение после перезагрузки | не проверялось (ClearTV ещё не HOME) |
+| Голосовой помощник доступен при ClearTV как HOME | не проверялось |
+| HDMI-CEC | включён (`hdmi_cec_enabled (int): 1`), 3 порта, ARC на HDMI 1 |
+| Хранилище | /data 3,0 ГБ, свободно 2,0 ГБ (порог «ротации» приложений Сбера пока далеко) |

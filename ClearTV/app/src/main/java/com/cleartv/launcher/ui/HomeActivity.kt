@@ -90,6 +90,7 @@ class HomeActivity : Activity() {
     private var packageReceiver: BroadcastReceiver? = null
     private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
     private var appsDirty = false
+    private var applyingDefaults = false
     private var resumed = false
     private var firstRender = true
     private var currentWallpaperId: String? = null
@@ -163,6 +164,7 @@ class HomeActivity : Activity() {
         prefsListener = prefs.addListener { key -> onPrefChanged(key) }
         prefs.countLaunch()
         applyKeepHomeExtra(intent)
+        applyOpenSettingsExtra(intent)
         if (app.safeModeNotice) {
             app.safeModeNotice = false
             Ui.dialog(this).setMessage(R.string.safe_mode_notice).setPositiveButton(R.string.ok, null).show()
@@ -171,6 +173,7 @@ class HomeActivity : Activity() {
     }
 
     private fun applyFonts() {
+        heroName.forceHasOverlappingRendering(false)   // plain text: alpha animations can skip the offscreen layer
         clock.typeface = Fonts.outfit(this, 300)
         greeting.typeface = Fonts.text(this, 500, getString(R.string.greeting_day))
         dateView.typeface = Fonts.text(this, 400, "Я")
@@ -217,6 +220,16 @@ class HomeActivity : Activity() {
             appsRow.scrollToStart()
             appsRow.focusIndex(0)
         }
+        applyOpenSettingsExtra(intent)
+    }
+
+    /** `am start -n <ClearTV> --ez cleartv.open_settings true` opens the settings panel (verify.ps1; remotes without MENU). */
+    private fun applyOpenSettingsExtra(intent: Intent?) {
+        if (intent == null || !intent.getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) return
+        intent.removeExtra(EXTRA_OPEN_SETTINGS)
+        if (allApps.isOpen) allApps.hide()
+        if (!settingsPanel.isOpen) settingsPanel.open()
+        Logs.event("settings_requested", "via" to "intent")
     }
 
     /** `am start -n <ClearTV> --ez cleartv.keep_home true|false` lets the PC scripts switch the keeper. */
@@ -313,8 +326,12 @@ class HomeActivity : Activity() {
         Async.run({ repo.load() }) { list, error ->
             if (error != null) { Logs.e("app discovery failed", error); return@run }
             val loaded = list ?: emptyList()
-            SaluteDefaults.applyFirstRun(this, prefs, loaded.map { it.packageName })
+            // The app list must be in place *before* first-run defaults are written: writing `hidden` fires the
+            // preference listener, which rebuilds the row, and an empty list at that moment would be saved as the
+            // user's (empty) choice. Seen on a real Salute TV: "favorites n=0 visible=0" right after install.
             allEntries = loaded.map { e -> labels[e.packageName]?.let { e.copy(label = it) } ?: e }
+            applyingDefaults = true
+            try { SaluteDefaults.applyFirstRun(this, prefs, loaded.map { it.packageName }) } finally { applyingDefaults = false }
             rebuildFavorites()
             if (allApps.isOpen) allApps.update(visibleEntries())
         }
@@ -326,19 +343,20 @@ class HomeActivity : Activity() {
     }
 
     private fun rebuildFavorites() {
+        if (allEntries.isEmpty()) return   // nothing discovered yet: never derive (or persist) an order from nothing
         val visible = visibleEntries()
         val byPkg = visible.associateBy { it.packageName }
-        var order = prefs.favorites
-        if (order == null) {
+        val saved = prefs.favorites
+        val order: List<String>
+        if (saved == null || (saved.isEmpty() && !prefs.favoritesTouched)) {
             order = defaultFavorites(visible)
-            prefs.favorites = order
-            Logs.i("favorites initialised with ${order.size} apps")
+            if (order.isNotEmpty()) { prefs.favorites = order; Logs.i("favorites initialised with ${order.size} apps") }
         } else {
-            val retained = AppOrder.retain(order, byPkg.keys)
-            if (retained != order) { order = retained; prefs.favorites = retained }
+            order = AppOrder.retain(saved, byPkg.keys)
+            if (order != saved) prefs.favorites = order
         }
         favorites = order.mapNotNull { byPkg[it] }.toMutableList()
-        Logs.event("favorites", "n" to favorites.size, "visible" to visible.size, "hidden" to prefs.hidden.size)
+        Logs.event("favorites", "n" to favorites.size, "visible" to visible.size, "hidden" to prefs.hidden.size, "touched" to prefs.favoritesTouched)
         renderAppsRow()
     }
 
@@ -451,6 +469,7 @@ class HomeActivity : Activity() {
     private fun setFavorite(entry: AppEntry, favorite: Boolean) {
         if (favorite) { if (favorites.none { it.packageName == entry.packageName }) favorites.add(entry) }
         else favorites.removeAll { it.packageName == entry.packageName }
+        prefs.favoritesTouched = true
         prefs.favorites = favorites.map { it.packageName }
         Logs.event("favorite", "pkg" to entry.packageName, "on" to favorite)
         renderAppsRow()
@@ -521,6 +540,7 @@ class HomeActivity : Activity() {
 
     private fun commitMove() {
         val m = move ?: return
+        prefs.favoritesTouched = true
         prefs.favorites = favorites.map { it.packageName }
         Logs.event("order_saved", "n" to favorites.size, "order" to favorites.joinToString(",") { it.packageName })
         exitMove(m)
@@ -657,7 +677,7 @@ class HomeActivity : Activity() {
             Prefs.K_CLOCK -> applyClockMode()
             Prefs.K_LABELS -> forEachCard { it.showLabel(prefs.showLabels) }
             Prefs.K_INPUTS -> loadInputs()
-            Prefs.K_HIDDEN -> rebuildFavorites()
+            Prefs.K_HIDDEN -> if (!applyingDefaults) rebuildFavorites()
             Prefs.K_REDUCED_MOTION -> {
                 motion = Ui.motion(prefs)
                 appsRow.smooth = motion.smoothScroll
@@ -812,5 +832,6 @@ class HomeActivity : Activity() {
     companion object {
         private const val DEFAULT_FAVORITES = 10
         private const val REQ_PICK = 41
+        const val EXTRA_OPEN_SETTINGS = "cleartv.open_settings"
     }
 }

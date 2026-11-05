@@ -265,6 +265,19 @@ Packages:
       gids=[3003]
       runtime permissions:
 
+  Package [ru.sberdevices.rro.framework] (f3124eb):
+    userId=10003
+    pkg=Package{9ee8248 ru.sberdevices.rro.framework}
+    codePath=/product/overlay/SberDevicesRROFramework.apk
+    versionCode=1 minSdk=33 targetSdk=33
+    versionName=1.0
+    flags=[ SYSTEM ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRODUCT ]
+    pkgFlags=[ SYSTEM ]
+    overlayTarget=android
+    overlayCategory=null
+    User 0: ceDataInode=96991 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      installReason=0
 Hidden system packages:
 
 Shared users:

@@ -84,14 +84,17 @@ if (Test-OnClearTv) { Add-Result 'warm_start' 'PASS' "TotalTime=$wtotal мс" ($
 
 # 4. D-pad
 Write-Step "4. Навигация пультом"
-$marker = Send-Marker
 Invoke-Adb shell am start -a android.intent.action.MAIN -c android.intent.category.HOME -n $HomeComponent | Out-Null; Pause-Ms 1000
+Send-Key 'KEYCODE_BACK' 300; Send-Key 'KEYCODE_BACK' 300   # close anything left open; BACK on the home itself does nothing
+$favEvent = @(Get-EventsSince '' | Where-Object { $_.Name -eq 'favorites' })
+$favCount = if ($favEvent.Count -gt 0) { [int]$favEvent[-1].Fields['n'] } else { 0 }
+$marker = Send-Marker
 foreach ($k in @('KEYCODE_DPAD_RIGHT', 'KEYCODE_DPAD_RIGHT', 'KEYCODE_DPAD_LEFT', 'KEYCODE_DPAD_UP', 'KEYCODE_DPAD_DOWN')) { Send-Key $k }
 $focusEvents = @(Get-EventsSince $marker | Where-Object { $_.Name -eq 'focus' })
 $indices = @($focusEvents | ForEach-Object { "$($_.Fields['row']):$($_.Fields['index'])" } | Select-Object -Unique)
-if ($focusEvents.Count -ge 2 -and $indices.Count -ge 2) { Add-Result 'dpad_navigation' 'PASS' "событий фокуса: $($focusEvents.Count), позиций: $($indices -join ' ')" ($focusEvents.Line -join ' | ') } else { Add-Result 'dpad_navigation' 'FAIL' "фокус не перемещается (событий: $($focusEvents.Count))" ($focusEvents.Line -join ' | ') }
-$favEvent = @(Get-EventsSince '' | Where-Object { $_.Name -eq 'favorites' })
-$favCount = if ($favEvent.Count -gt 0) { [int]$favEvent[-1].Fields['n'] } else { 0 }
+if ($focusEvents.Count -ge 2 -and $indices.Count -ge 2) { Add-Result 'dpad_navigation' 'PASS' "событий фокуса: $($focusEvents.Count), позиций: $($indices -join ' ')" ($focusEvents.Line -join ' | ') }
+elseif ($favCount -eq 0) { Add-Result 'dpad_navigation' 'FAIL' "на главном экране нет плиток, двигать фокус некуда ($($favEvent[-1].Line))" ($focusEvents.Line -join ' | ') }
+else { Add-Result 'dpad_navigation' 'FAIL' "фокус не перемещается (событий: $($focusEvents.Count), плиток: $favCount)" ($focusEvents.Line -join ' | ') }
 
 # 5. open app
 Write-Step "5. Открытие приложения с главного экрана"
@@ -109,14 +112,38 @@ else {
     Start-ClearTv
 }
 
-# 6. settings panel (MENU)
-Write-Step "6. Панель настроек (кнопка MENU) и возврат по BACK"
+# 6. settings panel
+Write-Step "6. Панель настроек: пультом (▲ к кнопке «Настройки», ▶▶▶, OK), затем возврат по BACK"
+Send-Key 'KEYCODE_BACK' 300; Send-Key 'KEYCODE_BACK' 300
 $marker = Send-Marker
-Send-Key 'KEYCODE_MENU' 800
-$open = Wait-Event $marker 'overlay' 4 { $_.Fields['name'] -eq 'settings' -and $_.Fields['open'] -eq 'true' }
-Send-Key 'KEYCODE_BACK' 800
-$closed = Wait-Event $marker 'overlay' 4 { $_.Fields['name'] -eq 'settings' -and $_.Fields['open'] -eq 'false' }
-if ($open -and $closed) { Add-Result 'settings_panel' 'PASS' 'открылась по MENU, закрылась по BACK' "$($open.Line) | $($closed.Line)" } elseif ($open) { Add-Result 'settings_panel' 'FAIL' 'открылась, но не закрылась по BACK' $open.Line } else { Add-Result 'settings_panel' 'FAIL' 'не открылась по MENU (на пульте нет MENU? используйте шестерёнку)' '' }
+$settingsOpen = { $_.Fields['name'] -eq 'settings' -and $_.Fields['open'] -eq 'true' }
+# a) the way a person does it: up from the dock to the top-right buttons, right to the last one (Settings), OK.
+#    Sber remotes have no MENU key, so this path is the one that matters (first real run: MENU did nothing).
+Send-Key 'KEYCODE_DPAD_UP' 400
+foreach ($i in 1..3) { Send-Key 'KEYCODE_DPAD_RIGHT' 250 }
+Send-Key 'KEYCODE_DPAD_CENTER' 900
+$open = Wait-Event $marker 'overlay' 3 $settingsOpen
+$via = 'пульт (▲, ▶▶▶, OK)'
+if (-not $open) {
+    Start-ClearTv                                   # in case OK landed on something else
+    Send-Key 'KEYCODE_MENU' 800                     # b) remotes that do have MENU
+    $open = Wait-Event $marker 'overlay' 3 $settingsOpen
+    $via = 'кнопка MENU'
+}
+if (-not $open) {                                   # c) the hook the scripts use (am start --ez cleartv.open_settings true)
+    Invoke-Adb shell am start -n $HomeComponent --ez cleartv.open_settings true | Out-Null; Pause-Ms 1200
+    $open = Wait-Event $marker 'overlay' 3 $settingsOpen
+    $via = 'команда am start --ez cleartv.open_settings true'
+}
+$closed = $null
+if ($open) {
+    Send-Key 'KEYCODE_BACK' 800
+    $closed = Wait-Event $marker 'overlay' 4 { $_.Fields['name'] -eq 'settings' -and $_.Fields['open'] -eq 'false' }
+}
+if ($open -and $closed -and $via -like 'пульт*') { Add-Result 'settings_panel' 'PASS' "открылась: $via; закрылась по BACK" "$($open.Line) | $($closed.Line)" }
+elseif ($open -and $closed) { Add-Result 'settings_panel' 'WARN' "путь пультом (▲, ▶▶▶, OK) не сработал; открылась через: $via; закрылась по BACK" "$($open.Line) | $($closed.Line)" }
+elseif ($open) { Add-Result 'settings_panel' 'FAIL' "открылась ($via), но не закрылась по BACK" $open.Line }
+else { Add-Result 'settings_panel' 'FAIL' 'не открылась ни пультом, ни по MENU, ни командой am start' '' }
 
 # 7. all apps
 Write-Step "7. Экран «Все приложения» (кнопка ▼ с дока)"
@@ -171,16 +198,17 @@ Start-ClearTv
 
 # 11. HDMI inputs
 Write-Step "11. HDMI-входы"
-$inputs = @(ConvertFrom-TvInputDump (Get-ShellText 'dumpsys tv_input') | Where-Object { $_.Passthrough })
+$inputs = @(ConvertFrom-TvInputDump (Get-ShellText 'dumpsys tv_input') | Where-Object { $_.Passthrough } | Sort-Object @{ Expression = { if ($_.Type -eq 'HDMI') { 0 } else { 1 } } }, Id)
 if ($inputs.Count -eq 0) { Add-Result 'hdmi_inputs' 'SKIP' 'прошивка не сообщает о физических входах через TvInputManager' '' }
 else {
     $id = $inputs[0].Id
+    Write-Info "Входы: $(($inputs | ForEach-Object { "$($_.Type) $($_.Id)" }) -join '; ')"
     $enc = [uri]::EscapeDataString($id)
     $r = Invoke-Adb shell am start -a android.intent.action.VIEW -d "content://android.media.tv/passthrough/$enc"
     Pause-Ms 3000
     $resumed = Get-ResumedActivity
     if ($r.Output -match 'Error|does not exist|No Activity') { Add-Result 'hdmi_inputs' 'FAIL' "вход $id найден, но обработчик переключения отсутствует: $($r.Output -replace "`n", ' ')" $r.Output }
-    elseif ($resumed -and $resumed -notmatch [regex]::Escape($PackageName)) { Add-Result 'hdmi_inputs' 'PASS' "вход $id открыт приложением $resumed (всего входов: $($inputs.Count))" $resumed }
+    elseif ($resumed -and $resumed -notmatch [regex]::Escape($PackageName)) { Add-Result 'hdmi_inputs' 'PASS' "вход $($inputs[0].Type) $id открыт приложением $resumed (физических входов: $($inputs.Count), HDMI: $(@($inputs | Where-Object Type -eq 'HDMI').Count))" $resumed }
     else { Add-Result 'hdmi_inputs' 'FAIL' "после запроса входа на экране $resumed" $r.Output }
     Start-ClearTv
 }

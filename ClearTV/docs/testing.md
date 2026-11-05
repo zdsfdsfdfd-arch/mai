@@ -9,20 +9,35 @@
 |---|---|
 | Компиляция всех исходников Kotlin против API 34 с заглушками Android `java.*` (только API, существующие на Android) | OK, предупреждений об отсутствующих API нет |
 | Ресурсы: `aapt2 compile/link`, манифест, 18 векторных иконок, 2 локали | OK |
-| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1132 класса, 13 146 методов |
+| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1170 классов, 13 474 метода (сборка 0.1.1) |
 | Подпись и выравнивание: `zipalign -c`, `apksigner verify` (v2, v3) | OK |
 | `aapt2 dump badging`: HOME/LEANBACK/LAUNCHER-активности, баннер, иконки 160–640 dpi, minSdk 24 | OK |
 | JUnit (модуль `core`, через `gradlew :core:test`, Gradle 8.14.3, Kotlin 2.0.21) | 13 тестов, 0 падений |
 | Встроенный ADB-клиент против поддельного adbd (`tools/adbtest/run.sh`: CNXN/AUTH TOKEN→SIGNATURE→RSAPUBLICKEY, shell, отказ потока) | OK, оба сценария (неизвестный ключ с подтверждением, известный ключ без запроса) |
-| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | см. ниже |
+| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 82 проверки, 0 падений; см. ниже |
 | Генерация растровых ассетов (иконки, баннер, 4 обоев) и визуальный просмотр баннера/обоев | OK |
 
 Тесты скриптов покрывают: разбор `getprop`, списков пакетов, `dumpsys package packages`, `meminfo`, `gfxinfo`,
-`tv_input`, событий logcat; правила классификации (структурные + база знаний Салют ТВ); `diagnose.ps1` целиком
+`tv_input` (формат AOSP и формат Салют ТВ/Android 13 без `type=`), `hdmi_control` (оба формата), событий logcat;
+правила классификации (структурные + база знаний Салют ТВ, RRO-оверлеи); `diagnose.ps1` целиком
 (отчёты, снимок, инвентаризация); `install.ps1` (журнал, `-SetHome` с хранителем); `clean.ps1` (план, отключение,
 заставка до отключения, оверлей, защита, порог места, проверка здоровья); `verify.ps1` (поток управления, отчёт);
 `restore.ps1` (откат HOME, пакетов, настроек, `-Uninstall`, пустой журнал); `run-all.ps1` (безопасный и полный
 режим с проверкой-воротами).
+
+## Выполнено на реальном телевизоре (отчёт друга, 2026-11-05)
+
+SaluteTV `at30a6`, Android 13 (API 33), StarOS, Amlogic T5W, 2 ГБ RAM, 1920×1080 / 320 dpi, ADB по Wi-Fi.
+Запуск `FULL.cmd` версии 0.1.0 (сводка — `reports/field-run-20261105.md`):
+
+| Тест | Результат | Примечание |
+|---|---|---|
+| installed, cold_start, warm_start | PASS | `am start -W` TotalTime 561 мс, первый кадр 308 мс |
+| all_apps, system_settings, hdmi_inputs, ram_usage, crash_recovery | PASS | PSS 56,1 МБ; HDMI открывает `ru.sberdevices.tvinputs` |
+| dpad_navigation, open_app, reorder | FAIL / SKIP | ряд избранного пуст из-за гонки при первом запуске — исправлено в 0.1.1 (`favorites_touched`) |
+| settings_panel | FAIL | клавиша MENU не доходит до приложения на пульте/прошивке Сбера — тест переписан на путь пультом ▲ ▶▶▶ OK |
+| frame_stats | WARN | 57 % рывков, GPU ~15 мс/кадр — убраны дубликат фона, тени и полноэкранный градиент (0.1.1); требует повторного замера |
+| home_key | SKIP | ClearTV ещё не назначен HOME (ворота run-all не пропустили полную настройку) |
 
 ## Не выполнено (невозможно в облачной среде)
 
@@ -46,7 +61,7 @@
 | Проверка расхода RAM | `ram_usage`, `soak` (`-SoakMinutes`) | `dumpsys meminfo` PSS, рост за время |
 | Плавность | `frame_stats` | `dumpsys gfxinfo` после серии нажатий |
 | Восстановление после аварийного завершения | `crash_recovery` | `am crash` (API 26+) / `force-stop`, затем HOME |
-| Панель настроек, «Все приложения» | `settings_panel`, `all_apps` | MENU/BACK, события `EVT overlay` |
+| Панель настроек, «Все приложения» | `settings_panel`, `all_apps` | пультом ▲ ▶▶▶ OK (на пультах Сбера нет MENU), запасные пути MENU и `am start --ez cleartv.open_settings true`; BACK; события `EVT overlay` |
 
 Результат — `reports/verify-report.md` с колонкой доказательств (строки logcat, вывод `am start`).
 

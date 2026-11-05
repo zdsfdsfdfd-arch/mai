@@ -307,16 +307,47 @@ function ConvertFrom-GfxInfo([string]$Text) {
 }
 
 function ConvertFrom-TvInputDump([string]$Text) {
-    # dumpsys tv_input lists TvInputInfo{id=com.x/.Service/HW1, type=HDMI, ...} or "mId=..." pairs
+    # dumpsys tv_input: AOSP prints "TvInputInfo{id=com.x/.Service/HW1, type=HDMI, ...}"; Salute TV (Android 13) prints
+    # "<id>: info: TvInputInfo{id=..., pkg=..., service=...}; state: 1" with no type. The type is then inferred from the
+    # service class name: Hdmi*/AV*/Component/... are physical (passthrough) inputs; Dtvkit/ADTV/DTV/ATV are tuners and
+    # must not be offered as "HDMI" (seen on a real at30a6: the tuner came first in the list and carried /HW19).
     $inputs = @()
-    foreach ($m in [regex]::Matches($Text, 'TvInputInfo\{([^}]*)\}')) {
+    $seen = @{}
+    foreach ($m in [regex]::Matches($Text, 'TvInputInfo\{([^}]*)\}(?:;\s*state:\s*(\d+))?')) {
         $body = $m.Groups[1].Value
-        $id = ''; $type = ''
+        $id = ''; $type = ''; $service = ''
         if ($body -match 'id=([^,}]+)') { $id = $Matches[1].Trim() }
+        if (-not $id -or $seen.ContainsKey($id)) { continue }
+        $seen[$id] = $true
         if ($body -match 'type=([^,}]+)') { $type = $Matches[1].Trim() }
-        if ($id) { $inputs += [pscustomobject]@{ Id = $id; Type = $type; Passthrough = ($id -match '/HW\d+' -or $type -match 'HDMI|COMPONENT|COMPOSITE|SCART|VGA|DVI|SVIDEO|DISPLAY_PORT') } }
+        if ($body -match 'service=([^,}]+)') { $service = $Matches[1].Trim() } else { $service = $id }
+        if (-not $type) {
+            $cls = ($service -split '\.')[-1]            # class name only: the package may be called *.hdmi for every input
+            $type = switch -Regex ($cls) {
+                'hdmi' { 'HDMI'; break }
+                '^(av|cvbs)\d*input|composite' { 'COMPOSITE'; break }
+                'component|ypbpr' { 'COMPONENT'; break }
+                'scart' { 'SCART'; break }
+                'vga' { 'VGA'; break }
+                'dvi' { 'DVI'; break }
+                'displayport' { 'DISPLAY_PORT'; break }
+                'dtvkit|adtv|dtv|atv|tuner|dvb|atsc|isdb' { 'TUNER'; break }
+                default { if ($id -match '/HW\d+') { 'OTHER_HW' } else { '' } }
+            }
+        }
+        $state = $null; if ($m.Groups[2].Success) { $state = [int]$m.Groups[2].Value }   # 0 connected, 1 standby, 2 disconnected
+        $inputs += [pscustomobject]@{ Id = $id; Type = $type; Service = $service; State = $state; Passthrough = ($type -match '^(HDMI|COMPONENT|COMPOSITE|SCART|VGA|DVI|SVIDEO|DISPLAY_PORT)$') }
     }
     return $inputs
+}
+
+function Test-HdmiCecEnabled([string]$Text) {
+    # dumpsys hdmi_control: Android <= 11 prints "mHdmiControlEnabled: true"; Android 12+ lists
+    # "hdmi_cec_enabled (int): 1 (default: 0)" under "CEC settings:" (seen on Salute TV at30a6, Android 13).
+    if ([string]::IsNullOrWhiteSpace($Text)) { return $false }
+    if ($Text -match 'hdmi_cec_enabled \(int\):\s*(\d)') { return ($Matches[1] -eq '1') }
+    if ($Text -match 'mHdmiControlEnabled[:=]\s*(true|false)') { return ($Matches[1] -eq 'true') }
+    return [bool]($Text -match 'HDMI control enabled: true|hdmi_control_enabled[:=]\s*1')
 }
 
 function ConvertFrom-LogcatEvents([string]$Text, [string]$Marker) {
@@ -399,13 +430,14 @@ function ConvertFrom-DumpsysPackages([string]$Text) {
     foreach ($block in $blocks) {
         if ($block -notmatch '^([A-Za-z0-9_.]+)\]') { continue }
         $pkg = $Matches[1]
-        $o = [ordered]@{ Package = $pkg; VersionName = ''; TargetSdk = 0; CodePath = ''; SharedUser = ''; Flags = ''; PrivateFlags = ''; Enabled = 'unknown'; Installed = $true; GrantedPermissions = @() }
+        $o = [ordered]@{ Package = $pkg; VersionName = ''; TargetSdk = 0; CodePath = ''; SharedUser = ''; Flags = ''; PrivateFlags = ''; Enabled = 'unknown'; Installed = $true; GrantedPermissions = @(); OverlayTarget = '' }
         if ($block -match '(?m)^\s+versionName=(.*)$') { $o.VersionName = $Matches[1].Trim() }
         if ($block -match 'targetSdk=(\d+)') { $o.TargetSdk = [int]$Matches[1] }
         if ($block -match '(?m)^\s+codePath=(.*)$') { $o.CodePath = $Matches[1].Trim() }
         if ($block -match 'sharedUser=.*?(android\.uid\.[A-Za-z0-9_.]+|name=([A-Za-z0-9_.]+))') { $o.SharedUser = $(if ($Matches[2]) { $Matches[2] } else { $Matches[1] }) }
         if ($block -match '(?m)^\s+flags=\[(.*?)\]') { $o.Flags = $Matches[1].Trim() }
         if ($block -match '(?m)^\s+privateFlags=\[(.*?)\]') { $o.PrivateFlags = $Matches[1].Trim() }
+        if ($block -match '(?m)^\s+overlayTarget=(\S+)') { $t = $Matches[1].Trim(); if ($t -ne 'null') { $o.OverlayTarget = $t } }
         if ($block -match 'User 0:.*?installed=(true|false).*?enabled=(\d)') {
             $o.Installed = ($Matches[1] -eq 'true')
             $o.Enabled = switch ($Matches[2]) { '0' { 'default' } '1' { 'enabled' } '2' { 'disabled' } '3' { 'disabled-user' } '4' { 'disabled-until-used' } default { 'unknown' } }
@@ -431,7 +463,8 @@ $script:CoreSystemPackages = @(
     'com.android.networkstack', 'com.android.networkstack.permissionconfig', 'com.android.networkstack.tethering', 'com.android.wifi.resources',
     'com.android.cellbroadcastreceiver', 'com.android.statementservice', 'com.android.sharedstoragebackup', 'com.android.webview', 'com.google.android.webview',
     'com.android.tv', 'com.android.tv.frameworkpackagestubs', 'com.android.pacprocessor', 'com.android.carrierconfig', 'com.android.vpndialogs',
-    'com.android.settings.intelligence', 'com.android.hdmicec' , 'com.android.ons', 'com.android.printspooler', 'com.android.managedprovisioning'
+    'com.android.settings.intelligence', 'com.android.hdmicec' , 'com.android.ons', 'com.android.printspooler', 'com.android.managedprovisioning',
+    'android.ext.services', 'android.ext.shared'
 )
 $script:VendorPrefixes = @('com.droidlogic.', 'com.amlogic.', 'com.mediatek.', 'com.mtk.', 'com.realtek.', 'com.rtk.', 'com.mstar.', 'com.novatek.', 'com.hisilicon.', 'com.hikeen.', 'com.allwinner.', 'com.rockchip.', 'com.qualcomm.', 'vendor.', 'com.qti.')
 $script:SystemSharedUids = @('android.uid.system', 'android.uid.phone', 'android.uid.bluetooth', 'android.uid.nfc', 'android.uid.networkstack', 'android.uid.shell', 'android.uid.se', 'android.uid.systemui')
@@ -467,6 +500,8 @@ function Get-PackageCategory {
     if ($pkg -eq $Context.CurrentHome) { $critical = $true; $reasons += 'текущий HOME-лаунчер (не отключать, пока ClearTV не проверен)' }
     if ($script:CoreSystemPackages -contains $pkg) { $critical = $true; $reasons += 'базовый компонент AOSP' }
     foreach ($p in $script:VendorPrefixes) { if ($pkg.StartsWith($p)) { $critical = $true; $reasons += 'пакет производителя SoC/платформы (драйверы, HDMI, тюнер)' ; break } }
+    if ($Info.OverlayTarget) { $critical = $true; $reasons += "RRO-оверлей ресурсов для '$($Info.OverlayTarget)' (кода нет; задаёт настройки прошивки)" }
+    if ($Info.CodePath -match '^/apex/') { $critical = $true; $reasons += 'модуль Mainline (APEX) — часть системы' }
     if ($Info.SharedUser -and ($script:SystemSharedUids -contains $Info.SharedUser)) { $critical = $true; $reasons += "sharedUserId=$($Info.SharedUser)" }
     if ($Context.TvInputPkgs -contains $pkg) { $critical = $true; $reasons += 'предоставляет TvInputService (HDMI/тюнер)' }
     if ($Context.PassthroughPkgs -contains $pkg) { $critical = $true; $reasons += 'обрабатывает переключение на HDMI-вход' }

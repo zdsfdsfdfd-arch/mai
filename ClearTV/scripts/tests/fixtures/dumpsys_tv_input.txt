@@ -1,4 +1,16 @@
-TvInputManagerService
-  TvInputInfo{id=com.vendor.hdmi/.InputService/HW1, type=HDMI, label=HDMI 1}
-  TvInputInfo{id=com.vendor.hdmi/.InputService/HW2, type=HDMI, label=HDMI 2}
-  TvInputInfo{id=com.vendor.tuner/.TunerService, type=TUNER}
+User Ids (Current user: 0):
+  0
+UserState (0):
+  inputMap: inputId -> TvInputState
+    com.droidlogic.dtvkit.inputsource/.DtvkitTvInput/HW19: info: TvInputInfo{id=com.droidlogic.dtvkit.inputsource/.DtvkitTvInput/HW19, pkg=com.droidlogic.dtvkit.inputsource, service=com.droidlogic.dtvkit.inputsource.DtvkitTvInput}; state: 0
+    org.videolan.vlc/.PreviewVideoInputService: info: TvInputInfo{id=org.videolan.vlc/.PreviewVideoInputService, pkg=org.videolan.vlc, service=org.videolan.vlc.PreviewVideoInputService}; state: 0
+    com.vendor.hdmi/.services.Hdmi1InputService/HW5: info: TvInputInfo{id=com.vendor.hdmi/.services.Hdmi1InputService/HW5, pkg=com.vendor.hdmi, service=com.vendor.hdmi.services.Hdmi1InputService}; state: 1
+    com.vendor.tuner/.services.ADTVInputService/HW16: info: TvInputInfo{id=com.vendor.tuner/.services.ADTVInputService/HW16, pkg=com.vendor.tuner, service=com.vendor.tuner.services.ADTVInputService}; state: 0
+    com.vendor.hdmi/.services.Hdmi2InputService/HW6: info: TvInputInfo{id=com.vendor.hdmi/.services.Hdmi2InputService/HW6, pkg=com.vendor.hdmi, service=com.vendor.hdmi.services.Hdmi2InputService}; state: 1
+    com.vendor.hdmi/.services.AV1InputService/HW1: info: TvInputInfo{id=com.vendor.hdmi/.services.AV1InputService/HW1, pkg=com.vendor.hdmi, service=com.vendor.hdmi.services.AV1InputService}; state: 0
+  packageSet:
+    com.vendor.hdmi
+    com.vendor.tuner
+  serviceStateMap: ComponentName -> ServiceState
+    ComponentInfo{com.vendor.hdmi/com.vendor.hdmi.services.ArcInputService}: com.android.server.tv.TvInputManagerService$ServiceState@1826d89
+      bound: true

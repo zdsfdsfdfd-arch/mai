@@ -54,7 +54,9 @@ case "$cmd" in
       "pm uninstall com.cleartv.launcher") rm -f "$STATE/installed"; echo "Success" ;;
       "dumpsys package com.cleartv.launcher") echo "  Package [com.cleartv.launcher] (1a2b3c):"; echo "    versionName=0.1.0" ;;
       "log -t ClearTV "*) msg="${rest#log -t ClearTV }"; msg="${msg//\"/}"; echo "11-04 12:00:00.000  1234  1234 I ClearTV : $msg" >> "$STATE/logcat.txt" ;;
+      "am start "*"cleartv.open_settings true"*) touch "$STATE/settings_open"; echo "11-04 12:00:00.000  1234  1234 I ClearTV : EVT overlay name=settings open=true" >> "$STATE/logcat.txt"; echo "Starting: Intent { cmp=com.cleartv.launcher/.ui.HomeActivity (has extras) }" ;;
       "am start "*) echo "Starting: Intent { cmp=com.cleartv.launcher/.ui.HomeActivity }"; echo "Status: ok"; echo "LaunchState: COLD"; echo "TotalTime: 812"; echo "WaitTime: 850"; echo "Complete" ;;
+      "input keyevent KEYCODE_BACK") if [ -f "$STATE/settings_open" ]; then rm -f "$STATE/settings_open"; echo "11-04 12:00:00.000  1234  1234 I ClearTV : EVT overlay name=settings open=false" >> "$STATE/logcat.txt"; fi ;;
       "am force-stop "*|"am crash "*|"input keyevent"*|"svc wifi "*|"rm "*|"mkdir "*|"screencap "*|"dumpsys gfxinfo com.cleartv.launcher reset") ;;
       "dumpsys activity activities") echo "    mResumedActivity: ActivityRecord{1f3 u0 com.cleartv.launcher/.ui.HomeActivity t12}" ;;
       "dumpsys meminfo com.cleartv.launcher") echo "Applications Memory Usage (in Kilobytes):"; echo "    TOTAL PSS:    48231            TOTAL RSS:    98000      TOTAL SWAP PSS:        0" ;;

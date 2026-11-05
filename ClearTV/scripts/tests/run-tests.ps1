@@ -36,12 +36,18 @@ Check 'ConvertFrom-MemInfoPss (new format)' ((ConvertFrom-MemInfoPss "    TOTAL 
 Check 'ConvertFrom-MemInfoPss (old format)' ((ConvertFrom-MemInfoPss "  TOTAL   51200   12   3") -eq 51200)
 $g = ConvertFrom-GfxInfo "Total frames rendered: 240`nJanky frames: 12 (5.00%)`n90th percentile: 14ms`n95th percentile: 19ms"
 Check 'ConvertFrom-GfxInfo' ($g.TotalFrames -eq 240 -and $g.JankyPercent -eq 5 -and $g.P95 -eq 19)
-$tv = ConvertFrom-TvInputDump (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_tv_input.txt') -Raw)
-Check 'ConvertFrom-TvInputDump' ($tv.Count -eq 3 -and @($tv | Where-Object Passthrough).Count -eq 2 -and $tv[0].Type -eq 'HDMI')
+$tv = @(ConvertFrom-TvInputDump (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_tv_input.txt') -Raw))
+Check 'ConvertFrom-TvInputDump (Salute/Android 13 format): 6 inputs, 3 physical, tuners are not passthrough' ($tv.Count -eq 6 -and @($tv | Where-Object Passthrough).Count -eq 3 -and @($tv | Where-Object Type -eq 'HDMI').Count -eq 2 -and @($tv | Where-Object Type -eq 'TUNER').Count -eq 2 -and ($tv[0].Type -eq 'TUNER') -and ($tv[2].State -eq 1)) "got $($tv.Count): $(($tv | ForEach-Object { "$($_.Type)/$($_.Passthrough)" }) -join ' ')"
+$tvA = @(ConvertFrom-TvInputDump "TvInputManagerService`n  TvInputInfo{id=com.vendor.hdmi/.InputService/HW1, type=HDMI, label=HDMI 1}`n  TvInputInfo{id=com.vendor.tuner/.TunerService, type=TUNER}`n")
+Check 'ConvertFrom-TvInputDump (AOSP format with type=)' ($tvA.Count -eq 2 -and $tvA[0].Passthrough -and -not $tvA[1].Passthrough -and $tvA[0].Type -eq 'HDMI')
+Check 'Test-HdmiCecEnabled (Android 13 "hdmi_cec_enabled (int): 1")' ((Test-HdmiCecEnabled "mIsCecAvailable: false`nCEC settings:`n  hdmi_cec_enabled (int): 1 (default: 0) [modifiable]`n") -eq $true)
+Check 'Test-HdmiCecEnabled (Android 13 disabled)' ((Test-HdmiCecEnabled "CEC settings:`n  hdmi_cec_enabled (int): 0 (default: 0) [modifiable]`n") -eq $false)
+Check 'Test-HdmiCecEnabled (legacy mHdmiControlEnabled)' ((Test-HdmiCecEnabled (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_hdmi_control.txt') -Raw)) -eq $true)
 $ev = ConvertFrom-LogcatEvents "I ClearTV : EVT focus row=apps index=0 pkg=a`nI ClearTV : MARK abc`nI ClearTV : EVT launch pkg=com.x ok=true`n" 'MARK abc'
 Check 'ConvertFrom-LogcatEvents after marker' ($ev.Count -eq 1 -and $ev[0].Name -eq 'launch' -and $ev[0].Fields['ok'] -eq 'true')
 $pk = ConvertFrom-DumpsysPackages (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_package_packages.txt') -Raw)
-Check 'ConvertFrom-DumpsysPackages count' ($pk.Count -eq 20) "got $($pk.Count)"
+Check 'ConvertFrom-DumpsysPackages count' ($pk.Count -eq 21) "got $($pk.Count)"
+Check 'ConvertFrom-DumpsysPackages overlayTarget' ((($pk | Where-Object Package -eq 'ru.sberdevices.rro.framework').OverlayTarget -eq 'android') -and (($pk | Where-Object Package -eq 'com.android.systemui').OverlayTarget -eq ''))
 $upd = $pk | Where-Object Package -eq 'com.example.updater'
 Check 'ConvertFrom-DumpsysPackages permissions' ($upd.GrantedPermissions -contains 'android.permission.INSTALL_PACKAGES' -and $upd.PrivateFlags -match 'PRIVILEGED')
 $sysui = $pk | Where-Object Package -eq 'com.android.systemui'
@@ -56,6 +62,7 @@ Check 'category: updater (INSTALL_PACKAGES) CRITICAL' ((Cat 'com.example.updater
 Check 'category: voice service CRITICAL' ((Cat 'com.example.voice') -eq 'CRITICAL')
 Check 'category: IME CRITICAL' ((Cat 'com.android.inputmethod.latin') -eq 'CRITICAL')
 Check 'category: SoC vendor CRITICAL' ((Cat 'com.droidlogic.tvinput') -eq 'CRITICAL')
+Check 'category: RRO overlay (no code, overlayTarget=android) CRITICAL' ((Cat 'ru.sberdevices.rro.framework') -eq 'CRITICAL')
 Check 'category: system media app OPTIONAL' ((Cat 'com.example.mediaapp') -eq 'OPTIONAL')
 Check 'category: user game OPTIONAL' ((Cat 'com.example.usergame') -eq 'OPTIONAL')
 Check 'category: mystery service UNKNOWN' ((Cat 'com.example.mysteryservice') -eq 'UNKNOWN')
@@ -81,9 +88,10 @@ $dr = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'device-report.json') -Raw
 Check 'device-report: model/api' ($dr.Device.Model -eq 'SBER_TV_FAKE' -and $dr.Android.Api -eq '30')
 Check 'device-report: memory and display' ($dr.Memory.TotalMb -eq 1500 -and $dr.Display.PhysicalSize -eq '1920x1080' -and $dr.Display.DensityDpi -eq '320')
 Check 'device-report: home + set-home support' ($dr.Home.Current -eq 'com.stock.launcher/.HomeActivity' -and $dr.Home.SetHomeActivitySupported -eq $true)
-Check 'device-report: inputs' ($dr.Tv.PassthroughInputs -eq 2 -and $dr.Tv.HdmiCecEnabled -eq $true)
-Check 'device-report: packages counted' ($dr.Packages.Total -eq 20 -and $dr.Packages.ByCategory.CRITICAL -ge 11 -and $dr.Packages.ByCategory.PROMOTIONAL -eq 2)
+Check 'device-report: inputs' ($dr.Tv.PassthroughInputs -eq 3 -and $dr.Tv.HdmiCecEnabled -eq $true)
+Check 'device-report: packages counted' ($dr.Packages.Total -eq 21 -and $dr.Packages.ByCategory.CRITICAL -ge 12 -and $dr.Packages.ByCategory.PROMOTIONAL -eq 2)
 $inv = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'inventory.json') -Raw | ConvertFrom-Json
+Check 'device-report: RRO overlays are CRITICAL, not UNKNOWN' ((($inv | Where-Object Package -eq 'ru.sberdevices.rro.framework').Category) -eq 'CRITICAL')
 Check 'inventory.json: launcher is CRITICAL' ((($inv | Where-Object Package -eq 'com.stock.launcher').Category) -eq 'CRITICAL')
 Check 'inventory.md written' (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'inventory.md'))
 Check 'device-report.md written' (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'device-report.md'))
@@ -108,6 +116,8 @@ $vr = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'verify-report.json') -Raw
 Check 'verify-report.json written with results' (@($vr.Results).Count -ge 12)
 Check 'verify: installed/cold_start/ram/gfx PASS on fake' ((@($vr.Results | Where-Object { $_.Test -in @('installed', 'cold_start', 'ram_usage', 'frame_stats') -and $_.Status -eq 'PASS' }).Count) -eq 4)
 Check 'verify: dpad FAIL on fake (no focus events, honest)' ((@($vr.Results | Where-Object { $_.Test -eq 'dpad_navigation' }).Status) -eq 'FAIL')
+$sp = @($vr.Results | Where-Object { $_.Test -eq 'settings_panel' })[0]
+Check 'verify: settings_panel WARN on fake (remote path silent, intent hook opens, BACK closes)' ($sp.Status -eq 'WARN' -and $sp.Details -match 'cleartv.open_settings') "got $($sp.Status): $($sp.Details)"
 Check 'verify-report.md written' (Test-Path (Join-Path $env:CLEARTV_REPORTS_DIR 'verify-report.md'))
 
 Write-Host "== 7. restore.ps1"

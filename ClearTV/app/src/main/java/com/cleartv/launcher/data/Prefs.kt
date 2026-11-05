@@ -19,6 +19,15 @@ class Prefs(context: Context) {
         get() = if (sp.contains(K_FAVORITES)) AppOrder.decode(sp.getString(K_FAVORITES, "")) else null
         set(value) { if (value == null) sp.edit().remove(K_FAVORITES).apply() else sp.edit().putString(K_FAVORITES, AppOrder.encode(value)).apply() }
 
+    /**
+     * True once the user has edited the home row themselves (added, removed or moved an app). An empty row that was
+     * never touched is treated as "not configured" so defaults can be re-applied — this also heals installs where an
+     * earlier build persisted an empty list before the app list had loaded.
+     */
+    var favoritesTouched: Boolean
+        get() = sp.getBoolean(K_FAV_TOUCHED, false)
+        set(value) = sp.edit().putBoolean(K_FAV_TOUCHED, value).apply()
+
     var hidden: Set<String>
         get() = StringSetCodec.decode(sp.getString(K_HIDDEN, null))
         set(value) = sp.edit().putString(K_HIDDEN, StringSetCodec.encode(value)).apply()
@@ -76,6 +85,7 @@ class Prefs(context: Context) {
     fun applySafeModeDefaults() {
         sp.edit()
             .remove(K_FAVORITES)
+            .remove(K_FAV_TOUCHED)
             .putString(K_WALLPAPER, DEFAULT_WALLPAPER)
             .putBoolean(K_REDUCED_MOTION, true)
             .putBoolean(K_SAFE_MODE, false)
@@ -83,7 +93,7 @@ class Prefs(context: Context) {
             .apply()
     }
 
-    fun resetLayout() { sp.edit().remove(K_FAVORITES).remove(K_HIDDEN).remove(K_LAST_FOCUS).apply() }
+    fun resetLayout() { sp.edit().remove(K_FAVORITES).remove(K_FAV_TOUCHED).remove(K_HIDDEN).remove(K_LAST_FOCUS).apply() }
 
     fun addListener(onChange: (String) -> Unit): SharedPreferences.OnSharedPreferenceChangeListener {
         val l = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> if (key != null) onChange(key) }
@@ -99,6 +109,7 @@ class Prefs(context: Context) {
 
     fun summary(): String = buildString {
         append("favorites=").append(favorites?.size ?: -1)
+        append(" favoritesTouched=").append(favoritesTouched)
         append(" hidden=").append(hidden.size)
         append(" wallpaper=").append(wallpaperId)
         append(" clock=").append(clockMode.storageKey)
@@ -115,6 +126,7 @@ class Prefs(context: Context) {
         const val FILE = "cleartv"
         const val DEFAULT_WALLPAPER = "bundled:black"
         const val K_FAVORITES = "favorites"
+        const val K_FAV_TOUCHED = "favorites_touched"
         const val K_HIDDEN = "hidden"
         const val K_WALLPAPER = "wallpaper"
         const val K_CLOCK = "clock_mode"
