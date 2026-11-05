@@ -43,6 +43,7 @@ param(
     [switch]$LowerStorageThreshold,
     [switch]$DisableAutoUpdates,
     [switch]$RemoveOtherApps,
+    [switch]$PhoneAppsFullscreen,
     [switch]$DryRun,
     [switch]$Yes,
     [switch]$AutoInstallTools
@@ -122,6 +123,7 @@ if ($BlockOverlays) { if ($rows.Package -contains $overlayPkg) { $extras += "З�
 if ($HomeGuard) { $extras += "Защита главного экрана: enabled_accessibility_services += $ClearTvGuard" }
 if ($LowerStorageThreshold) { $extras += "Порог нехватки места: sys_storage_threshold_percentage=1 (защита от «ротации» приложений StarOS)" }
 if ($DisableAutoUpdates) { $extras += "Автообновления: ota_disable_automatic_update=1, auto_update_apps=0 (прошивка перестанет обновляться сама!)" }
+if ($PhoneAppsFullscreen) { $extras += "Телефонные приложения во весь экран: wm set-ignore-orientation-request false (портретные приложения вроде Netflix не будут узкой полосой)" }
 
 Write-Step "План ($Mode): отключить $($plan.Count) пакет(ов)"
 foreach ($p in $plan) { Write-Info ("{0,-42} {1}{2}" -f $p.Package, $(if ($p.Known) { $p.Known } else { $p.Why }), $(if ($p.Breaks) { " — перестанет: $($p.Breaks)" } else { '' })) }
@@ -213,6 +215,23 @@ if ($HomeGuard) {
         Add-JournalEntry -Action 'home-guard' -Description "Включена служба спец. возможностей ClearTV" -Command "settings put secure enabled_accessibility_services '$new'" -RestoreCommand $restore -Previous $prev -New $new | Out-Null
         Write-Ok "Служба включена"
     } else { Write-Warn "enabled_accessibility_services не изменился (сейчас: $now)" }
+}
+
+if ($PhoneAppsFullscreen) {
+    Write-Step "Телефонные приложения во весь экран"
+    # Android 12+ letterboxes portrait-only apps into a narrow strip on a landscape display when the display
+    # "ignores orientation requests". With it off the app is laid out in the TV's landscape bounds instead.
+    $prevOut = Get-ShellText 'wm get-ignore-orientation-request'
+    $prevVal = if ($prevOut -match '\b(true|false)\b') { $Matches[1] } else { '' }
+    if (-not $prevVal) { Write-Warn "wm get-ignore-orientation-request не поддерживается этой прошивкой ($($prevOut.Trim())) — пропуск" }
+    else {
+        Invoke-AdbShell 'wm set-ignore-orientation-request false' | Out-Null
+        $nowOut = Get-ShellText 'wm get-ignore-orientation-request'
+        if ($nowOut -match '\bfalse\b') {
+            Add-JournalEntry -Action 'phone-apps-fullscreen' -Description "ignoreOrientationRequest: $prevVal -> false (портретные приложения во весь экран)" -Command 'wm set-ignore-orientation-request false' -RestoreCommand "wm set-ignore-orientation-request $prevVal" -Previous $prevVal -New 'false' -Verify 'wm get-ignore-orientation-request' | Out-Null
+            Write-Ok "Портретные приложения будут раскладываться на весь экран (было: $prevVal; проверьте Netflix/Twitch после перезапуска приложения)"
+        } else { Write-Warn "не применилось: $($nowOut.Trim())" }
+    }
 }
 
 if ($LowerStorageThreshold) {

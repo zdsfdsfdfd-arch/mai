@@ -77,7 +77,12 @@
     <string name="wp_forest">Лес</string>
 
     <string name="home_guard_label">ClearTV: защита главного экрана</string>
-    <string name="home_guard_description">Возвращает ClearTV, если прошивка сама показала свой лаунчер. Содержимое экрана не читается.</string>
+    <string name="home_guard_description">Возвращает ClearTV, если прошивка сама показала свой лаунчер, и даёт курсор для телефонных приложений (долгое OK). Содержимое экрана не читается.</string>
+    <string name="settings_mouse">Курсор для телефонных приложений</string>
+    <string name="settings_mouse_sub">В любом приложении удержите OK: стрелки двигают курсор, OK нажимает, двойное нажатие стрелки прокручивает, удержание OK убирает</string>
+    <string name="settings_mouse_needs_service">Нужна служба «ClearTV: защита главного экрана» в Спец. возможностях</string>
+    <string name="mouse_on">Курсор включён: стрелки — движение, OK — нажатие, удержание OK — выключить</string>
+    <string name="mouse_off">Курсор выключен</string>
     <string name="dream_label">ClearTV: часы</string>
     <string name="settings_keep_home">Удерживать главный экран после перезагрузки</string>
     <string name="settings_keep_home_sub">Через отладку по сети на самом ТВ (порт 5555). Один раз подтвердите запрос «Разрешить отладку» с галочкой «Всегда»</string>

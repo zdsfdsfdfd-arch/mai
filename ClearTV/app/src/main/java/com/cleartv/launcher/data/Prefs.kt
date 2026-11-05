@@ -80,6 +80,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(K_KEEP_HOME, false)
         set(value) = sp.edit().putBoolean(K_KEEP_HOME, value).apply()
 
+    /** Cursor for phone apps (long OK toggles it in any app except ClearTV); needs the accessibility service. */
+    var virtualMouse: Boolean
+        get() = sp.getBoolean(K_VIRTUAL_MOUSE, true)
+        set(value) = sp.edit().putBoolean(K_VIRTUAL_MOUSE, value).apply()
+
     /** The accessibility guard may be enabled system-wide; this switch lets the user pause its effect. */
     var homeGuard: Boolean
         get() = sp.getBoolean(K_HOME_GUARD, true)
@@ -194,5 +199,6 @@ class Prefs(context: Context) {
         const val K_LAUNCHES = "launch_count"
         const val K_KEEP_HOME = "keep_home"
         const val K_HOME_GUARD = "home_guard"
+        const val K_VIRTUAL_MOUSE = "virtual_mouse"
     }
 }

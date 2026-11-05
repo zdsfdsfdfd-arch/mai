@@ -84,7 +84,7 @@ if ($doFull) {
     } else {
         $fullSteps = @(
             @{ Name = 'Главный экран ClearTV'; File = 'install.ps1'; Params = @{ Ip = $Ip; SetHome = $true; NoLaunch = $true; Yes = $true } },
-            @{ Name = 'Очистка Сбера, защита, заставка'; File = 'clean.ps1'; Params = @{ Ip = $Ip; Mode = 'Recommended'; BlockOverlays = $true; Screensaver = $true; HomeGuard = $true; LowerStorageThreshold = $true; RemoveOtherApps = [bool]$RemoveOtherApps; Yes = $true } }
+            @{ Name = 'Очистка Сбера, защита, заставка'; File = 'clean.ps1'; Params = @{ Ip = $Ip; Mode = 'Recommended'; BlockOverlays = $true; Screensaver = $true; HomeGuard = $true; LowerStorageThreshold = $true; RemoveOtherApps = [bool]$RemoveOtherApps; PhoneAppsFullscreen = $true; Yes = $true } }
         )
         foreach ($s in $fullSteps) {
             Write-Host ""; Write-Host ("#" * 70) -ForegroundColor Cyan; Write-Host ("# " + $s.Name) -ForegroundColor Cyan; Write-Host ("#" * 70) -ForegroundColor Cyan

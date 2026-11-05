@@ -53,6 +53,8 @@ case "$cmd" in
       "dumpsys connectivity") echo "NetworkProviders for:"; echo "  4: WifiNetworkFactory"; echo ""; echo "Active default network: 102"; echo "" ;;
       "df /data") echo "Filesystem 1K-blocks Used Available Use% Mounted on"; echo "/dev/block/dm-1 3000000 2600000 400000 87% /data" ;;
       "dumpsys wifi") echo "Wi-Fi is enabled" ;;
+      "wm get-ignore-orientation-request") v="$(cat "$STATE/ignore_orientation.txt" 2>/dev/null)"; echo "ignoreOrientationRequest ${v:-true} for displayId=0" ;;
+      "wm set-ignore-orientation-request "*) echo "${rest##* }" > "$STATE/ignore_orientation.txt" ;;
       "pm uninstall com.cleartv.launcher") rm -f "$STATE/installed"; echo "Success" ;;
       "pm uninstall -k --user 0 "*) pkg="${rest##* }"; grep -qx "$pkg" "$STATE/uninstalled.txt" 2>/dev/null || echo "$pkg" >> "$STATE/uninstalled.txt"; echo "Success" ;;
       "cmd package install-existing "*) pkg="${rest##* }"; if [ -f "$STATE/uninstalled.txt" ]; then grep -vx "$pkg" "$STATE/uninstalled.txt" > "$STATE/u.tmp"; mv -f "$STATE/u.tmp" "$STATE/uninstalled.txt"; fi; echo "Package $pkg installed for user: 0" ;;

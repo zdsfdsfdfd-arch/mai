@@ -10,12 +10,12 @@
 | Компиляция всех исходников Kotlin против API 34 с заглушками Android `java.*` (только API, существующие на Android) | OK, предупреждений об отсутствующих API нет |
 | Ресурсы: `aapt2 compile/link`, манифест, 18 векторных иконок, 2 локали | OK |
 | DxCompat: контрольный класс с `compareBy({…}, {…})` (фасад stdlib, унаследованный метод-заглушка) отклоняется проверкой, exit 2 | OK (0.1.4; в 0.1.2–0.1.3 проверка это пропускала — сборки падали на ТВ) |
-| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1176 классов, 13 523 методов (сборка 0.1.9) |
+| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1181 классов, 13 572 методов (сборка 0.2.0) |
 | Подпись и выравнивание: `zipalign -c`, `apksigner verify` (v2, v3) | OK |
 | `aapt2 dump badging`: HOME/LEANBACK/LAUNCHER-активности, баннер, иконки 160–640 dpi, minSdk 24 | OK |
 | JUnit (модуль `core`, через `gradlew :core:test`, Gradle 8.14.3, Kotlin 2.0.21) | 13 тестов, 0 падений |
 | Встроенный ADB-клиент против поддельного adbd (`tools/adbtest/run.sh`: CNXN/AUTH TOKEN→SIGNATURE→RSAPUBLICKEY, shell, отказ потока) | OK, оба сценария (неизвестный ключ с подтверждением, известный ключ без запроса) |
-| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 107 проверок, 0 падений; см. ниже |
+| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 109 проверок, 0 падений; см. ниже |
 | Генерация растровых ассетов (иконки, баннер, 4 обоев) и визуальный просмотр баннера/обоев | OK |
 
 Тесты скриптов покрывают: разбор `getprop`, списков пакетов, `dumpsys package packages`, `meminfo`, `gfxinfo`,
@@ -71,6 +71,7 @@ SaluteTV `at30a6`, Android 13 (API 33), StarOS, Amlogic T5W, 2 ГБ RAM, 1920×1
 | Проверка расхода RAM | `ram_usage`, `soak` (`-SoakMinutes`) | `dumpsys meminfo` PSS, рост за время |
 | Плавность | `frame_stats` | `dumpsys gfxinfo` после серии нажатий |
 | Восстановление после аварийного завершения | `crash_recovery` | `am crash` (API 26+) / `force-stop`, затем HOME |
+| Курсор для телефонных приложений | `virtual_mouse` | в системных настройках долгое OK → `EVT mouse on=true`, второе долгое OK → `on=false`; SKIP без службы спец. возможностей |
 | Панель настроек, «Все приложения» | `settings_panel`, `all_apps` | пультом ▲ ▶▶▶ OK (на пультах Сбера нет MENU), запасные пути MENU и `am start --ez cleartv.open_settings true`; BACK; события `EVT overlay` |
 | Приложения владельца (`apps\*.apk`, `*.apkm`) | `get-apps.ps1` (GitHub/сайты разработчиков — сам; APKMirror — открывает страницу, человек нажимает «Download APK», файл подхватывается из «Загрузок») → `install-apps.ps1` | проверка zip/AndroidManifest или бандла, SHA-256 в `reports/apps-download.md`; `adb install -r -t` или `install-multiple` (base + сплиты под ABI/плотность/язык ТВ), журнал `install-app`; ряд ClearTV обновляется сам |
 

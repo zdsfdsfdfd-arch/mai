@@ -262,7 +262,25 @@ if ((Test-OnClearTv) -and -not $safe) { Add-Result 'crash_recovery' 'PASS' "гл
 elseif (Test-OnClearTv) { Add-Result 'crash_recovery' 'WARN' "поднялся, но сработал безопасный режим (см. files/crash на устройстве)$homeNote" $safe.Line }
 else { Add-Result 'crash_recovery' 'FAIL' "после сбоя на экране $(Get-ResumedActivity)$homeNote" '' }
 
-# 15. reboot (opt-in)
+# 15. virtual mouse for phone apps (needs the accessibility service)
+Write-Step "15. Курсор для телефонных приложений (долгое OK в чужом приложении)"
+$guardOn = ((Get-ShellText 'settings get secure enabled_accessibility_services') -match 'HomeGuardService')
+if (-not $guardOn) { Add-Result 'virtual_mouse' 'SKIP' 'служба ClearTV в спец. возможностях не включена (clean.ps1 -HomeGuard)' '' }
+else {
+    Invoke-Adb shell am start -a android.settings.SETTINGS | Out-Null; Pause-Ms 2000
+    $marker = Send-Marker
+    Send-Key 'KEYCODE_DPAD_CENTER' -LongPress 1200
+    $mon = Wait-Event $marker 'mouse' 4 { $_.Fields['on'] -eq 'true' }
+    Send-Key 'KEYCODE_DPAD_RIGHT' 250; Send-Key 'KEYCODE_DPAD_RIGHT' 250
+    Send-Key 'KEYCODE_DPAD_CENTER' -LongPress 1200
+    $moff = Wait-Event $marker 'mouse' 4 { $_.Fields['on'] -eq 'false' }
+    Start-ClearTv
+    if ($mon -and $moff) { Add-Result 'virtual_mouse' 'PASS' 'долгое OK включило курсор в системных настройках, второе — выключило' "$($mon.Line) | $($moff.Line)" }
+    elseif ($mon) { Add-Result 'virtual_mouse' 'FAIL' 'курсор включился, но не выключился' $mon.Line }
+    else { Add-Result 'virtual_mouse' 'FAIL' 'служба включена, но долгое OK не дало курсор — после обновления APK выключите и включите «ClearTV: защита главного экрана» в Спец. возможностях (прошивка перечитает права службы)' '' }
+}
+
+# 16. reboot (opt-in)
 if ($Reboot) {
     Write-Step "15. Перезагрузка"
     Invoke-Adb reboot | Out-Null

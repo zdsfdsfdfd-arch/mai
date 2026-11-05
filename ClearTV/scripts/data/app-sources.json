@@ -223,11 +223,11 @@
       "name": "Chrome",
       "kind": "mirror",
       "mirror_pages": [
-        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=chrome",
-        "https://www.apkmirror.com/apk/google-inc/chrome/"
+        "https://www.apkmirror.com/apk/google-inc/chrome/",
+        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=chrome"
       ],
       "file_hint": "chrome",
-      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт",
+      "variant_hint": "Chrome (обычный, не Beta/Dev/Canary): armeabi-v7a, nodpi или xhdpi, Android 13; «APK» или бандл «.apkm»",
       "packages": [
         "com.android.chrome",
         "com.chrome.beta"
@@ -237,7 +237,7 @@
         "com.chrome.beta"
       ],
       "source": "APKMirror (подписанные Google сборки)",
-      "note": "Chrome не рассчитан на пульт, но ставится и работает как обычный браузер."
+      "note": "Chrome не рассчитан на пульт: включите курсор ClearTV (удержать OK в приложении)."
     }
   ],
   "retired": [

@@ -1,6 +1,6 @@
 # Отчёт о сборке ClearTV без Android SDK (облачная сессия, Linux)
 
-Дата: 2026-11-05 15:29 UTC (сборка 0.1.9; предыдущие: 0.1.8 `aa1aa5b2…bd084`, 0.1.7 `75a92c41…50acf`, 0.1.6 `911a53f4…240bd`, 0.1.5 `6de71cc8…ee202`, 0.1.4 `dcf093ab…9a0c0`, 0.1.3 `3159ad15…beef9`, 0.1.2 `ede459cd…c15d9c`, 0.1.1 `363ce3ad…958d8`, 0.1.0 `5085922f…3255d6`).
+Дата: 2026-11-05 17:41 UTC (сборка 0.2.0; предыдущие: 0.1.9 `24bb4975…35e19`, 0.1.8 `aa1aa5b2…bd084`, 0.1.7 `75a92c41…50acf`, 0.1.6 `911a53f4…240bd`, 0.1.5 `6de71cc8…ee202`, 0.1.4 `dcf093ab…9a0c0`, 0.1.3 `3159ad15…beef9`, 0.1.2 `ede459cd…c15d9c`, 0.1.1 `363ce3ad…958d8`, 0.1.0 `5085922f…3255d6`).
 `dl.google.com` (Android SDK, Google Maven), поэтому вместо Gradle + AGP + D8 использована цепочка
 kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробности: `docs/build-without-sdk.md`.
 
@@ -18,11 +18,11 @@ kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробн
 
 ## Результат
 
-- APK: `dist/ClearTV-0.1.9-debug.apk` — 1367502 байт
-- SHA-256: `24bb4975d2130cdf66756fd2734faff701de832077c3d196b9720d4a05535e19`
+- APK: `dist/ClearTV-0.2.0-debug.apk` — 1371598 байт
+- SHA-256: `9c646a136d55c4fbb5010ffb1f280485da51d50b8ac9a95dcd1aebe66071cb96`
 - Подпись: v2 + v3 (debug-ключ `app/debug.keystore`, пароль `android`), `apksigner verify` — Verifies
-- minSdk 24, targetSdk 34, versionCode 10, versionName 0.1.9; dex версии 037 (без invokedynamic)
-- Классов в dex: 1176, методов: 13523
+- minSdk 24, targetSdk 34, versionCode 11, versionName 0.2.0; dex версии 037 (без invokedynamic)
+- Классов в dex: 1181, методов: 13572
 
 ## DxCompat: методы kotlin-stdlib, заменённые заглушками (invokedynamic не поддерживается dx)
 

@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.os.SystemClock
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import com.cleartv.launcher.ClearTvApp
 import com.cleartv.launcher.data.HomeKeeper
@@ -23,6 +24,8 @@ class HomeGuardService : AccessibilityService() {
     private var homePackagesAt = 0L
     private var lastBounceAt = 0L
     private var lastResolverAt = 0L
+    private var foregroundPkg: String? = null
+    private val mouse by lazy { VirtualMouse(this) }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -30,14 +33,16 @@ class HomeGuardService : AccessibilityService() {
             eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
             notificationTimeout = 100
+            flags = flags or AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS   // virtual mouse (needs canRequestFilterKeyEvents in the XML)
         }
-        Logs.event("home_guard", "connected" to true)
+        Logs.event("home_guard", "connected" to true, "keyFilter" to ((serviceInfo?.flags ?: 0) and AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS != 0))
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val pkg = event.packageName?.toString() ?: return
-        if (pkg == packageName) return
+        foregroundPkg = pkg
+        if (pkg == packageName) { if (mouse.active) mouse.deactivate(); return }
         val app = ClearTvApp.get(this)
         if (!app.prefs.homeGuard) return
         if (app.prefs.safeMode || app.prefs.crashedRecently()) return   // a crashing ClearTV must never fight the TV
@@ -69,6 +74,18 @@ class HomeGuardService : AccessibilityService() {
             Logs.w("home guard could not start ClearTV", t)
         }
     }
+
+    /** Every key goes through here first (FLAG_REQUEST_FILTER_KEY_EVENTS); the virtual mouse decides, everything else passes. */
+    override fun onKeyEvent(event: KeyEvent): Boolean {
+        return try {
+            mouse.onKey(event, foregroundIsOwn = foregroundPkg == packageName, enabled = ClearTvApp.get(this).prefs.virtualMouse)
+        } catch (t: Throwable) {
+            Logs.w("virtual mouse key handling", t); false
+        }
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean { try { mouse.deactivate() } catch (_: Throwable) {}; return super.onUnbind(intent) }
+    override fun onDestroy() { try { mouse.deactivate() } catch (_: Throwable) {}; super.onDestroy() }
 
     override fun onInterrupt() {}
 

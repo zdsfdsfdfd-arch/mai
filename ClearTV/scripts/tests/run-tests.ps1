@@ -207,7 +207,8 @@ Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt') -ErrorAction Sile
 $planMd = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'clean-plan.md') -Raw
 Check 'clean dry-run: plan lists promo + crashreporter only' (($planMd -match 'ru.sberdevices.smarthome.promo') -and ($planMd -match 'ru.sberdevices.crashreporter') -and ($planMd -notmatch 'ru.sberdevices.startube') -and ($planMd -notmatch 'ru.sberdevices.starlauncher'))
 Check 'clean dry-run: nothing disabled' (-not (Test-Path (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt')))
-& (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -Yes -BlockOverlays -Screensaver -HomeGuard -LowerStorageThreshold *> (Join-Path $tmp 'clean.log')
+& (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -Yes -BlockOverlays -Screensaver -HomeGuard -LowerStorageThreshold -PhoneAppsFullscreen *> (Join-Path $tmp 'clean.log')
+Check 'clean: phone apps fullscreen (wm ignore-orientation-request false) applied and journaled with rollback to true' (((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'ignore_orientation.txt') -Raw).Trim() -eq 'false') -and (@(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json | Where-Object { $_.Action -eq 'phone-apps-fullscreen' -and $_.RestoreCommand -eq 'wm set-ignore-orientation-request true' }).Count -eq 1))
 $calls = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'calls.log') -Raw
 Check 'clean: screensaver is set before packages are disabled' ($calls.IndexOf('settings put secure screensaver_components') -lt $calls.IndexOf('pm disable-user --user 0 ru.sberdevices.smarthome.promo'))
 $global = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_global.txt') -Raw
@@ -226,6 +227,7 @@ $disabled = @(Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt') -Er
 $secure = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_secure.txt') -Raw -ErrorAction SilentlyContinue)
 $ops = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'appops.txt') -Raw -ErrorAction SilentlyContinue)
 $global = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_global.txt') -Raw -ErrorAction SilentlyContinue)
+Check 'restore after clean: ignore-orientation-request back to true' (((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'ignore_orientation.txt') -Raw).Trim()) -eq 'true')
 Check 'restore after clean: packages enabled, settings and appops back' (($disabled.Count -eq 0) -and ($secure -notmatch 'screensaver_components=') -and ($secure -notmatch 'HomeGuardService') -and ($ops -match 'ru.sberdevices.services=allow') -and ($global -notmatch 'sys_storage_threshold_percentage='))
 $jc = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json)
 Check 'restore after clean: all entries marked restored' (@($jc | Where-Object { -not $_.Restored -and $_.RestoreCommand }).Count -eq 0)

@@ -76,7 +76,12 @@
     <string name="wp_forest">Forest</string>
 
     <string name="home_guard_label">ClearTV: home screen guard</string>
-    <string name="home_guard_description">Brings ClearTV back when the firmware shows its own launcher by itself. Screen content is not read.</string>
+    <string name="home_guard_description">Brings ClearTV back when the firmware shows its own launcher by itself, and provides a cursor for phone apps (hold OK). Screen content is not read.</string>
+    <string name="settings_mouse">Cursor for phone apps</string>
+    <string name="settings_mouse_sub">In any app hold OK: arrows move the cursor, OK taps, a double arrow press scrolls, holding OK hides it</string>
+    <string name="settings_mouse_needs_service">Needs the "ClearTV: home screen guard" service under Accessibility</string>
+    <string name="mouse_on">Cursor on: arrows move, OK taps, hold OK to turn off</string>
+    <string name="mouse_off">Cursor off</string>
     <string name="dream_label">ClearTV: clock</string>
     <string name="settings_keep_home">Keep home screen after reboot</string>
     <string name="settings_keep_home_sub">Through network debugging on the TV itself (port 5555). Confirm the "Allow debugging" prompt once with "Always"</string>

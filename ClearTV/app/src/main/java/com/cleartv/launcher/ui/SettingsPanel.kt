@@ -234,6 +234,13 @@ class SettingsPanel(private val home: HomeActivity, private val host: FrameLayou
         }
 
         row(list).apply {
+            val systemOn = home.isHomeGuardEnabledInSystem()
+            set(s.getString(R.string.settings_mouse), if (systemOn) s.getString(R.string.settings_mouse_sub) else s.getString(R.string.settings_mouse_needs_service), null, R.drawable.ic_input)
+            setToggle(prefs.virtualMouse)
+            setOnClickListener { prefs.virtualMouse = !prefs.virtualMouse; setToggle(prefs.virtualMouse) }
+        }
+
+        row(list).apply {
             val on = home.isClearDreamSelected()
             set(s.getString(R.string.settings_dream), if (on) s.getString(R.string.settings_dream_on) else s.getString(R.string.settings_dream_off, home.currentScreensaver() ?: "—"), null, R.drawable.ic_clock)
             setOnClickListener { home.openDreamSettings() }
