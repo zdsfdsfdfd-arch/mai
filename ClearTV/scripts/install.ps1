@@ -76,12 +76,14 @@ if ($wasInstalled) {
     Add-JournalEntry -Action 'update-apk' -Description "Обновление ClearTV $prevVersion -> $ver" -Command "adb install -r -t $Apk" -RestoreCommand "" -Previous $prevVersion -New $ver -Verify "pm path $PackageName" | Out-Null
     # Android forgets the default HOME when the HOME app itself is updated: the next HOME press shows the chooser
     # (ResolverActivity) — seen on a real Salute TV. The choice was made and journalled earlier; just put it back.
-    if ((Test-SameComponent $homeBefore $HomeComponent) -and -not (Test-SameComponent (Get-ResolvedHome) $HomeComponent)) {
+    # The reset is not always visible right after `adb install`; re-applying the choice is idempotent, so do it always.
+    if (Test-SameComponent $homeBefore $HomeComponent) {
         $r = Invoke-Adb shell cmd package set-home-activity $HomeComponent
+        Pause-Ms 500
         $homeAfter = Get-ResolvedHome
         if (Test-SameComponent $homeAfter $HomeComponent) {
-            Add-JournalEntry -Action 'set-home-reapply' -Description "После обновления APK прошивка сбросила HOME; ClearTV назначен снова" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand "" -Previous 'chooser' -New $HomeComponent | Out-Null
-            Write-Ok "Главный экран после обновления возвращён ClearTV (прошивка сбрасывает выбор при обновлении HOME-приложения)"
+            Add-JournalEntry -Action 'set-home-reapply' -Description "После обновления APK выбор HOME назначен снова (прошивка сбрасывает его при обновлении HOME-приложения)" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand "" -Previous $HomeComponent -New $HomeComponent | Out-Null
+            Write-Ok "Главный экран после обновления подтверждён: ClearTV"
         } else { Write-Warn "После обновления HOME = $homeAfter; назначить снова: install.ps1 -SetHome ($($r.Output))" }
     }
 } else {
@@ -118,15 +120,25 @@ function Enable-HomeKeeper {
     Invoke-Adb shell am start -n $HomeComponent --ez cleartv.keep_home true | Out-Null
     Write-Info "Хранитель главного экрана включён: на телевизоре появится запрос «Разрешить отладку по USB?» от ClearTV — отметьте «Всегда разрешать» и подтвердите."
 }
+function Test-RealLauncher([string]$Component) {
+    # A component restore.ps1 can hand HOME back to: not ClearTV, not the system chooser, not empty.
+    if ([string]::IsNullOrWhiteSpace($Component)) { return $false }
+    if (Test-SameComponent $Component $HomeComponent) { return $false }
+    if ($Component -match 'ResolverActivity|FallbackHome') { return $false }
+    return $true
+}
 function Get-PreviousHomeForJournal {
-    # The launcher that was HOME before ClearTV: from an earlier failed-looking attempt, else from the first snapshot.
-    foreach ($e in @(Read-Journal | Where-Object { $_.Action -eq 'set-home-attempt' -and $_.Previous } | Sort-Object Time -Descending)) {
-        if (-not (Test-SameComponent $e.Previous $HomeComponent)) { return [string]$e.Previous }
+    # The launcher that was HOME before ClearTV: earlier journal entries, else the first snapshot, else the
+    # firmware's stock launcher from the knowledge base when it is installed.
+    foreach ($e in @(Read-Journal | Where-Object { $_.Action -in @('set-home', 'set-home-attempt') -and $_.Previous } | Sort-Object Time)) {
+        if (Test-RealLauncher ([string]$e.Previous)) { return [string]$e.Previous }
     }
     foreach ($dir in @(Get-ChildItem $BackupDir -Directory -ErrorAction SilentlyContinue | Sort-Object Name)) {
         $f = Join-Path $dir.FullName 'home-activity.txt'
-        if (Test-Path $f) { $h = ([string](Get-Content $f -Raw)).Trim(); if ($h -and -not (Test-SameComponent $h $HomeComponent)) { return $h } }
+        if (Test-Path $f) { $h = ([string](Get-Content $f -Raw)).Trim(); if (Test-RealLauncher $h) { return $h } }
     }
+    $stock = [string](Get-KnowledgeBase).Raw.platform.stock_home
+    if ($stock -and ((Get-ShellText "pm path $(($stock -split '/')[0])") -match 'package:')) { return $stock }
     return ''
 }
 
@@ -152,9 +164,12 @@ if ($SetHome) {
     } elseif (-not $supported) {
         Write-Warn "Прошивка не поддерживает set-home-activity. Безопасных альтернатив через ADB нет; ClearTV остаётся доступным из списка приложений штатного лаунчера (иконка ClearTV)."
     } else {
+        # When the firmware shows its chooser (ResolverActivity) there is no launcher to go back to in $current: remember a real one.
+        $previousForRestore = if (Test-RealLauncher $current) { $current } else { Get-PreviousHomeForJournal }
+        if (-not $previousForRestore) { $previousForRestore = $current }
         Write-Host ""
         Write-Host "  Последствия: кнопка HOME и включение телевизора будут открывать ClearTV вместо '$current'." -ForegroundColor Yellow
-        Write-Host "  Откат: scripts\restore.ps1 (выполнит cmd package set-home-activity $current)." -ForegroundColor Yellow
+        Write-Host "  Откат: scripts\restore.ps1 (выполнит cmd package set-home-activity $previousForRestore)." -ForegroundColor Yellow
         $go = $Yes
         if (-not $go) { $answer = Read-Host "  Продолжить? [y/N]"; $go = ($answer -match '^[yYдД]') }
         if ($go) {
@@ -163,7 +178,7 @@ if ($SetHome) {
             Pause-Ms 1000
             $after = Get-ResolvedHome
             if (Test-SameComponent $after $HomeComponent) {
-                Add-JournalEntry -Action 'set-home' -Description "HOME: $current -> $HomeComponent" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand (Get-SetHomeRestoreCommand $current) -Previous $current -New $HomeComponent -Verify 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' | Out-Null
+                Add-JournalEntry -Action 'set-home' -Description "HOME: $current -> $HomeComponent (откат на $previousForRestore)" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand (Get-SetHomeRestoreCommand $previousForRestore) -Previous $previousForRestore -New $HomeComponent -Verify 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' | Out-Null
                 Write-Ok "Главный экран: $after"
                 if (-not $NoKeepHome) { Enable-HomeKeeper }
                 Write-Info "Проверьте кнопку HOME на пульте. Откат: scripts\restore.ps1"

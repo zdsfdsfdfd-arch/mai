@@ -185,7 +185,7 @@ class SettingsPanel(private val home: HomeActivity, private val host: FrameLayou
         row(list).apply {
             set(s.getString(R.string.settings_reduced_motion), null, null, R.drawable.ic_tune)
             setToggle(prefs.reducedMotion)
-            setOnClickListener { prefs.reducedMotion = !prefs.reducedMotion; setToggle(prefs.reducedMotion) }
+            setOnClickListener { prefs.reducedMotion = !prefs.reducedMotion; prefs.reducedMotionUserSet = true; setToggle(prefs.reducedMotion) }
         }
 
         row(list).apply {

@@ -63,6 +63,14 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(K_REDUCED_MOTION, false)
         set(value) = sp.edit().putBoolean(K_REDUCED_MOTION, value).apply()
 
+    /** True once the owner toggled "reduce motion" themselves (then an update must not undo it). */
+    var reducedMotionUserSet: Boolean
+        get() = sp.getBoolean(K_REDUCED_USER, false)
+        set(value) = sp.edit().putBoolean(K_REDUCED_USER, value).apply()
+
+    /** versionCode of the build that applied safe-mode defaults, 0 when none. */
+    val safeModeAppliedVersion: Int get() = sp.getInt(K_SAFE_APPLIED_VERSION, 0)
+
     var safeMode: Boolean
         get() = sp.getBoolean(K_SAFE_MODE, false)
         set(value) = sp.edit().putBoolean(K_SAFE_MODE, value).apply()
@@ -92,15 +100,30 @@ class Prefs(context: Context) {
     fun safeModeSync(on: Boolean) { sp.edit().putBoolean(K_SAFE_MODE, on).commit() }
 
     /** Applies the safe-mode defaults and clears the flag so the next start is a normal one. */
-    fun applySafeModeDefaults() {
+    fun applySafeModeDefaults(versionCode: Int) {
         sp.edit()
             .remove(K_FAVORITES)
             .remove(K_FAV_TOUCHED)
             .putString(K_WALLPAPER, DEFAULT_WALLPAPER)
             .putBoolean(K_REDUCED_MOTION, true)
+            .putInt(K_SAFE_APPLIED_VERSION, versionCode)
             .putBoolean(K_SAFE_MODE, false)
             .putString(K_CRASHES, "")
             .apply()
+    }
+
+    /**
+     * Safe mode is a reaction to a broken build. Once a *different* build runs, its defaults are undone — unless the
+     * owner changed the setting themselves meanwhile. Returns true when something was undone.
+     */
+    fun undoSafeModeAfterUpdate(versionCode: Int): Boolean {
+        val applied = safeModeAppliedVersion
+        if (applied == 0 || applied == versionCode) return false
+        val e = sp.edit().remove(K_SAFE_APPLIED_VERSION).putString(K_CRASHES, "")
+        var undone = false
+        if (!reducedMotionUserSet && reducedMotion) { e.putBoolean(K_REDUCED_MOTION, false); undone = true }
+        e.apply()
+        return undone
     }
 
     fun resetLayout() { sp.edit().remove(K_FAVORITES).remove(K_FAV_TOUCHED).remove(K_HIDDEN).remove(K_LAST_FOCUS).apply() }
@@ -155,6 +178,8 @@ class Prefs(context: Context) {
         const val K_LABELS = "show_labels"
         const val K_INPUTS = "show_inputs"
         const val K_REDUCED_MOTION = "reduced_motion"
+        const val K_REDUCED_USER = "reduced_motion_user"
+        const val K_SAFE_APPLIED_VERSION = "safe_mode_applied_version"
         const val K_SAFE_MODE = "safe_mode"
         const val K_CRASHES = "crash_history"
         const val K_LAST_FOCUS = "last_focus"

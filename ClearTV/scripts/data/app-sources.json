@@ -27,25 +27,17 @@
     },
     {
       "id": "twitch",
-      "name": "Twitch → Xtra",
-      "kind": "direct",
-      "url": "https://github.com/crackededed/Xtra/releases/download/latest/app-release.apk",
-      "fallback_page": "https://github.com/crackededed/Xtra/releases/tag/latest",
-      "file": "Xtra-twitch.apk",
-      "hosts": [
-        "github.com",
-        "githubusercontent.com"
-      ],
+      "name": "Twitch",
+      "kind": "manual",
+      "page": "https://www.twitch.tv/downloads/",
       "packages": [
-        "com.github.andreyasadchy.xtra"
+        "tv.twitch.android.app"
       ],
       "skip_if_installed": [
-        "tv.twitch.android.app",
-        "tv.twitch.android.viewer",
-        "com.github.andreyasadchy.xtra"
+        "tv.twitch.android.app"
       ],
-      "source": "README и workflow android.yml проекта crackededed/Xtra: релиз с тегом latest собирается из app/build/outputs/apk/release/*.apk",
-      "note": "Официальный Twitch для Android TV распространяется только через Google Play. Xtra — открытый клиент Twitch (AGPL) с поддержкой Android TV (LEANBACK_LAUNCHER в манифесте); не является приложением Twitch Interactive."
+      "source": "Twitch Interactive распространяет приложение только через Google Play и Amazon Appstore; прямого APK на twitch.tv нет",
+      "note": "Нужен официальный APK Twitch для Android TV (пакет tv.twitch.android.app): скачайте его на ПК и положите в папку apps — установится и встанет на главный экран. Сторонние клиенты (Xtra) больше не ставятся и удаляются с телевизора."
     },
     {
       "id": "happ",
@@ -72,10 +64,10 @@
     {
       "id": "rutube",
       "name": "RUTUBE",
-      "kind": "page",
-      "page": "https://rutube.ru/androidtv/",
+      "kind": "direct",
       "hosts": [
-        "rutube.ru"
+        "rutube.ru",
+        "rtbcdn.ru"
       ],
       "file": "Rutube-AndroidTV.apk",
       "packages": [
@@ -86,13 +78,10 @@
         "ru.rutube.app",
         "ru.rutube.tv"
       ],
-      "source": "Официальная страница RUTUBE для Android TV: ссылка на APK берётся прямо со страницы (только домен rutube.ru)",
-      "note": "RUTUBE сам раздаёт APK для Android TV 7.0+. Если ссылка на странице не найдена, скрипт сохраняет страницу в reports\\raw для разбора и печатает адрес — скачайте файл вручную и положите в папку apps.",
-      "pages": [
-        "https://rutube.ru/androidtv/",
-        "https://rutube.ru/app/",
-        "https://rutube.ru/smarttv/"
-      ]
+      "source": "Официальная страница RUTUBE для Android TV (rutube.ru/androidtv): кнопка «Скачать» ведёт на rutube.ru/androidtv/latest/ — постоянный адрес последней версии (найден в сохранённой странице)",
+      "note": "RUTUBE сам раздаёт APK для Android TV 7.0+. Если адрес перестанет отдавать файл, скрипт напечатает страницу — скачайте вручную и положите в папку apps.",
+      "url": "https://rutube.ru/androidtv/latest/",
+      "fallback_page": "https://rutube.ru/androidtv/"
     },
     {
       "id": "vk",
@@ -147,6 +136,12 @@
       "page": "",
       "source": "Google распространяет Chrome только через Google Play",
       "note": "На телевизоре есть браузер Сбера (ru.sberdevices.starbrowser), он уже в ряду."
+    }
+  ],
+  "retired": [
+    {
+      "package": "com.github.andreyasadchy.xtra",
+      "why": "сторонний клиент Twitch, владелец попросил только официальное приложение"
     }
   ]
 }

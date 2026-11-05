@@ -66,7 +66,7 @@ ClearTV/
    ```powershell
    .\scripts\build.ps1 -InstallSdk
    ```
-   Можно пропустить и использовать готовый `dist\ClearTV-0.1.4-debug.apk` (собран без SDK, см. `reports\build-report-nosdk.md`).
+   Можно пропустить и использовать готовый `dist\ClearTV-0.1.5-debug.apk` (собран без SDK, см. `reports\build-report-nosdk.md`).
 4. Установка и запуск вручную (ClearTV появится и в списке приложений штатного лаунчера):
    ```powershell
    .\scripts\install.ps1 -Ip 192.168.1.50
@@ -121,6 +121,12 @@ Android TV — официального YouTube на Салют ТВ нет), Xt
 что итоговый адрес принадлежит домену разработчика и что файл — APK, записывает SHA-256 в
 `reports/apps-download.md`, затем `install-apps.ps1` ставит их. Netflix, HBO Max, Apple TV, Spotify и Chrome
 официально вне магазинов не раздаются — для них печатается честное пояснение, APK-агрегаторы не используются.
+Twitch: по решению владельца только официальное приложение (`tv.twitch.android.app`); его APK кладут в `apps\`
+вручную, сторонний клиент Xtra из каталога убран и удаляется с телевизора (`retired`, обратимо через `restore.ps1`).
+
+Что работает из России, решает сам сервис, а не лаунчер: RUTUBE и VK Видео — да; YouTube (SmartTube) и Twitch —
+насколько пропускает провайдер, Happ с вашей подпиской закрывает блокировки; Netflix, Spotify, HBO Max, Apple TV
+в России не обслуживают клиентов, и лаунчер это не изменит.
 Свои файлы можно положить в `apps\` вручную (`APPS.cmd`); отключить загрузку — `run-all.ps1 -NoDownload`.
 Подробности — `apps/README.md`.
 

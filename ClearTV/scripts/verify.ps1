@@ -83,7 +83,7 @@ if ($on) { Add-Result 'cold_start' 'PASS' "am start TotalTime=$total мс, пе�
 Write-Step "3. Повторный запуск"
 Invoke-Adb shell am start -a android.settings.SETTINGS | Out-Null; Pause-Ms 2000
 $warm = Invoke-Adb shell am start -W -n $HomeComponent
-$wtotal = ''; if ($warm.Output -match 'TotalTime:\s*(\d+)') { $wtotal = [int]$Matches[1] }
+$wtotal = ''; if ($warm.Output -match 'TotalTime:\s*(\d+)') { $wtotal = [int]$Matches[1] } elseif ($warm.Output -match 'WaitTime:\s*(\d+)') { $wtotal = "$($Matches[1]) (WaitTime, задача уже была на экране)" }
 Pause-Ms 1000
 if (Test-OnClearTv) { Add-Result 'warm_start' 'PASS' "TotalTime=$wtotal мс" ($warm.Output -replace "`n", ' | ') } else { Add-Result 'warm_start' 'FAIL' 'не вернулся на экран' ($warm.Output -replace "`n", ' | ') }
 
@@ -235,7 +235,8 @@ foreach ($k in @('KEYCODE_DPAD_RIGHT', 'KEYCODE_DPAD_RIGHT', 'KEYCODE_DPAD_RIGHT
 $gfx = Get-ShellText "dumpsys gfxinfo $PackageName"
 Write-Utf8File (Join-Path $raw 'gfxinfo.txt') $gfx
 $g = ConvertFrom-GfxInfo $gfx
-if ($null -ne $g.TotalFrames) { Add-Result 'frame_stats' $(if ($g.JankyPercent -le 20) { 'PASS' } else { 'WARN' }) "кадров $($g.TotalFrames), рывков $($g.JankyFrames) ($($g.JankyPercent)%), p90 $($g.P90) мс, p95 $($g.P95) мс" ($g | ConvertTo-Json -Compress) } else { Add-Result 'frame_stats' 'SKIP' 'gfxinfo не вернул статистику (устройство может не поддерживать)' '' }
+if ($null -ne $g.TotalFrames -and $g.TotalFrames -lt 20) { Add-Result 'frame_stats' 'SKIP' "слишком мало кадров для оценки ($($g.TotalFrames)): анимации выключены (настройка «Меньше анимации», включается безопасным режимом) или ряд короткий" ($g | ConvertTo-Json -Compress) }
+elseif ($null -ne $g.TotalFrames) { Add-Result 'frame_stats' $(if ($g.JankyPercent -le 20) { 'PASS' } else { 'WARN' }) "кадров $($g.TotalFrames), рывков $($g.JankyFrames) ($($g.JankyPercent)%), p90 $($g.P90) мс, p95 $($g.P95) мс" ($g | ConvertTo-Json -Compress) } else { Add-Result 'frame_stats' 'SKIP' 'gfxinfo не вернул статистику (устройство может не поддерживать)' '' }
 
 # 14. crash recovery
 Write-Step "14. Восстановление после аварийного завершения"

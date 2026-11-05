@@ -20,10 +20,13 @@ class ClearTvApp : Application() {
         super.onCreate()
         prefs = Prefs(this)
         CrashGuard(this, prefs).install()
+        val versionCode = try { @Suppress("DEPRECATION") packageManager.getPackageInfo(packageName, 0).versionCode } catch (t: Throwable) { 0 }
         if (prefs.safeMode) {
-            Logs.event("safe_mode", "applied" to true)
-            prefs.applySafeModeDefaults()
+            Logs.event("safe_mode", "applied" to true, "version" to versionCode)
+            prefs.applySafeModeDefaults(versionCode)
             safeModeNotice = true
+        } else if (prefs.undoSafeModeAfterUpdate(versionCode)) {
+            Logs.event("safe_mode", "undone_after_update" to true, "version" to versionCode)
         }
         apps = AppRepository(this)
         wallpapers = WallpaperRepository(this)

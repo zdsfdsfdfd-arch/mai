@@ -78,13 +78,11 @@
     {
       "name": "Twitch",
       "keywords": [
-        "twitch",
-        "xtra"
+        "twitch"
       ],
       "packages": [
         "tv.twitch.android.app",
-        "tv.twitch.android.viewer",
-        "com.github.andreyasadchy.xtra"
+        "tv.twitch.android.viewer"
       ]
     },
     {

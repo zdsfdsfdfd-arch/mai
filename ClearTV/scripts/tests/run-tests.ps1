@@ -50,9 +50,9 @@ Check 'Get-PreferredAppPackages: owner list loaded (VK Video, YouTube)' ((@(Get-
 Check 'Select-ApkLink: relative link on the official domain, foreign hosts ignored' (((Select-ApkLink '<a href="https://cdn.evil.example/x.apk">bad</a> <a class="btn" href="/static/apps/rutube-tv.apk?v=3">APK</a>' 'https://rutube.ru/androidtv/' @('rutube.ru')) -eq 'https://rutube.ru/static/apps/rutube-tv.apk?v=3') -and ($null -eq (Select-ApkLink '<a href="https://cdn.evil.example/x.apk">bad</a>' 'https://rutube.ru/androidtv/' @('rutube.ru'))))
 Check 'Test-HostAllowed: exact host and subdomains only' ((Test-HostAllowed 'objects.githubusercontent.com' @('github.com', 'githubusercontent.com')) -and -not (Test-HostAllowed 'github.com.evil.example' @('github.com')))
 $src = @(Get-AppSources)
-Check 'app-sources.json: 10 owner apps, only official hosts, every direct entry has url/file/hosts' ($src.Count -eq 10 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -and $_.file -and $_.hosts }).Count -eq 3 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -notmatch '^https://github\.com/' }).Count -eq 0)
+Check 'app-sources.json: 10 owner apps, direct entries only from github.com/rutube.ru with url/file/hosts, Twitch manual (official only)' ($src.Count -eq 10 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -and $_.file -and $_.hosts }).Count -eq 3 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -notmatch '^https://(github\.com|rutube\.ru)/' }).Count -eq 0 -and (($src | Where-Object id -eq 'twitch').kind -eq 'manual'))
 $plan = & (Join-Path $scripts 'get-apps.ps1') -ListOnly -Folder (Join-Path $tmp 'apps-plan') *>&1 | Out-String
-Check 'get-apps -ListOnly: plans SmartTube/Xtra/Happ/RUTUBE, explains Netflix/HBO/Apple/Spotify/Chrome, no network' (($plan -match 'smarttube_stable\.apk') -and ($plan -match 'Happ\.apk') -and ($plan -match 'rutube\.ru/androidtv') -and ($plan -match 'Netflix') -and ($plan -match 'официального APK нет|не публикует APK'))
+Check 'get-apps -ListOnly: plans SmartTube/Happ/RUTUBE, explains Twitch/Netflix/HBO/Apple/Spotify/Chrome, no network' (($plan -match 'smarttube_stable\.apk') -and ($plan -match 'Happ\.apk') -and ($plan -match 'rutube\.ru/androidtv/latest') -and ($plan -match 'Netflix') -and ($plan -match 'tv\.twitch\.android\.app') -and ($plan -match 'официального APK нет|не публикует APK'))
 $ev = ConvertFrom-LogcatEvents "I ClearTV : EVT focus row=apps index=0 pkg=a`nI ClearTV : MARK abc`nI ClearTV : EVT launch pkg=com.x ok=true`n" 'MARK abc'
 Check 'ConvertFrom-LogcatEvents after marker' ($ev.Count -eq 1 -and $ev[0].Name -eq 'launch' -and $ev[0].Fields['ok'] -eq 'true')
 $pk = ConvertFrom-DumpsysPackages (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_package_packages.txt') -Raw)
@@ -134,6 +134,18 @@ $calls = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'calls.log') -Raw
 Check 'repair: keeper enabled (cleartv.keep_home true sent)' ($calls -match 'cleartv.keep_home true')
 & (Join-Path $scripts 'restore.ps1') -Ip 192.168.1.50 -Yes *> (Join-Path $tmp 'restore-repair.log')
 Check 'repair: restore brings the stock launcher back' (((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw).Trim()) -eq 'com.stock.launcher/.HomeActivity')
+$env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports'
+
+Write-Host "== 5d. install.ps1 -SetHome while the firmware shows its chooser: rollback points at a real launcher"
+$env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-chooser'
+New-Item -ItemType Directory -Path (Join-Path $env:CLEARTV_REPORTS_DIR 'backup/20260101-000000') -Force | Out-Null
+Set-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'backup/20260101-000000/home-activity.txt') 'com.stock.launcher/.HomeActivity'
+Set-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') 'android/com.android.internal.app.ResolverActivity'
+& (Join-Path $scripts 'install.ps1') -Ip 192.168.1.50 -Apk $apk -NoLaunch -SetHome -Yes *> (Join-Path $tmp 'install-chooser.log')
+$jc2 = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json | Where-Object Action -eq 'set-home')
+Check 'chooser: set-home journal entry remembers the stock launcher, not ResolverActivity' ($jc2.Count -eq 1 -and $jc2[0].Previous -eq 'com.stock.launcher/.HomeActivity' -and $jc2[0].RestoreCommand -match 'set-home-activity com.stock.launcher/.HomeActivity$') "got $($jc2 | ConvertTo-Json -Compress)"
+& (Join-Path $scripts 'restore.ps1') -Ip 192.168.1.50 -Yes *> (Join-Path $tmp 'restore-chooser.log')
+Check 'chooser: restore sets the stock launcher' (((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw).Trim()) -eq 'com.stock.launcher/.HomeActivity')
 $env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports'
 
 Write-Host "== 5c. install-apps.ps1 (owner's APK folder)"

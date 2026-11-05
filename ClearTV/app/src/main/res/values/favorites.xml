@@ -14,7 +14,7 @@
         <item>apple tv=com.apple.atve.androidtv.appletv,com.apple.atve.sony.appletv,com.apple.atve.amazon.appletv</item>
         <item>spotify=com.spotify.tv.android,com.spotify.music,com.spotify.lite</item>
         <item>happ=su.happ.proxyutility,com.happproxy</item>
-        <item>twitch|xtra=tv.twitch.android.app,tv.twitch.android.viewer,com.github.andreyasadchy.xtra</item>
+        <item>twitch=tv.twitch.android.app,tv.twitch.android.viewer</item>
         <item>rutube=ru.rutube.app,ru.rutube.tv</item>
         <item>vk видео|вк видео|vk video=com.vk.tv,com.vk.vkvideo</item>
         <item>chrome=com.android.chrome,com.chrome.beta</item>

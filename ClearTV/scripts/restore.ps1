@@ -57,7 +57,18 @@ foreach ($e in $pending) {
     $go = $Yes
     if (-not $go) { $answer = Read-Host "  Выполнить? [y/N]"; $go = ($answer -match '^[yYдД]') }
     if (-not $go) { Write-Info "пропущено"; continue }
-    $r = Invoke-AdbShell $e.RestoreCommand
+    $cmd = [string]$e.RestoreCommand
+    if ($e.Action -eq 'set-home' -and ($e.Previous -match 'ResolverActivity|FallbackHome' -or -not $e.Previous)) {
+        # Older journals (ClearTV <= 0.1.4) could record the firmware's chooser as the previous HOME; use a real launcher.
+        $real = ''
+        foreach ($dir in @(Get-ChildItem $BackupDir -Directory -ErrorAction SilentlyContinue | Sort-Object Name)) {
+            $f = Join-Path $dir.FullName 'home-activity.txt'
+            if (Test-Path $f) { $h = ([string](Get-Content $f -Raw)).Trim(); if ($h -and $h -notmatch 'ResolverActivity|FallbackHome' -and -not (Test-SameComponent $h $HomeComponent)) { $real = $h; break } }
+        }
+        if (-not $real) { $stock = [string](Get-KnowledgeBase).Raw.platform.stock_home; if ($stock -and ((Get-ShellText "pm path $(($stock -split '/')[0])") -match 'package:')) { $real = $stock } }
+        if ($real) { $cmd = Get-SetHomeRestoreCommand $real; $e.Previous = $real; Write-Info "в журнале вместо лаунчера записан выбор системы; возвращаю $real" }
+    }
+    $r = Invoke-AdbShell $cmd
     if ($r.Output) { Write-Info $r.Output }
     $ok = ($r.ExitCode -eq 0 -and $r.Output -notmatch 'Error|Failure|Exception')
     if ($e.Action -eq 'set-home') {

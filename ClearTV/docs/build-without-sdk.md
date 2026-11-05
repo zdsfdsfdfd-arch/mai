@@ -1,7 +1,7 @@
 # Сборка без Android SDK
 
 Используется, когда недоступны `dl.google.com` и `maven.google.com` (Android SDK, AGP, AndroidX). Так был
-собран `dist/ClearTV-0.1.4-debug.apk` в облачной сессии (отчёт: `reports/build-report-nosdk.md`).
+собран `dist/ClearTV-0.1.5-debug.apk` в облачной сессии (отчёт: `reports/build-report-nosdk.md`).
 
 ## Источники инструментов (все официальные или дистрибутивные)
 

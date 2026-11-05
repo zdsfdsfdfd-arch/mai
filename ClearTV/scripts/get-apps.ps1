@@ -150,6 +150,23 @@ foreach ($a in $apps) {
     $rows += [pscustomobject]$row
 }
 
+# Apps the owner no longer wants (catalog "retired"): removed for the user, data kept, reversible with restore.ps1
+$retired = @((Read-JsonFile (Join-Path (Join-Path $PSScriptRoot 'data') 'app-sources.json')).retired)
+if (-not $ListOnly -and $installed.Count -gt 0) {
+    foreach ($r in $retired) {
+        $pkg = [string]$r.package
+        if (-not $pkg -or $installed -notcontains $pkg) { continue }
+        Write-Step "Удаление $pkg"
+        Write-Info $r.why
+        $res = Invoke-AdbShell "pm uninstall -k --user 0 $pkg"
+        if ($res.Output -match 'Success') {
+            Add-JournalEntry -Action 'uninstall-user-app' -Description "Удалено для пользователя $pkg ($($r.why))" -Command "pm uninstall -k --user 0 $pkg" -RestoreCommand "cmd package install-existing $pkg" -Previous 'installed' -New 'uninstalled-user' -Verify "pm path $pkg" | Out-Null
+            Write-Ok "$pkg удалено (данные сохранены; вернуть: restore.ps1)"
+            $rows += [pscustomobject][ordered]@{ App = $pkg; Result = 'удалено по списку владельца'; File = ''; SizeMb = ''; Sha256 = ''; Source = ''; Note = [string]$r.why }
+        } else { Write-Warn "$pkg не удалилось: $($res.Output)" }
+    }
+}
+
 if (-not $ListOnly) {
     $md = New-Object System.Text.StringBuilder
     [void]$md.AppendLine("# Загрузка приложений владельца — $(Get-Date -Format 'yyyy-MM-dd HH:mm')")

@@ -6,7 +6,7 @@
 | Приложение | Откуда | Что ставится |
 |---|---|---|
 | YouTube | GitHub Releases проекта SmartTube (ссылка из его README) | SmartTube — открытый клиент YouTube для Android TV; официального YouTube на Салют ТВ нет (нет сервисов Google) |
-| Twitch | GitHub Releases проекта Xtra (тег `latest`) | Xtra — открытый клиент Twitch с поддержкой Android TV; официальный Twitch есть только в Google Play |
+| Twitch | вручную: официальный APK для Android TV (пакет `tv.twitch.android.app`) в эту папку | Twitch Interactive раздаёт приложение только через Google Play и Amazon Appstore; сторонний клиент Xtra по решению владельца убран и удаляется с телевизора |
 | Happ | GitHub Releases Happ-proxy/happ-android (ссылка из README) | официальная сборка Happ (пакет `su.happ.proxyutility`); серверы не входят |
 | RUTUBE | официальная страница rutube.ru/androidtv (ссылка на .apk берётся со страницы, только домен rutube.ru) | официальное приложение RUTUBE для Android TV |
 | VK Видео | — | уже стоит на телевизоре |
@@ -17,6 +17,8 @@
 на последнюю версию. Затем `install-apps.ps1` устанавливает всё из этой папки (`adb install -r -t`).
 
 Свои APK можно положить сюда вручную и запустить `APPS.cmd`. Файлы `*.apk` в репозиторий не попадают.
+Для Twitch: нужен именно официальный APK-файл (не `.apkm`/bundle), версия для Android TV; после установки ClearTV
+сам поставит его на главный экран (правило `twitch` = `tv.twitch.android.app`).
 
 ClearTV ставит приложения из списка владельца первыми на главный экран (пока порядок ряда автоматический);
 `clean.ps1` их никогда не отключает.
