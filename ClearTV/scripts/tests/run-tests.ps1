@@ -50,7 +50,7 @@ Check 'Get-PreferredAppPackages: owner list loaded (VK Video, YouTube)' ((@(Get-
 Check 'Select-ApkLink: relative link on the official domain, foreign hosts ignored' (((Select-ApkLink '<a href="https://cdn.evil.example/x.apk">bad</a> <a class="btn" href="/static/apps/rutube-tv.apk?v=3">APK</a>' 'https://rutube.ru/androidtv/' @('rutube.ru')) -eq 'https://rutube.ru/static/apps/rutube-tv.apk?v=3') -and ($null -eq (Select-ApkLink '<a href="https://cdn.evil.example/x.apk">bad</a>' 'https://rutube.ru/androidtv/' @('rutube.ru'))))
 Check 'Test-HostAllowed: exact host and subdomains only' ((Test-HostAllowed 'objects.githubusercontent.com' @('github.com', 'githubusercontent.com')) -and -not (Test-HostAllowed 'github.com.evil.example' @('github.com')))
 $src = @(Get-AppSources)
-Check 'app-sources.json: 11 owner entries, direct entries only from github.com/rutube.ru with url/file/hosts, Twitch via APKMirror (official builds)' ($src.Count -eq 11 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -and $_.file -and $_.hosts }).Count -eq 3 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -notmatch '^https://(github\.com|rutube\.ru)/' }).Count -eq 0 -and (($src | Where-Object id -eq 'twitch').kind -eq 'mirror'))
+Check 'app-sources.json: 12 owner entries, direct entries only from github.com/rutube.ru with url/file/hosts, Twitch via APKMirror (official builds)' ($src.Count -eq 12 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -and $_.file -and $_.hosts }).Count -eq 3 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -notmatch '^https://(github\.com|rutube\.ru)/' }).Count -eq 0 -and (($src | Where-Object id -eq 'twitch').kind -eq 'mirror'))
 Check 'app-sources.json: APKMirror entries (owner decision) open apkmirror.com pages only, with file hints and expected packages' (@($src | Where-Object { $_.kind -eq 'mirror' }).Count -eq 7 -and @($src | Where-Object { $_.kind -eq 'mirror' -and (@($_.mirror_pages | Where-Object { $_ -notmatch '^https://www\.apkmirror\.com/' }).Count -gt 0 -or -not $_.file_hint -or -not $_.packages) }).Count -eq 0)
 $mirrorOut = & (Join-Path $scripts 'get-apps.ps1') -Ip 192.168.1.50 -Only netflix -Folder (Join-Path $tmp 'apps-mirror') -WaitMinutes 0 -NoBrowser -Yes *>&1 | Out-String
 Check 'get-apps mirror: no browser, zero wait -> honest "file did not appear", no crash' ($mirrorOut -match 'файл не появился')
@@ -59,11 +59,11 @@ Set-Content (Join-Path $mirrorDir 'com.netflix.mediaclient_9.apk') 'placeholder'
 $mirrorOut2 = & (Join-Path $scripts 'get-apps.ps1') -Ip 192.168.1.50 -Only netflix -Folder $mirrorDir -WaitMinutes 0 -NoBrowser -Yes *>&1 | Out-String
 Check 'get-apps mirror: a matching file already in apps is reported, not re-requested' ($mirrorOut2 -match 'Уже в папке')
 $plan = & (Join-Path $scripts 'get-apps.ps1') -ListOnly -Folder (Join-Path $tmp 'apps-plan') *>&1 | Out-String
-Check 'get-apps -ListOnly: plans SmartTube/Happ/RUTUBE and APKMirror pages for the rest, no network' (($plan -match 'smarttube_stable\.apk') -and ($plan -match 'Happ\.apk') -and ($plan -match 'rutube\.ru/androidtv/latest') -and ($plan -match 'apkmirror\.com') -and ($plan -match 'armeabi-v7a'))
+Check 'get-apps -ListOnly: plans SmartTube/Happ/RUTUBE/TV Bro and APKMirror pages for the rest, no network' (($plan -match 'smarttube_stable\.apk') -and ($plan -match 'latest_version\.json') -and ($plan -match 'Happ\.apk') -and ($plan -match 'rutube\.ru/androidtv/latest') -and ($plan -match 'apkmirror\.com') -and ($plan -match 'armeabi-v7a'))
 $ev = ConvertFrom-LogcatEvents "I ClearTV : EVT focus row=apps index=0 pkg=a`nI ClearTV : MARK abc`nI ClearTV : EVT launch pkg=com.x ok=true`n" 'MARK abc'
 Check 'ConvertFrom-LogcatEvents after marker' ($ev.Count -eq 1 -and $ev[0].Name -eq 'launch' -and $ev[0].Fields['ok'] -eq 'true')
 $pk = ConvertFrom-DumpsysPackages (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_package_packages.txt') -Raw)
-Check 'ConvertFrom-DumpsysPackages count' ($pk.Count -eq 21) "got $($pk.Count)"
+Check 'ConvertFrom-DumpsysPackages count' ($pk.Count -eq 22) "got $($pk.Count)"
 Check 'ConvertFrom-DumpsysPackages overlayTarget' ((($pk | Where-Object Package -eq 'ru.sberdevices.rro.framework').OverlayTarget -eq 'android') -and (($pk | Where-Object Package -eq 'com.android.systemui').OverlayTarget -eq ''))
 $upd = $pk | Where-Object Package -eq 'com.example.updater'
 Check 'ConvertFrom-DumpsysPackages permissions' ($upd.GrantedPermissions -contains 'android.permission.INSTALL_PACKAGES' -and $upd.PrivateFlags -match 'PRIVILEGED')
@@ -106,7 +106,7 @@ Check 'device-report: model/api' ($dr.Device.Model -eq 'SBER_TV_FAKE' -and $dr.A
 Check 'device-report: memory and display' ($dr.Memory.TotalMb -eq 1500 -and $dr.Display.PhysicalSize -eq '1920x1080' -and $dr.Display.DensityDpi -eq '320')
 Check 'device-report: home + set-home support' ($dr.Home.Current -eq 'com.stock.launcher/.HomeActivity' -and $dr.Home.SetHomeActivitySupported -eq $true)
 Check 'device-report: inputs' ($dr.Tv.PassthroughInputs -eq 3 -and $dr.Tv.HdmiCecEnabled -eq $true)
-Check 'device-report: packages counted' ($dr.Packages.Total -eq 21 -and $dr.Packages.ByCategory.CRITICAL -ge 12 -and $dr.Packages.ByCategory.PROMOTIONAL -eq 2)
+Check 'device-report: packages counted' ($dr.Packages.Total -eq 22 -and $dr.Packages.ByCategory.CRITICAL -ge 12 -and $dr.Packages.ByCategory.PROMOTIONAL -eq 2)
 $inv = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'inventory.json') -Raw | ConvertFrom-Json
 Check 'device-report: RRO overlays are CRITICAL, not UNKNOWN' ((($inv | Where-Object Package -eq 'ru.sberdevices.rro.framework').Category) -eq 'CRITICAL')
 Check 'inventory.json: launcher is CRITICAL' ((($inv | Where-Object Package -eq 'com.stock.launcher').Category) -eq 'CRITICAL')
@@ -208,6 +208,7 @@ $planMd = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'clean-plan.md') -Raw
 Check 'clean dry-run: plan lists promo + crashreporter only' (($planMd -match 'ru.sberdevices.smarthome.promo') -and ($planMd -match 'ru.sberdevices.crashreporter') -and ($planMd -notmatch 'ru.sberdevices.startube') -and ($planMd -notmatch 'ru.sberdevices.starlauncher'))
 Check 'clean dry-run: nothing disabled' (-not (Test-Path (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt')))
 & (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -Yes -BlockOverlays -Screensaver -HomeGuard -LowerStorageThreshold -PhoneAppsFullscreen *> (Join-Path $tmp 'clean.log')
+Check 'clean: portrait phone app gets OVERRIDE_ANY_ORIENTATION with reset rollback (Netflix phone build on fake TV)' (((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'compat.txt') -Raw) -match 'com.netflix.mediaclient=OVERRIDE_ANY_ORIENTATION') -and (@(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json | Where-Object { $_.Action -eq 'compat-any-orientation' -and $_.RestoreCommand -eq 'am compat reset com.netflix.mediaclient' }).Count -eq 1))
 Check 'clean: phone apps fullscreen (wm ignore-orientation-request false) applied and journaled with rollback to true' (((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'ignore_orientation.txt') -Raw).Trim() -eq 'false') -and (@(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json | Where-Object { $_.Action -eq 'phone-apps-fullscreen' -and $_.RestoreCommand -eq 'wm set-ignore-orientation-request true' }).Count -eq 1))
 $calls = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'calls.log') -Raw
 Check 'clean: screensaver is set before packages are disabled' ($calls.IndexOf('settings put secure screensaver_components') -lt $calls.IndexOf('pm disable-user --user 0 ru.sberdevices.smarthome.promo'))
@@ -227,6 +228,7 @@ $disabled = @(Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt') -Er
 $secure = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_secure.txt') -Raw -ErrorAction SilentlyContinue)
 $ops = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'appops.txt') -Raw -ErrorAction SilentlyContinue)
 $global = [string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'settings_global.txt') -Raw -ErrorAction SilentlyContinue)
+Check 'restore after clean: compat override reset' ((([string](Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'compat.txt') -Raw -ErrorAction SilentlyContinue)) -notmatch 'com.netflix.mediaclient'))
 Check 'restore after clean: ignore-orientation-request back to true' (((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'ignore_orientation.txt') -Raw).Trim()) -eq 'true')
 Check 'restore after clean: packages enabled, settings and appops back' (($disabled.Count -eq 0) -and ($secure -notmatch 'screensaver_components=') -and ($secure -notmatch 'HomeGuardService') -and ($ops -match 'ru.sberdevices.services=allow') -and ($global -notmatch 'sys_storage_threshold_percentage='))
 $jc = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json)
@@ -237,7 +239,7 @@ $env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-remove'
 Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'disabled.txt'), (Join-Path $env:CLEARTV_FAKE_STATE 'uninstalled.txt') -ErrorAction SilentlyContinue
 & (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -DryRun -RemoveOtherApps *> (Join-Path $tmp 'clean-remove-dry.log')
 $planMd = Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'clean-plan.md') -Raw
-Check 'remove dry-run: user game planned for uninstall, Sber startube/music and system apps not' (($planMd -match 'pm uninstall -k --user 0 com.example.usergame') -and ($planMd -notmatch 'ru.sberdevices.startube') -and ($planMd -notmatch 'com.example.mediaapp'))
+Check 'remove dry-run: user game planned for uninstall, Sber startube/music, system apps and the owner Netflix not' (($planMd -match 'pm uninstall -k --user 0 com.example.usergame') -and ($planMd -notmatch 'ru.sberdevices.startube') -and ($planMd -notmatch 'com.example.mediaapp') -and ($planMd -notmatch 'com.netflix.mediaclient'))
 & (Join-Path $scripts 'clean.ps1') -Ip 192.168.1.50 -Yes -RemoveOtherApps *> (Join-Path $tmp 'clean-remove.log')
 $un = @(Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'uninstalled.txt') -ErrorAction SilentlyContinue)
 Check 'remove: user game uninstalled for user 0, journaled with install-existing rollback' (($un -contains 'com.example.usergame') -and (@(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json | Where-Object { $_.Action -eq 'uninstall-user-app' -and $_.RestoreCommand -match 'install-existing com.example.usergame' }).Count -eq 1))

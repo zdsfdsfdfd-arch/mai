@@ -278,6 +278,19 @@ Packages:
     overlayCategory=null
     User 0: ceDataInode=96991 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
       installReason=0
+  Package [com.netflix.mediaclient] (abc):
+    userId=10060
+    pkg=Package{1 com.netflix.mediaclient}
+    codePath=/data/app/com.netflix.mediaclient-1
+    versionCode=74817 minSdk=28 targetSdk=33
+    versionName=9.90.1
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[  ]
+    install permissions:
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=1 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      gids=[3003]
+      runtime permissions:
 Hidden system packages:
 
 Shared users:

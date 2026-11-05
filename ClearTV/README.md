@@ -66,7 +66,7 @@ ClearTV/
    ```powershell
    .\scripts\build.ps1 -InstallSdk
    ```
-   Можно пропустить и использовать готовый `dist\ClearTV-0.2.0-debug.apk` (собран без SDK, см. `reports\build-report-nosdk.md`).
+   Можно пропустить и использовать готовый `dist\ClearTV-0.2.1-debug.apk` (собран без SDK, см. `reports\build-report-nosdk.md`).
 4. Установка и запуск вручную (ClearTV появится и в списке приложений штатного лаунчера):
    ```powershell
    .\scripts\install.ps1 -Ip 192.168.1.50
@@ -143,9 +143,10 @@ YouTube, Netflix, Spotify, HBO Max, Apple TV, Twitch и Chrome (по решен�
 (быстрее при удержании), OK нажимает, двойное нажатие стрелки прокручивает в её сторону, удержание OK убирает
 курсор; «Назад» и остальные кнопки работают как обычно. Нажатия выполняются через `dispatchGesture`, содержимое
 экрана служба по-прежнему не читает. Выключается в настройках ClearTV. Отдельно `clean.ps1 -PhoneAppsFullscreen`
-(входит в FULL) выключает «игнорирование запросов ориентации» (`wm set-ignore-orientation-request false`):
-портретные приложения вроде телефонного Netflix перестают показываться узкой полосой и раскладываются на весь
-экран; обратимо через `restore.ps1`.
+(входит в FULL): для телефонных сборок (Netflix, Twitch, Chrome, Spotify, YouTube) включает обратимое
+переопределение `am compat enable OVERRIDE_ANY_ORIENTATION <пакет>`, чтобы портретное приложение раскладывалось
+в ландшафт вместо узкой полосы, и выключает `ignoreOrientationRequest` дисплея, если он был включён; откат —
+`restore.ps1`. Браузер для телевизора — TV Bro (качается сам с GitHub разработчика), Chrome остаётся телефонным.
 
 ## Полная настройка «как на ролике» (FULL.cmd)
 

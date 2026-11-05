@@ -7,6 +7,7 @@
 | YouTube → SmartTube | скрипт качает сам с GitHub проекта SmartTube | открытый клиент YouTube для Android TV (запасной вариант) |
 | Happ | скрипт качает сам с GitHub Happ-proxy | официальная сборка (пакет `su.happ.proxyutility`) |
 | RUTUBE | скрипт качает сам с официальной кнопки rutube.ru/androidtv | официальное приложение для Android TV |
+| TV Bro | скрипт качает сам с GitHub разработчика (release-канал из `latest_version.json`) | браузер, сделанный под пульт Android TV (собственный курсор) |
 | YouTube (официальный), Netflix, Spotify, HBO Max, Apple TV, Twitch, Chrome | **APKMirror, по решению владельца**: скрипт открывает страницу в браузере ПК, человек нажимает «Download APK», скрипт подхватывает файл из «Загрузок» и кладёт сюда | подписанные разработчиками сборки (APKMirror сверяет подписи); сам сайт автоматике не поддаётся, поэтому одно нажатие — за человеком |
 
 Вариант для этого телевизора (SaluteTV at30a6): **armeabi-v7a** (или universal/noarch), **nodpi или xhdpi** (320 dpi),

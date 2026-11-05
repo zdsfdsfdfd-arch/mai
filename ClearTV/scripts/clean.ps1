@@ -225,12 +225,26 @@ if ($PhoneAppsFullscreen) {
     $prevVal = if ($prevOut -match '\b(true|false)\b') { $Matches[1] } else { '' }
     if (-not $prevVal) { Write-Warn "wm get-ignore-orientation-request не поддерживается этой прошивкой ($($prevOut.Trim())) — пропуск" }
     else {
-        Invoke-AdbShell 'wm set-ignore-orientation-request false' | Out-Null
-        $nowOut = Get-ShellText 'wm get-ignore-orientation-request'
-        if ($nowOut -match '\bfalse\b') {
-            Add-JournalEntry -Action 'phone-apps-fullscreen' -Description "ignoreOrientationRequest: $prevVal -> false (портретные приложения во весь экран)" -Command 'wm set-ignore-orientation-request false' -RestoreCommand "wm set-ignore-orientation-request $prevVal" -Previous $prevVal -New 'false' -Verify 'wm get-ignore-orientation-request' | Out-Null
-            Write-Ok "Портретные приложения будут раскладываться на весь экран (было: $prevVal; проверьте Netflix/Twitch после перезапуска приложения)"
-        } else { Write-Warn "не применилось: $($nowOut.Trim())" }
+        if ($prevVal -eq 'false') { Write-Info "ignoreOrientationRequest уже false — дисплей не виноват в узкой полосе (телевизор не умеет поворачиваться, портретное приложение укладывается в полосу)" }
+        else {
+            Invoke-AdbShell 'wm set-ignore-orientation-request false' | Out-Null
+            $nowOut = Get-ShellText 'wm get-ignore-orientation-request'
+            if ($nowOut -match '\bfalse\b') {
+                Add-JournalEntry -Action 'phone-apps-fullscreen' -Description "ignoreOrientationRequest: $prevVal -> false (портретные приложения во весь экран)" -Command 'wm set-ignore-orientation-request false' -RestoreCommand "wm set-ignore-orientation-request $prevVal" -Previous $prevVal -New 'false' -Verify 'wm get-ignore-orientation-request' | Out-Null
+                Write-Ok "Портретные приложения будут раскладываться на весь экран (было: $prevVal)"
+            } else { Write-Warn "не применилось: $($nowOut.Trim())" }
+        }
+    }
+    # Per-app compat override (Android 12L+): the app's fixed portrait request is treated as "any orientation", so it is
+    # laid out in the TV's landscape bounds. Reversible: am compat reset <pkg>. Only for phone builds of the owner's apps.
+    $portraitApps = @('com.netflix.mediaclient', 'tv.twitch.android.app', 'com.android.chrome', 'com.spotify.music', 'com.google.android.youtube')
+    foreach ($pkg in @($portraitApps | Where-Object { $rows.Package -contains $_ })) {
+        $out = (Invoke-AdbShell "am compat enable OVERRIDE_ANY_ORIENTATION $pkg").Output
+        $flat = (([string]$out) -replace "`r?`n", ' ').Trim()
+        if ($flat -match '(?i)enabled change') {
+            Add-JournalEntry -Action 'compat-any-orientation' -Description "${pkg}: OVERRIDE_ANY_ORIENTATION включён (портретное приложение во весь экран)" -Command "am compat enable OVERRIDE_ANY_ORIENTATION $pkg" -RestoreCommand "am compat reset $pkg" -Previous 'default' -New 'OVERRIDE_ANY_ORIENTATION' -Verify "am compat dump $pkg" | Out-Null
+            Write-Ok "${pkg}: $flat (перезапустите приложение)"
+        } else { Write-Warn "${pkg}: прошивка не приняла переопределение ориентации: $flat" }
     }
 }
 

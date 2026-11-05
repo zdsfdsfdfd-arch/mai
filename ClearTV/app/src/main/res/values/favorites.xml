@@ -19,6 +19,7 @@
         <item>rutube=ru.rutube.app,ru.rutube.tv</item>
         <item>vk видео|вк видео|vk video=com.vk.tv,com.vk.vkvideo</item>
         <item>chrome=com.android.chrome,com.chrome.beta</item>
+        <item>tv bro|tvbro=com.phlox.tvwebbrowser</item>
     </string-array>
 
     <!--

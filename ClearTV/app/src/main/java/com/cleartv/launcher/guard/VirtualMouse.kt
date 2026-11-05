@@ -10,6 +10,8 @@ import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.view.Gravity
 import android.view.KeyEvent
@@ -41,36 +43,66 @@ class VirtualMouse(private val service: AccessibilityService) {
     private var swallowKey = -1          // after a toggle: eat the rest of that key press (repeats and UP)
     private var lastDirKey = -1
     private var lastDirUpAt = 0L
+    private var okDownAt = 0L
+    private var heldDir = -1
+    private var heldSince = 0L
+    private val handler = Handler(Looper.getMainLooper())
+    private val mover = object : Runnable {
+        override fun run() {
+            if (!active || heldDir == -1) return
+            step(heldDir, SystemClock.uptimeMillis() - heldSince)
+            handler.postDelayed(this, TICK_MS)
+        }
+    }
 
-    /** Returns true when the event was consumed. [foregroundIsOwn]: ClearTV itself is in front (never intercept there). */
+    /**
+     * Returns true when the event was consumed. [foregroundIsOwn]: ClearTV itself is in front (never intercept there).
+     *
+     * The accessibility key filter sees only the physical DOWN and UP of a key: auto-repeats are synthesised by the
+     * input dispatcher after the filter, so "held" is measured here by the clock (an injected `input keyevent
+     * --longpress` does carry FLAG_LONG_PRESS and is honoured too). Movement while an arrow is held is driven by
+     * [mover], not by repeats.
+     */
     fun onKey(event: KeyEvent, foregroundIsOwn: Boolean, enabled: Boolean): Boolean {
         val code = event.keyCode
+        val now = SystemClock.uptimeMillis()
         if (swallowKey == code) { if (event.action == KeyEvent.ACTION_UP) swallowKey = -1; return true }
         val isOk = code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_NUMPAD_ENTER || code == KeyEvent.KEYCODE_BUTTON_A
-        val longPress = event.action == KeyEvent.ACTION_DOWN && (event.flags and KeyEvent.FLAG_LONG_PRESS) != 0
+        val longFlag = event.action == KeyEvent.ACTION_DOWN && (event.flags and KeyEvent.FLAG_LONG_PRESS) != 0
         if (!active) {
-            if (!enabled || foregroundIsOwn || !isOk || !longPress) return false
-            activate()
-            swallowKey = code
-            return true
+            if (!enabled || foregroundIsOwn || !isOk) return false
+            if (longFlag) { activate(); swallowKey = code; return true }
+            if (event.action == KeyEvent.ACTION_DOWN) { if (event.repeatCount == 0) okDownAt = now; return false }   // the app gets the press as usual
+            if (event.action == KeyEvent.ACTION_UP) {
+                val held = if (okDownAt > 0) now - okDownAt else 0L
+                okDownAt = 0
+                if (held >= HOLD_MS) { activate(); return true }   // the app never sees this UP, so the held press is not a click
+            }
+            return false
         }
         when (code) {
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (event.action == KeyEvent.ACTION_DOWN) {
-                    if (event.repeatCount == 0 && code == lastDirKey && SystemClock.uptimeMillis() - lastDirUpAt < DOUBLE_PRESS_MS) {
-                        lastDirKey = -1
-                        flick(code)
-                    } else move(code, event.repeatCount)
+                    if (event.repeatCount > 0) return true
+                    if (code == lastDirKey && now - lastDirUpAt < DOUBLE_PRESS_MS) { lastDirKey = -1; flick(code); return true }
+                    heldDir = code; heldSince = now
+                    step(code, 0)
+                    handler.removeCallbacks(mover); handler.postDelayed(mover, FIRST_TICK_MS)
                 } else if (event.action == KeyEvent.ACTION_UP) {
-                    lastDirKey = code
-                    lastDirUpAt = SystemClock.uptimeMillis()
+                    if (heldDir == code) { heldDir = -1; handler.removeCallbacks(mover) }
+                    lastDirKey = code; lastDirUpAt = now
                 }
                 return true
             }
         }
         if (isOk) {
-            if (longPress) { deactivate(); swallowKey = code; return true }
-            if (event.action == KeyEvent.ACTION_UP) tap()
+            if (longFlag) { deactivate(); swallowKey = code; return true }
+            if (event.action == KeyEvent.ACTION_DOWN) { if (event.repeatCount == 0) okDownAt = now; return true }
+            if (event.action == KeyEvent.ACTION_UP) {
+                val held = if (okDownAt > 0) now - okDownAt else 0L
+                okDownAt = 0
+                if (held >= HOLD_MS) deactivate() else tap()
+            }
             return true
         }
         return false
@@ -104,19 +136,22 @@ class VirtualMouse(private val service: AccessibilityService) {
     fun deactivate() {
         if (!active) return
         active = false
+        heldDir = -1; handler.removeCallbacks(mover)
         try { cursor?.let { wm.removeViewImmediate(it) } } catch (t: Throwable) { Logs.w("virtual mouse overlay removal", t) }
         cursor = null; lp = null
         Logs.event("mouse", "on" to false)
         toast(service.getString(R.string.mouse_off))
     }
 
-    private fun move(code: Int, repeat: Int) {
-        val step = density * (7f + minOf(repeat, 30) * 1.3f)
+    /** One movement tick; the longer the arrow has been held ([heldMs]), the faster the cursor goes. */
+    private fun step(code: Int, heldMs: Long) {
+        val ramp = minOf(heldMs, RAMP_MS).toFloat() / RAMP_MS
+        val px = density * (4f + 16f * ramp)
         when (code) {
-            KeyEvent.KEYCODE_DPAD_UP -> y -= step
-            KeyEvent.KEYCODE_DPAD_DOWN -> y += step
-            KeyEvent.KEYCODE_DPAD_LEFT -> x -= step
-            KeyEvent.KEYCODE_DPAD_RIGHT -> x += step
+            KeyEvent.KEYCODE_DPAD_UP -> y -= px
+            KeyEvent.KEYCODE_DPAD_DOWN -> y += px
+            KeyEvent.KEYCODE_DPAD_LEFT -> x -= px
+            KeyEvent.KEYCODE_DPAD_RIGHT -> x += px
         }
         x = x.coerceIn(0f, screenW - 1f); y = y.coerceIn(0f, screenH - 1f)
         val p = lp ?: return
@@ -165,5 +200,11 @@ class VirtualMouse(private val service: AccessibilityService) {
         override fun onDraw(canvas: Canvas) { canvas.drawPath(path, fill); canvas.drawPath(path, stroke) }
     }
 
-    companion object { private const val DOUBLE_PRESS_MS = 320L }
+    companion object {
+        private const val DOUBLE_PRESS_MS = 320L
+        private const val HOLD_MS = 550L
+        private const val TICK_MS = 28L
+        private const val FIRST_TICK_MS = 120L
+        private const val RAMP_MS = 1400L
+    }
 }

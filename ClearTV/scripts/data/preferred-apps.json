@@ -124,6 +124,16 @@
         "com.android.chrome",
         "com.chrome.beta"
       ]
+    },
+    {
+      "name": "TV Bro",
+      "keywords": [
+        "tv bro",
+        "tvbro"
+      ],
+      "packages": [
+        "com.phlox.tvwebbrowser"
+      ]
     }
   ]
 }

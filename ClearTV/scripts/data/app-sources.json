@@ -55,7 +55,7 @@
         "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
       ],
       "file_hint": "twitch",
-      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; версия для Android TV — если есть; НЕ берите сборку для Fire TV/Amazon (ошибка «Amazon Appstore required») — нужна обычная Google-сборка Twitch (телефонная tv.twitch.android.app или Android TV без пометки Amazon)",
+      "variant_hint": "на APKMirror нужен вариант «Android TV» от Google (пакет tv.twitch.android.viewer без пометки Fire TV/Amazon); сборка 13.0.0.1 оказалась Amazon-овской («Amazon Appstore required»); если такого варианта нет — телефонная tv.twitch.android.app (armeabi-v7a) с курсором ClearTV",
       "packages": [
         "tv.twitch.android.app",
         "tv.twitch.android.viewer"
@@ -238,6 +238,26 @@
       ],
       "source": "APKMirror (подписанные Google сборки)",
       "note": "Chrome не рассчитан на пульт: включите курсор ClearTV (удержать OK в приложении)."
+    },
+    {
+      "id": "tvbro",
+      "name": "TV Bro (браузер для телевизора)",
+      "kind": "page",
+      "page": "https://raw.githubusercontent.com/truefedex/tv-bro/master/latest_version.json",
+      "fallback_page": "https://github.com/truefedex/tv-bro/releases",
+      "hosts": [
+        "github.com",
+        "githubusercontent.com"
+      ],
+      "file": "TVBro.apk",
+      "packages": [
+        "com.phlox.tvwebbrowser"
+      ],
+      "skip_if_installed": [
+        "com.phlox.tvwebbrowser"
+      ],
+      "source": "Официальный репозиторий truefedex/tv-bro: файл latest_version.json (его читает сам браузер для обновлений) указывает на APK release-канала для armeabi-v7a в GitHub Releases",
+      "note": "Браузер, сделанный под пульт Android TV (собственный курсор, закладки, голосовой поиск). Chrome телефонный — для телевизора не предназначен; TV Bro показывается отдельной карточкой."
     }
   ],
   "retired": [
