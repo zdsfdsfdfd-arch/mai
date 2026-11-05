@@ -128,24 +128,39 @@
     },
     {
       "id": "netflix",
-      "name": "Netflix",
+      "name": "Netflix (Android TV, 13.2.2 — по выбору владельца)",
+      "kind": "mirror",
+      "mirror_pages": [
+        "https://www.apkmirror.com/apk/netflix-inc/netflix-android-tv/netflix-android-tv-13-2-2-release/",
+        "https://www.apkmirror.com/apk/netflix-inc/netflix-android-tv/"
+      ],
+      "file_hint": "(?i)com\\.netflix\\.ninja_13\\.2\\.2|netflix.*13[._-]2[._-]2",
+      "variant_hint": "именно 13.2.2: armeabi-v7a, nodpi, Android TV; «APK», не bundle",
+      "packages": [
+        "com.netflix.ninja"
+      ],
+      "skip_if_installed": [],
+      "source": "APKMirror, страница релиза Netflix (Android TV) 13.2.2 (ссылку дал владелец); старая 12.1.6 на этом ТВ ответила «версия не поддерживается» (отчёт 20:37)",
+      "note": "Ставится поверх 12.1.6 (adb install -r). Проверка сертификации у Netflix для Android TV одна на все версии, поэтому ожидания скромные; результат покажет сам телевизор. Старый файл com.netflix.ninja_12.1.6… из папки apps лучше удалить, иначе скрипт будет пытаться ставить его заново."
+    },
+    {
+      "id": "netflix_phone",
+      "name": "Netflix (телефонная версия)",
       "kind": "mirror",
       "mirror_pages": [
         "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=netflix",
         "https://www.apkmirror.com/apk/netflix-inc/netflix/"
       ],
-      "file_hint": "netflix",
-      "variant_hint": "ТЕЛЕФОННАЯ версия (пакет com.netflix.mediaclient), не «Android TV» (com.netflix.ninja — на этом ТВ сказала «версия не поддерживается»); лучше 8.x или старше, armeabi-v7a, nodpi; управление пультом неудобно, качество SD",
+      "file_hint": "(?i)com\\.netflix\\.mediaclient|netflix",
+      "variant_hint": "телефонная версия (com.netflix.mediaclient), armeabi-v7a, nodpi; 8.x или старше — больше шансов на несертифицированном ТВ",
       "packages": [
-        "com.netflix.mediaclient",
-        "com.netflix.ninja"
+        "com.netflix.mediaclient"
       ],
       "skip_if_installed": [
-        "com.netflix.mediaclient",
-        "com.netflix.ninja"
+        "com.netflix.mediaclient"
       ],
-      "source": "APKMirror (подписанные Netflix сборки); сам Netflix APK вне магазинов больше не раздаёт (страница 57688 проверена 10:42)",
-      "note": "Версия Netflix для Android TV (ninja) требует сертификацию Netflix и на Салют ТВ не запускается (проверено 20:35). Телефонная версия проверяет только Play Protect — старые сборки (8.x и ниже) на несертифицированных устройствах обычно работают в SD. Нужен зарубежный аккаунт и VPN."
+      "source": "APKMirror (подписанные Netflix сборки)",
+      "note": "Запускается на этом ТВ (проверено 23:27), требует зарубежный аккаунт и VPN; портретная раскладка — см. -PhoneAppsFullscreen; с курсором ClearTV."
     },
     {
       "id": "hbomax",
