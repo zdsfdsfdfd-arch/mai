@@ -84,11 +84,14 @@
 | Пункт | Результат на устройстве |
 |---|---|
 | Модель / Android / API | SaluteTV at30a6 (CVTE, Amlogic T5W), Android 13 / API 33, StarOS `eng.tuz_st.20260618.152406` |
-| Текущий HOME и поддержка `set-home-activity` | `ru.sberdevices.starlauncher/.ui.mainscreen.MainActivity`; `cmd package set-home-activity` есть в `cmd package help`; `cmd role` на этой сборке недоступен |
+| Текущий HOME и поддержка `set-home-activity` | было `ru.sberdevices.starlauncher/.ui.mainscreen.MainActivity`; `cmd package set-home-activity com.cleartv.launcher/…` → Success, `resolve-activity` печатает короткую форму `com.cleartv.launcher/.ui.HomeActivity` (сравнивать через `Test-SameComponent`); `cmd role` на этой сборке недоступен |
 | HDMI-входов в `TvInputManager` / обработчик найден | 3 HDMI + 1 AV (`com.droidlogic.tvinput`), тюнеры Dtvkit/ADTV отдельно; обработчик `ru.sberdevices.tvinputs/.main.activity.InputPlaybackActivity` — работает |
 | Кнопка MENU на пульте есть | нет; `input keyevent KEYCODE_MENU` до приложения не доходит — настройки открываются кнопкой на экране |
-| PSS ClearTV, рывки кадров (%) | 56,1 МБ; 57 % рывков в 0.1.0 (GPU ~15 мс/кадр) — переделано в 0.1.1, ждёт повторного замера |
+| PSS ClearTV, рывки кадров (%) | 56–61 МБ; рывки 57 % в 0.1.0 → 19,6 % в 0.1.1 (GPU p50 20 → 13 мс) |
 | Поведение после перезагрузки | не проверялось (ClearTV ещё не HOME) |
 | Голосовой помощник доступен при ClearTV как HOME | не проверялось |
 | HDMI-CEC | включён (`hdmi_cec_enabled (int): 1`), 3 порта, ARC на HDMI 1 |
+| `dumpsys connectivity` | формат Android 12+: `Active default network: <id>`; строки `CONNECTED/CONNECTED` нет (ломало проверку здоровья в clean.ps1 до 0.1.2) |
+| Фокус с верхних кнопок | ▶ на последней кнопке находил карточку за краем экрана (FocusFinder по абсолютным координатам) — ряд без фокуса теперь отдаёт только запомненную карточку |
+| Превью-каналы | VLC и VK Видео регистрируют `TvInputService` для превью на главном экране — это не HDMI/тюнер; критичны только входы с типом из `dumpsys tv_input` |
 | Хранилище | /data 3,0 ГБ, свободно 2,0 ГБ (порог «ротации» приложений Сбера пока далеко) |

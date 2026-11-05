@@ -52,7 +52,7 @@ $model = Get-Prop 'ro.product.model'; $api = [int](Get-Prop 'ro.build.version.sd
 Write-Ok "Устройство: $serial ($model, API $api)"
 $stamp = Get-Timestamp
 $raw = New-Dir (Join-Path $RawDir "verify-$stamp")
-$isDefaultHome = ((Get-ResolvedHome) -eq $HomeComponent)
+$isDefaultHome = (Test-SameComponent (Get-ResolvedHome) $HomeComponent)
 Write-Info "ClearTV — главный экран по умолчанию: $isDefaultHome"
 
 # 1. installed
@@ -175,6 +175,8 @@ else {
         Send-Key 'KEYCODE_DPAD_CENTER' -LongPress 1200; Send-Key 'KEYCODE_DPAD_DOWN' 500; Send-Key 'KEYCODE_DPAD_CENTER' 800; Send-Key 'KEYCODE_DPAD_LEFT' 600; Send-Key 'KEYCODE_DPAD_CENTER' 800
     } elseif ($moveStart) { Send-Key 'KEYCODE_BACK'; Add-Result 'reorder' 'FAIL' 'режим перемещения включился, но порядок не сохранён' $moveStart.Line }
     else { Send-Key 'KEYCODE_BACK'; Add-Result 'reorder' 'FAIL' 'длинное нажатие не открыло меню (или пункт меню не найден)' '' }
+    # The test edited the row; hand it back to automatic ordering (preferred apps first) so the owner's layout is not frozen.
+    Invoke-Adb shell am start -n $HomeComponent --ez cleartv.auto_layout true | Out-Null; Pause-Ms 800
 }
 
 # 9. system settings

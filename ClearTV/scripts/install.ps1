@@ -102,16 +102,44 @@ if (-not $NoLaunch) {
     if ($resumed -and $resumed -match [regex]::Escape($PackageName)) { Write-Ok "ClearTV на экране ($resumed)" } else { Write-Warn "На экране: $resumed — проверьте телевизор" }
 }
 
+function Enable-HomeKeeper {
+    # Salute TV firmware may put its launcher back at boot: ask ClearTV to keep the HOME choice through the TV's own ADB.
+    Invoke-Adb shell am start -n $HomeComponent --ez cleartv.keep_home true | Out-Null
+    Write-Info "Хранитель главного экрана включён: на телевизоре появится запрос «Разрешить отладку по USB?» от ClearTV — отметьте «Всегда разрешать» и подтвердите."
+}
+function Get-PreviousHomeForJournal {
+    # The launcher that was HOME before ClearTV: from an earlier failed-looking attempt, else from the first snapshot.
+    foreach ($e in @(Read-Journal | Where-Object { $_.Action -eq 'set-home-attempt' -and $_.Previous } | Sort-Object Time -Descending)) {
+        if (-not (Test-SameComponent $e.Previous $HomeComponent)) { return [string]$e.Previous }
+    }
+    foreach ($dir in @(Get-ChildItem $BackupDir -Directory -ErrorAction SilentlyContinue | Sort-Object Name)) {
+        $f = Join-Path $dir.FullName 'home-activity.txt'
+        if (Test-Path $f) { $h = ([string](Get-Content $f -Raw)).Trim(); if ($h -and -not (Test-SameComponent $h $HomeComponent)) { return $h } }
+    }
+    return ''
+}
+
 if ($SetHome) {
     Write-Step "Назначение главным экраном"
     $current = Get-ResolvedHome
     $supported = Test-SetHomeActivitySupported
     Write-Info "Текущий HOME: $current"
     Write-Info "cmd package set-home-activity поддерживается: $supported"
-    if (-not $supported) {
-        Write-Warn "Прошивка не поддерживает set-home-activity. Безопасных альтернатив через ADB нет; ClearTV остаётся доступным из списка приложений штатного лаунчера (иконка ClearTV)."
-    } elseif ($current -eq $HomeComponent) {
+    if (Test-SameComponent $current $HomeComponent) {
         Write-Ok "ClearTV уже назначен главным экраном"
+        # The journal must hold the way back. ClearTV 0.1.1 compared the short component name printed by
+        # resolve-activity ("pkg/.ui.HomeActivity") with the full one, logged a successful switch as a failed attempt
+        # without a restore command and never enabled the keeper — repaired here from the attempt/snapshot.
+        if (@(Get-PendingJournal | Where-Object { $_.Action -eq 'set-home' }).Count -eq 0) {
+            $previous = Get-PreviousHomeForJournal
+            if ($previous) {
+                Add-JournalEntry -Action 'set-home' -Description "HOME: $previous -> $HomeComponent (запись отката восстановлена по журналу/снимку)" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand (Get-SetHomeRestoreCommand $previous) -Previous $previous -New $HomeComponent -Verify 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' | Out-Null
+                Write-Ok "В журнал добавлена команда отката: cmd package set-home-activity $previous"
+                if (-not $NoKeepHome) { Enable-HomeKeeper }
+            } else { Write-Warn "Прежний главный экран для журнала отката не найден (нет снимка состояния) — restore.ps1 не сможет вернуть штатный лаунчер автоматически" }
+        }
+    } elseif (-not $supported) {
+        Write-Warn "Прошивка не поддерживает set-home-activity. Безопасных альтернатив через ADB нет; ClearTV остаётся доступным из списка приложений штатного лаунчера (иконка ClearTV)."
     } else {
         Write-Host ""
         Write-Host "  Последствия: кнопка HOME и включение телевизора будут открывать ClearTV вместо '$current'." -ForegroundColor Yellow
@@ -123,15 +151,10 @@ if ($SetHome) {
             Write-Info $r.Output
             Pause-Ms 1000
             $after = Get-ResolvedHome
-            if ($after -eq $HomeComponent) {
-                $restoreCmd = "am start -n $HomeComponent --ez cleartv.keep_home false; cmd package set-home-activity $current"
-                Add-JournalEntry -Action 'set-home' -Description "HOME: $current -> $HomeComponent" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand $restoreCmd -Previous $current -New $HomeComponent -Verify 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' | Out-Null
+            if (Test-SameComponent $after $HomeComponent) {
+                Add-JournalEntry -Action 'set-home' -Description "HOME: $current -> $HomeComponent" -Command "cmd package set-home-activity $HomeComponent" -RestoreCommand (Get-SetHomeRestoreCommand $current) -Previous $current -New $HomeComponent -Verify 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' | Out-Null
                 Write-Ok "Главный экран: $after"
-                if (-not $NoKeepHome) {
-                    # Salute TV firmware may put its launcher back at boot: ask ClearTV to keep the HOME choice through the TV's own ADB.
-                    Invoke-Adb shell am start -n $HomeComponent --ez cleartv.keep_home true | Out-Null
-                    Write-Info "Хранитель главного экрана включён: на телевизоре появится запрос «Разрешить отладку по USB?» от ClearTV — отметьте «Всегда разрешать» и подтвердите."
-                }
+                if (-not $NoKeepHome) { Enable-HomeKeeper }
                 Write-Info "Проверьте кнопку HOME на пульте. Откат: scripts\restore.ps1"
             } else {
                 Write-Fail "HOME не изменился (сейчас: $after). Прошивка игнорирует set-home-activity; обходные пути с системными пакетами не применяются намеренно."

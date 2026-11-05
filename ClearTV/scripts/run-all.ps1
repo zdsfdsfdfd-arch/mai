@@ -29,9 +29,13 @@ if (-not $Ip) { Write-Host "IP не указан." -ForegroundColor Red; exit 1 
 
 $steps = @(
     @{ Name = 'Диагностика'; File = 'diagnose.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } },
-    @{ Name = 'Установка ClearTV'; File = 'install.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } },
-    @{ Name = 'Проверка на телевизоре'; File = 'verify.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } }
+    @{ Name = 'Установка ClearTV'; File = 'install.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } }
 )
+$appsDir = Join-Path $root 'apps'
+if (@(Get-ChildItem $appsDir -Filter '*.apk' -Recurse -File -ErrorAction SilentlyContinue).Count -gt 0) {
+    $steps += @{ Name = 'Приложения из папки apps'; File = 'install-apps.ps1'; Params = @{ Ip = $Ip; Yes = $true } }
+}
+$steps += @{ Name = 'Проверка на телевизоре'; File = 'verify.ps1'; Params = @{ Ip = $Ip; AutoInstallTools = $true } }
 
 $summary = @()
 foreach ($s in $steps) {

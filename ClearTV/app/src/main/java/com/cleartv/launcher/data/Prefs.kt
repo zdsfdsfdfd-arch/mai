@@ -95,6 +95,9 @@ class Prefs(context: Context) {
 
     fun resetLayout() { sp.edit().remove(K_FAVORITES).remove(K_FAV_TOUCHED).remove(K_HIDDEN).remove(K_LAST_FOCUS).apply() }
 
+    /** Back to the automatic row order (preferred apps first); hidden apps are kept. */
+    fun autoLayout() { sp.edit().remove(K_FAVORITES).remove(K_FAV_TOUCHED).apply() }
+
     fun addListener(onChange: (String) -> Unit): SharedPreferences.OnSharedPreferenceChangeListener {
         val l = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> if (key != null) onChange(key) }
         listeners += l // keep a strong reference: SharedPreferences stores listeners weakly

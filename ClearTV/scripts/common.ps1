@@ -278,6 +278,38 @@ function Get-ResolvedHome {
     return $null
 }
 
+function ConvertTo-FullComponent([string]$Component) {
+    # resolve-activity prints the short form "pkg/.ui.Main"; set-home-activity and our constants use "pkg/pkg.ui.Main".
+    if ([string]::IsNullOrWhiteSpace($Component)) { return '' }
+    $c = $Component.Trim()
+    if ($c -match '^([^/\s]+)/\.(\S+)$') { return "$($Matches[1])/$($Matches[1]).$($Matches[2])" }
+    return $c
+}
+function Test-SameComponent([string]$A, [string]$B) {
+    if ([string]::IsNullOrWhiteSpace($A) -or [string]::IsNullOrWhiteSpace($B)) { return $false }
+    return ((ConvertTo-FullComponent $A) -eq (ConvertTo-FullComponent $B))
+}
+function Get-SetHomeRestoreCommand([string]$Previous) {
+    # turn the keeper off first, or ClearTV would put itself back after the switch
+    return "am start -n $script:HomeComponent --ez cleartv.keep_home false; cmd package set-home-activity $Previous"
+}
+
+function Test-ConnectivityDumpOnline([string]$Text) {
+    # dumpsys connectivity: Android <= 11 prints NetworkInfo with "state: CONNECTED/CONNECTED"; Android 12+ prints
+    # "Active default network: 102" (or "none"). Returns $true/$false, or $null when the format is unknown.
+    if ([string]::IsNullOrWhiteSpace($Text)) { return $null }
+    if ($Text -match 'Active default network:\s*(\S+)') { return [bool]($Matches[1] -match '^\d+$') }
+    if ($Text -match 'CONNECTED/CONNECTED') { return $true }
+    if ($Text -match 'NetworkAgentInfo') { return $false }
+    return $null
+}
+
+function Get-PreferredAppPackages {
+    $data = Read-JsonFile (Join-Path (Join-Path $PSScriptRoot 'data') 'preferred-apps.json')
+    if (-not $data) { return @() }
+    return @($data.apps | ForEach-Object { @($_.packages) } | Where-Object { $_ })
+}
+
 function Get-HomeCandidates {
     $r = Invoke-AdbShell 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
     return @(ConvertFrom-BriefComponents $r.Output)
@@ -381,9 +413,12 @@ function Test-DeviceHealth([string]$ExpectedHome) {
     if ((Get-ShellText 'echo ok').Trim() -ne 'ok') { return 'телевизор не отвечает на команды' }
     $resolved = Get-ResolvedHome
     if (-not $resolved) { return 'на телевизоре не осталось главного экрана (HOME не резолвится)' }
-    if ($ExpectedHome -and $resolved -ne $ExpectedHome) { return "сменился главный экран: теперь $resolved" }
-    $conn = Get-ShellText 'dumpsys connectivity'
-    if ($conn -and $conn -notmatch 'CONNECTED/CONNECTED') { return 'телевизор потерял сеть' }
+    if ($ExpectedHome -and -not (Test-SameComponent $resolved $ExpectedHome)) { return "сменился главный экран: теперь $resolved" }
+    # A TV that answers over Wi-Fi ADB is online by definition; otherwise read the connectivity dump (both formats).
+    if (-not ($script:Serial -match ':\d+$')) {
+        $online = Test-ConnectivityDumpOnline (Get-ShellText 'dumpsys connectivity')
+        if ($online -eq $false) { return 'телевизор потерял сеть' }
+    }
     return $null
 }
 function Get-SecureSetting([string]$Key) { $v = (Get-ShellText "settings get secure $Key").Trim(); if ($v -eq 'null') { '' } else { $v } }
@@ -558,6 +593,7 @@ function Get-DeviceInventory {
     $raw.Home          = Get-ShellText 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
     $raw.MainAny       = Get-ShellText 'cmd package query-activities --brief -a android.intent.action.MAIN'
     $raw.TvInput       = Get-ShellText 'cmd package query-services --brief -a android.media.tv.TvInputService'
+    $raw.TvInputDump   = Get-ShellText 'dumpsys tv_input'
     $raw.Voice         = Get-ShellText 'cmd package query-services --brief -a android.service.voice.VoiceInteractionService'
     $raw.Boot          = Get-ShellText 'cmd package query-receivers --brief -a android.intent.action.BOOT_COMPLETED'
     $raw.Passthrough   = Get-ShellText 'cmd package query-activities --brief -a android.intent.action.VIEW -d content://android.media.tv/passthrough/probe'
@@ -565,12 +601,16 @@ function Get-DeviceInventory {
     $raw.ResolvedHome  = Get-ShellText 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
 
     $pkgOf = { param($comps) @($comps | ForEach-Object { ($_ -split '/')[0] } | Select-Object -Unique) }
+    # Only inputs with a type (HDMI/AV/tuner...) make their package critical; apps that merely publish a home-screen
+    # preview channel (VLC, VK Video) also register a TvInputService and must not be mistaken for HDMI providers.
+    $hwInputs = @(ConvertFrom-TvInputDump $raw.TvInputDump | Where-Object { $_.Type })
+    $tvInputPkgs = if ($hwInputs.Count -gt 0) { @($hwInputs | ForEach-Object { ($_.Id -split '/')[0] } | Select-Object -Unique) } else { & $pkgOf (ConvertFrom-BriefComponents $raw.TvInput) }
     $ctx = @{
         LeanbackPkgs = & $pkgOf (ConvertFrom-BriefComponents $raw.Leanback)
         LauncherPkgs = & $pkgOf (ConvertFrom-BriefComponents $raw.Launcher)
         HomePkgs     = & $pkgOf (ConvertFrom-BriefComponents $raw.Home)
         MainAnyPkgs  = & $pkgOf (ConvertFrom-BriefComponents $raw.MainAny)
-        TvInputPkgs  = & $pkgOf (ConvertFrom-BriefComponents $raw.TvInput)
+        TvInputPkgs  = $tvInputPkgs
         VoicePkgs    = & $pkgOf (ConvertFrom-BriefComponents $raw.Voice)
         BootPkgs     = & $pkgOf (ConvertFrom-BriefComponents $raw.Boot)
         PassthroughPkgs = & $pkgOf (ConvertFrom-BriefComponents $raw.Passthrough)

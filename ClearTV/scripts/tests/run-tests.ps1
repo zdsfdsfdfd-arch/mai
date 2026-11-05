@@ -43,6 +43,10 @@ Check 'ConvertFrom-TvInputDump (AOSP format with type=)' ($tvA.Count -eq 2 -and 
 Check 'Test-HdmiCecEnabled (Android 13 "hdmi_cec_enabled (int): 1")' ((Test-HdmiCecEnabled "mIsCecAvailable: false`nCEC settings:`n  hdmi_cec_enabled (int): 1 (default: 0) [modifiable]`n") -eq $true)
 Check 'Test-HdmiCecEnabled (Android 13 disabled)' ((Test-HdmiCecEnabled "CEC settings:`n  hdmi_cec_enabled (int): 0 (default: 0) [modifiable]`n") -eq $false)
 Check 'Test-HdmiCecEnabled (legacy mHdmiControlEnabled)' ((Test-HdmiCecEnabled (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_hdmi_control.txt') -Raw)) -eq $true)
+Check 'Test-SameComponent: short "pkg/.ui.HomeActivity" equals the full name' ((Test-SameComponent 'com.cleartv.launcher/.ui.HomeActivity' 'com.cleartv.launcher/com.cleartv.launcher.ui.HomeActivity') -and -not (Test-SameComponent 'ru.sberdevices.starlauncher/.ui.mainscreen.MainActivity' 'com.cleartv.launcher/.ui.HomeActivity') -and -not (Test-SameComponent '' 'a/.B'))
+Check 'Test-ConnectivityDumpOnline (Android 13 active default network)' ((Test-ConnectivityDumpOnline "NetworkProviders for:`n  4: WifiNetworkFactory`n`nActive default network: 102`n") -eq $true)
+Check 'Test-ConnectivityDumpOnline (Android 13 offline / legacy / unknown)' (((Test-ConnectivityDumpOnline "Active default network: none`n") -eq $false) -and ((Test-ConnectivityDumpOnline "NetworkAgentInfo{ ni{[type: WIFI[], state: CONNECTED/CONNECTED]} }") -eq $true) -and ($null -eq (Test-ConnectivityDumpOnline "")))
+Check 'Get-PreferredAppPackages: owner list loaded (VK Video, YouTube)' ((@(Get-PreferredAppPackages) -contains 'com.vk.tv') -and (@(Get-PreferredAppPackages) -contains 'com.google.android.youtube.tv'))
 $ev = ConvertFrom-LogcatEvents "I ClearTV : EVT focus row=apps index=0 pkg=a`nI ClearTV : MARK abc`nI ClearTV : EVT launch pkg=com.x ok=true`n" 'MARK abc'
 Check 'ConvertFrom-LogcatEvents after marker' ($ev.Count -eq 1 -and $ev[0].Name -eq 'launch' -and $ev[0].Fields['ok'] -eq 'true')
 $pk = ConvertFrom-DumpsysPackages (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_package_packages.txt') -Raw)
@@ -109,6 +113,32 @@ Check 'set-home applied on device' ($homeState.Trim() -eq 'com.cleartv.launcher/
 $sh = $j | Where-Object Action -eq 'set-home'
 Check 'journal: set-home entry remembers previous launcher and turns the keeper off first' ($sh.Previous -eq 'com.stock.launcher/.HomeActivity' -and $sh.RestoreCommand -match 'cleartv.keep_home false; cmd package set-home-activity com.stock.launcher/.HomeActivity$')
 Check 'journal: update entry has no restore command' ((@($j | Where-Object Action -eq 'update-apk').Count -eq 1))
+
+Write-Host "== 5b. install.ps1 -SetHome on a TV that is already switched but has no rollback entry (first real run)"
+$env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports-repair'
+New-Item -ItemType Directory -Path (Join-Path $env:CLEARTV_REPORTS_DIR 'backup/20260101-000000') -Force | Out-Null
+Set-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'backup/20260101-000000/home-activity.txt') 'com.stock.launcher/.HomeActivity'
+Set-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') 'com.cleartv.launcher/com.cleartv.launcher.ui.HomeActivity'
+Remove-Item (Join-Path $env:CLEARTV_FAKE_STATE 'logcat.txt') -ErrorAction SilentlyContinue
+& (Join-Path $scripts 'install.ps1') -Ip 192.168.1.50 -Apk $apk -NoLaunch -SetHome -Yes *> (Join-Path $tmp 'install-repair.log')
+$jr = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json)
+$shr = @($jr | Where-Object Action -eq 'set-home')
+Check 'repair: set-home entry recreated from the snapshot with a restore command' ($shr.Count -eq 1 -and $shr[0].Previous -eq 'com.stock.launcher/.HomeActivity' -and $shr[0].RestoreCommand -match 'set-home-activity com.stock.launcher/.HomeActivity$') "got $($shr.Count): $($shr | ConvertTo-Json -Compress)"
+$calls = Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'calls.log') -Raw
+Check 'repair: keeper enabled (cleartv.keep_home true sent)' ($calls -match 'cleartv.keep_home true')
+& (Join-Path $scripts 'restore.ps1') -Ip 192.168.1.50 -Yes *> (Join-Path $tmp 'restore-repair.log')
+Check 'repair: restore brings the stock launcher back' (((Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'home.txt') -Raw).Trim()) -eq 'com.stock.launcher/.HomeActivity')
+$env:CLEARTV_REPORTS_DIR = Join-Path $tmp 'reports'
+
+Write-Host "== 5c. install-apps.ps1 (owner's APK folder)"
+$appsDir = Join-Path $tmp 'apps'; New-Item -ItemType Directory -Path $appsDir -Force | Out-Null
+Set-Content (Join-Path $appsDir 'SomeApp.apk') 'fake'
+& (Join-Path $scripts 'install-apps.ps1') -Ip 192.168.1.50 -Folder $appsDir -Yes *> (Join-Path $tmp 'install-apps.log')
+$ja = @(Get-Content (Join-Path $env:CLEARTV_REPORTS_DIR 'operations-journal.json') -Raw | ConvertFrom-Json)
+Check 'install-apps: APK installed and journaled without an automatic rollback' (@($ja | Where-Object { $_.Action -eq 'install-app' -and -not $_.RestoreCommand }).Count -eq 1)
+$emptyDir = Join-Path $tmp 'apps-empty'; New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
+$outApps = & (Join-Path $scripts 'install-apps.ps1') -Ip 192.168.1.50 -Folder $emptyDir -Yes *>&1 | Out-String
+Check 'install-apps: empty folder is a no-op' ($outApps -match 'нет APK')
 
 Write-Host "== 6. verify.ps1 smoke run (fake device, time-scaled)"
 & (Join-Path $scripts 'verify.ps1') -Ip 192.168.1.50 *> (Join-Path $tmp 'verify.log')

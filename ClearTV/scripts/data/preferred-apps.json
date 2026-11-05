@@ -1,0 +1,115 @@
+{
+  "about": "Приложения владельца: ведут главный ряд ClearTV в этом порядке и никогда не отключаются clean.ps1. Зеркало app/src/main/res/values/favorites.xml (лаунчер подбирает по имени пакета, затем по подписи).",
+  "apps": [
+    {
+      "name": "YouTube",
+      "keywords": [
+        "youtube",
+        "ютуб"
+      ],
+      "packages": [
+        "com.google.android.youtube.tv",
+        "com.google.android.youtube",
+        "com.teamsmart.videomanager.tv",
+        "com.liskovsoft.smarttubetv.beta",
+        "ru.sberdevices.startube"
+      ]
+    },
+    {
+      "name": "Netflix",
+      "keywords": [
+        "netflix"
+      ],
+      "packages": [
+        "com.netflix.ninja",
+        "com.netflix.mediaclient"
+      ]
+    },
+    {
+      "name": "HBO Max",
+      "keywords": [
+        "hbo max",
+        "hbo"
+      ],
+      "packages": [
+        "com.wbd.stream",
+        "com.hbo.hbonow",
+        "eu.hbogo.androidtv",
+        "com.hbo.go"
+      ]
+    },
+    {
+      "name": "Apple TV",
+      "keywords": [
+        "apple tv"
+      ],
+      "packages": [
+        "com.apple.atve.androidtv.appletv",
+        "com.apple.atve.sony.appletv",
+        "com.apple.atve.amazon.appletv"
+      ]
+    },
+    {
+      "name": "Spotify",
+      "keywords": [
+        "spotify"
+      ],
+      "packages": [
+        "com.spotify.tv.android",
+        "com.spotify.music",
+        "com.spotify.lite"
+      ]
+    },
+    {
+      "name": "Happ VPN",
+      "keywords": [
+        "happ"
+      ],
+      "packages": [
+        "com.happproxy"
+      ]
+    },
+    {
+      "name": "Twitch",
+      "keywords": [
+        "twitch"
+      ],
+      "packages": [
+        "tv.twitch.android.app",
+        "tv.twitch.android.viewer"
+      ]
+    },
+    {
+      "name": "Rutube",
+      "keywords": [
+        "rutube"
+      ],
+      "packages": [
+        "ru.rutube.app",
+        "ru.rutube.tv"
+      ]
+    },
+    {
+      "name": "VK Видео",
+      "keywords": [
+        "vk видео",
+        "вк видео",
+        "vk video"
+      ],
+      "packages": [
+        "com.vk.tv",
+        "com.vk.vkvideo"
+      ]
+    },
+    {
+      "name": "Chrome",
+      "keywords": [
+        "chrome"
+      ],
+      "packages": [
+        "com.android.chrome",
+        "com.chrome.beta"
+      ]
+    }
+  ]
+}

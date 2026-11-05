@@ -37,7 +37,8 @@ case "$cmd" in
       "cmd package set-home-activity "*) echo "${rest##* }" > "$STATE/home.txt"; echo "Success" ;;
       "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME")
         echo "priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true"
-        if [ -f "$STATE/home.txt" ]; then cat "$STATE/home.txt"; else echo "com.stock.launcher/.HomeActivity"; fi ;;
+        # like a real device, print the short form "pkg/.Class" when the class lives in the package
+        if [ -f "$STATE/home.txt" ]; then h="$(cat "$STATE/home.txt")"; pkg="${h%%/*}"; cls="${h#*/}"; case "$cls" in "$pkg".*) cls=".${cls#"$pkg".}";; esac; echo "$pkg/$cls"; else echo "com.stock.launcher/.HomeActivity"; fi ;;
       "pm path com.cleartv.launcher") [ -f "$STATE/installed" ] && echo "package:/data/app/com.cleartv.launcher-1/base.apk" ;;
       "echo ok") echo ok ;;
       "pm disable-user --user 0 "*) pkg="${rest##* }"; grep -qx "$pkg" "$STATE/disabled.txt" 2>/dev/null || echo "$pkg" >> "$STATE/disabled.txt"; echo "Package $pkg new state: disabled-user" ;;
@@ -48,7 +49,7 @@ case "$cmd" in
       "settings delete secure "*|"settings delete global "*) ns="$(echo "$rest" | cut -d' ' -f3)"; key="${rest##* }"; if [ -f "$STATE/settings_$ns.txt" ]; then grep -v "^$key=" "$STATE/settings_$ns.txt" > "$STATE/s.tmp"; mv -f "$STATE/s.tmp" "$STATE/settings_$ns.txt"; fi; echo "Deleted 1 rows" ;;
       "appops get "*) pkg="$(echo "$rest" | cut -d' ' -f3)"; m="$(grep "^$pkg=" "$STATE/appops.txt" 2>/dev/null | cut -d= -f2)"; echo "SYSTEM_ALERT_WINDOW: ${m:-allow}" ;;
       "appops set "*) pkg="$(echo "$rest" | cut -d' ' -f3)"; mode="${rest##* }"; touch "$STATE/appops.txt"; grep -v "^$pkg=" "$STATE/appops.txt" > "$STATE/a.tmp"; echo "$pkg=$mode" >> "$STATE/a.tmp"; mv -f "$STATE/a.tmp" "$STATE/appops.txt" ;;
-      "dumpsys connectivity") echo "NetworkAgentInfo{ ni{[type: WIFI[], state: CONNECTED/CONNECTED]} }" ;;
+      "dumpsys connectivity") echo "NetworkProviders for:"; echo "  4: WifiNetworkFactory"; echo ""; echo "Active default network: 102"; echo "" ;;
       "df /data") echo "Filesystem 1K-blocks Used Available Use% Mounted on"; echo "/dev/block/dm-1 3000000 2600000 400000 87% /data" ;;
       "dumpsys wifi") echo "Wi-Fi is enabled" ;;
       "pm uninstall com.cleartv.launcher") rm -f "$STATE/installed"; echo "Success" ;;

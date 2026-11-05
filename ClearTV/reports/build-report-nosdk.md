@@ -1,6 +1,6 @@
 # Отчёт о сборке ClearTV без Android SDK (облачная сессия, Linux)
 
-Дата: 2026-11-05 02:33 UTC (сборка 0.1.1; предыдущая 0.1.0 от 2026-11-04 22:44 UTC имела SHA-256 `5085922f…3255d6`). Сборка выполнена скриптом `scripts/build-nosdk.sh` в контейнере без доступа к
+Дата: 2026-11-05 03:11 UTC (сборка 0.1.2; предыдущие: 0.1.1 от 2026-11-05 02:33 UTC, SHA-256 `363ce3ad…958d8`; 0.1.0 от 2026-11-04 22:44 UTC, `5085922f…3255d6`).
 `dl.google.com` (Android SDK, Google Maven), поэтому вместо Gradle + AGP + D8 использована цепочка
 kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробности: `docs/build-without-sdk.md`.
 
@@ -18,11 +18,11 @@ kotlinc → aapt2 → DxCompat → dx → zipalign → apksigner. Подробн
 
 ## Результат
 
-- APK: `dist/ClearTV-0.1.1-debug.apk` — 1355214 байт
-- SHA-256: `363ce3ad653b7997480b655879d91777f6a4bea4bae46821c2a10c3b94c958d8`
+- APK: `dist/ClearTV-0.1.2-debug.apk` — 1359310 байт
+- SHA-256: `ede459cde079a6b09c15b659e7fb2f1b6055458547373ba82a34365319c15d9c`
 - Подпись: v2 + v3 (debug-ключ `app/debug.keystore`, пароль `android`), `apksigner verify` — Verifies
-- minSdk 24, targetSdk 34, versionCode 2, versionName 0.1.1; dex версии 037 (без invokedynamic)
-- Классов в dex: 1170, методов: 13474
+- minSdk 24, targetSdk 34, versionCode 3, versionName 0.1.2; dex версии 037 (без invokedynamic)
+- Классов в dex: 1174, методов: 13492
 
 ## DxCompat: методы kotlin-stdlib, заменённые заглушками (invokedynamic не поддерживается dx)
 

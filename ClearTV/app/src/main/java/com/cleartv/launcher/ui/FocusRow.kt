@@ -156,10 +156,15 @@ class FocusRow @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         return if (current == null) -1 else container.indexOfChild(current)
     }
 
-    /** When focus comes back from another row (UP/DOWN), offer only the remembered card to FocusFinder. */
+    /**
+     * While focus is elsewhere, offer only the remembered card to FocusFinder — for every direction. Coming back
+     * (UP/DOWN) then lands on that card, and LEFT/RIGHT from the top-right buttons cannot jump into the row: with
+     * all cards on offer, RIGHT from the last button used to find an off-screen card whose left edge lay beyond
+     * the button and open it (seen on a real TV; the row scrolled to card 5 and launched it).
+     */
     override fun addFocusables(views: ArrayList<View>, direction: Int, focusableMode: Int) {
         val remembered = container.getChildAt(lastFocusedIndex)
-        if (remembered != null && !hasFocus() && (direction == FOCUS_UP || direction == FOCUS_DOWN)) {
+        if (remembered != null && !hasFocus()) {
             remembered.addFocusables(views, direction, focusableMode)
             return
         }

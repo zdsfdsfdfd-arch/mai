@@ -33,6 +33,7 @@ import com.cleartv.launcher.data.AppEntry
 import com.cleartv.launcher.data.AppRepository
 import com.cleartv.launcher.data.HomeKeeper
 import com.cleartv.launcher.data.NetworkMonitor
+import com.cleartv.launcher.data.PreferredApps
 import com.cleartv.launcher.data.Prefs
 import com.cleartv.launcher.data.SaluteDefaults
 import com.cleartv.launcher.data.TvInputsRepository
@@ -225,7 +226,15 @@ class HomeActivity : Activity() {
 
     /** `am start -n <ClearTV> --ez cleartv.open_settings true` opens the settings panel (verify.ps1; remotes without MENU). */
     private fun applyOpenSettingsExtra(intent: Intent?) {
-        if (intent == null || !intent.getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) return
+        if (intent == null) return
+        if (intent.getBooleanExtra(EXTRA_AUTO_LAYOUT, false)) {
+            // verify.ps1 moves cards around to test the feature and then hands the row back to automatic mode
+            intent.removeExtra(EXTRA_AUTO_LAYOUT)
+            prefs.autoLayout()
+            Logs.event("auto_layout", "via" to "intent")
+            if (allEntries.isNotEmpty()) rebuildFavorites()
+        }
+        if (!intent.getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) return
         intent.removeExtra(EXTRA_OPEN_SETTINGS)
         if (allApps.isOpen) allApps.hide()
         if (!settingsPanel.isOpen) settingsPanel.open()
@@ -346,24 +355,39 @@ class HomeActivity : Activity() {
         if (allEntries.isEmpty()) return   // nothing discovered yet: never derive (or persist) an order from nothing
         val visible = visibleEntries()
         val byPkg = visible.associateBy { it.packageName }
-        val saved = prefs.favorites
+        // Automatic mode until the owner edits the row: the order is derived from what is installed right now, so a
+        // preferred app (res/values/favorites.xml) shows up as soon as it is installed. After the first edit the saved
+        // order is the truth and only loses apps that were uninstalled.
+        preferredNow = PreferredApps.pick(this, visible).map { it.packageName }.toSet()
         val order: List<String>
-        if (saved == null || (saved.isEmpty() && !prefs.favoritesTouched)) {
+        if (!prefs.favoritesTouched) {
             order = defaultFavorites(visible)
-            if (order.isNotEmpty()) { prefs.favorites = order; Logs.i("favorites initialised with ${order.size} apps") }
         } else {
+            val saved = prefs.favorites ?: emptyList()
             order = AppOrder.retain(saved, byPkg.keys)
             if (order != saved) prefs.favorites = order
         }
         favorites = order.mapNotNull { byPkg[it] }.toMutableList()
-        Logs.event("favorites", "n" to favorites.size, "visible" to visible.size, "hidden" to prefs.hidden.size, "touched" to prefs.favoritesTouched)
+        Logs.event("favorites", "n" to favorites.size, "visible" to visible.size, "hidden" to prefs.hidden.size,
+            "auto" to !prefs.favoritesTouched, "preferred" to favorites.count { it.packageName in preferredNow })
         renderAppsRow()
     }
 
+    private var preferredNow: Set<String> = emptySet()
+
+    /** Preferred apps first (in the owner's order), then what the owner installed, then the firmware's TV apps, then utilities. */
     private fun defaultFavorites(visible: List<AppEntry>): List<String> {
-        val tv = visible.filter { it.leanback }.map { it.packageName }
-        val rest = visible.filter { !it.leanback }.map { it.packageName }
-        return (tv + rest).take(DEFAULT_FAVORITES)
+        val preferred = PreferredApps.pick(this, visible)
+        val rest = visible.filter { it.packageName !in preferredNow }
+            .sortedWith(compareBy<AppEntry>({ rank(it) }, { it.label.lowercase() }))
+        return (preferred + rest).map { it.packageName }.take(DEFAULT_FAVORITES)
+    }
+
+    private fun rank(e: AppEntry): Int = when {
+        !e.system && e.leanback -> 0   // installed by the owner, made for TV
+        !e.system -> 1                 // installed by the owner
+        e.leanback -> 2                // firmware apps made for TV
+        else -> 3                      // settings, players, casting receivers and other utilities
     }
 
     private fun renderAppsRow() {
@@ -830,8 +854,9 @@ class HomeActivity : Activity() {
     private fun toast(text: CharSequence) { Toast.makeText(this, text, Toast.LENGTH_SHORT).show() }
 
     companion object {
-        private const val DEFAULT_FAVORITES = 10
+        private const val DEFAULT_FAVORITES = 12
         private const val REQ_PICK = 41
         const val EXTRA_OPEN_SETTINGS = "cleartv.open_settings"
+        const val EXTRA_AUTO_LAYOUT = "cleartv.auto_layout"
     }
 }

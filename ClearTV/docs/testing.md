@@ -9,12 +9,12 @@
 |---|---|
 | Компиляция всех исходников Kotlin против API 34 с заглушками Android `java.*` (только API, существующие на Android) | OK, предупреждений об отсутствующих API нет |
 | Ресурсы: `aapt2 compile/link`, манифест, 18 векторных иконок, 2 локали | OK |
-| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1170 классов, 13 474 метода (сборка 0.1.1) |
+| Dex: `dx` + DxCompat, проверка отсутствия ссылок на заглушки и `invokedynamic` | OK, 1174 классов, 13 492 методов (сборка 0.1.2) |
 | Подпись и выравнивание: `zipalign -c`, `apksigner verify` (v2, v3) | OK |
 | `aapt2 dump badging`: HOME/LEANBACK/LAUNCHER-активности, баннер, иконки 160–640 dpi, minSdk 24 | OK |
 | JUnit (модуль `core`, через `gradlew :core:test`, Gradle 8.14.3, Kotlin 2.0.21) | 13 тестов, 0 падений |
 | Встроенный ADB-клиент против поддельного adbd (`tools/adbtest/run.sh`: CNXN/AUTH TOKEN→SIGNATURE→RSAPUBLICKEY, shell, отказ потока) | OK, оба сценария (неизвестный ключ с подтверждением, известный ключ без запроса) |
-| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 82 проверки, 0 падений; см. ниже |
+| Тесты PowerShell-скриптов (`scripts/tests/run-tests.ps1`, PowerShell 7.4, подменный adb) | 92 проверки, 0 падений; см. ниже |
 | Генерация растровых ассетов (иконки, баннер, 4 обоев) и визуальный просмотр баннера/обоев | OK |
 
 Тесты скриптов покрывают: разбор `getprop`, списков пакетов, `dumpsys package packages`, `meminfo`, `gfxinfo`,
@@ -39,6 +39,12 @@ SaluteTV `at30a6`, Android 13 (API 33), StarOS, Amlogic T5W, 2 ГБ RAM, 1920×1
 | frame_stats | WARN | 57 % рывков, GPU ~15 мс/кадр — убраны дубликат фона, тени и полноэкранный градиент (0.1.1); требует повторного замера |
 | home_key | SKIP | ClearTV ещё не назначен HOME (ворота run-all не пропустили полную настройку) |
 
+Второй запуск (ClearTV 0.1.1, 08:47): PASS 12, FAIL 0, WARN 1 (`settings_panel` открылась только командой — фокус
+с кнопки «Настройки» уходил в док, исправлено в 0.1.2), SKIP 1 (`home_key`); `frame_stats` 19,6 % рывков, PSS 60,9 МБ.
+Полная настройка выполнена: HOME = ClearTV, заставка, запрет оверлея, защита HOME, порог хранилища. Отключение
+пакетов остановила ложная проверка сети (формат `dumpsys connectivity` Android 13) — исправлено в 0.1.2.
+Подробности: `reports/field-run-20261105.md`.
+
 ## Не выполнено (невозможно в облачной среде)
 
 - Запуск ClearTV на устройстве или эмуляторе: нет образов эмулятора (dl.google.com закрыт) и нет KVM.
@@ -62,6 +68,7 @@ SaluteTV `at30a6`, Android 13 (API 33), StarOS, Amlogic T5W, 2 ГБ RAM, 1920×1
 | Плавность | `frame_stats` | `dumpsys gfxinfo` после серии нажатий |
 | Восстановление после аварийного завершения | `crash_recovery` | `am crash` (API 26+) / `force-stop`, затем HOME |
 | Панель настроек, «Все приложения» | `settings_panel`, `all_apps` | пультом ▲ ▶▶▶ OK (на пультах Сбера нет MENU), запасные пути MENU и `am start --ez cleartv.open_settings true`; BACK; события `EVT overlay` |
+| Приложения владельца (`apps\*.apk`) | `install-apps.ps1` (шаг run-all, если в папке есть APK) | `adb install -r -t`, журнал `install-app`; ряд ClearTV обновляется сам |
 
 Результат — `reports/verify-report.md` с колонкой доказательств (строки logcat, вывод `am start`).
 

@@ -16,3 +16,5 @@ reports/adb-log.txt
 *.log
 *.idsig
 ClearTV-reports-*.zip
+# APK files the owner drops in for install-apps.ps1
+apps/**/*.apk

@@ -72,8 +72,10 @@ if ($null -ne $freeMb -and $freeMb -lt 450 -and -not $LowerStorageThreshold) { W
 # ------------------------------------------------------------------ plan
 $wifiOwners = @([regex]::Matches((Get-ShellText "dumpsys wifi"), 'cname=([^\s]+)') | ForEach-Object { $_.Groups[1].Value })
 $homePkg = if ($homeNow) { ($homeNow -split '/')[0] } else { '' }
+$preferredPkgs = @(Get-PreferredAppPackages)
 function Test-NeverTouch($row) {
     if ($row.Package -eq $PackageName) { return 'ClearTV' }
+    if ($preferredPkgs -contains $row.Package) { return 'приложение из списка владельца (scripts/data/preferred-apps.json)' }
     if ($row.Category -eq 'CRITICAL' -or $row.Category -eq 'UNKNOWN') { return $row.Category }
     if ($row.Package -eq $homePkg) { return 'текущий HOME' }
     if ($wifiOwners -contains $row.Package) { return 'владеет сохранённой сетью Wi-Fi' }

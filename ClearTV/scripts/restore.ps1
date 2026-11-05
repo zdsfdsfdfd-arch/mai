@@ -62,7 +62,7 @@ foreach ($e in $pending) {
     $ok = ($r.ExitCode -eq 0 -and $r.Output -notmatch 'Error|Failure|Exception')
     if ($e.Action -eq 'set-home') {
         $now = Get-ResolvedHome
-        $ok = ($now -eq $e.Previous)
+        $ok = (Test-SameComponent $now $e.Previous)
         if ($ok) { Write-Ok "HOME восстановлен: $now" } else { Write-Fail "HOME сейчас: $now (ожидалось $($e.Previous))" }
     } elseif ($e.Action -eq 'install-apk') {
         $ok = ((Get-ShellText "pm path $PackageName") -notmatch 'package:')
