@@ -17,7 +17,7 @@
         <item>twitch=tv.twitch.android.app,tv.twitch.android.viewer,web:twitch</item>
         <item>rutube=ru.rutube.app,ru.rutube.tv</item>
         <item>vk видео|вк видео|vk video=com.vk.tv,com.vk.vkvideo</item>
-        <item>chrome|браузер|browser=com.android.chrome,com.chrome.beta,ru.sberdevices.starbrowser</item>
+        <item>chrome=com.android.chrome,com.chrome.beta</item>
     </string-array>
 
     <!--

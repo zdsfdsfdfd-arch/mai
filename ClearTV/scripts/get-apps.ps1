@@ -21,6 +21,8 @@ param(
     [string]$Serial,
     [string]$Folder,
     [string[]]$Only = @(),
+    [int]$WaitMinutes = 4,
+    [switch]$NoBrowser,
     [switch]$ListOnly,
     [switch]$Force,
     [switch]$Yes,
@@ -75,6 +77,29 @@ function Get-PageText([string]$Url) {
     $client.DefaultRequestHeaders.UserAgent.ParseAdd('Mozilla/5.0 (Windows NT 10.0; Win64; x64) ClearTV-get-apps/1.0')
     try { return $client.GetStringAsync($Url).GetAwaiter().GetResult() } finally { $client.Dispose() }
 }
+function Test-SkipKey {
+    try { if ([Console]::KeyAvailable) { $k = [Console]::ReadKey($true); return ($k.Key -in @('Enter', 'Escape', 'Spacebar')) } } catch { }
+    return $false
+}
+function Wait-ForDownloadedApk([string]$Hint, [datetime]$Since, [string[]]$Dirs, [int]$TimeoutMinutes) {
+    # A new *.apk/*.apkm/*.xapk/*.apks whose name matches $Hint, written after $Since, not still being downloaded.
+    $deadline = $Since.AddMinutes($TimeoutMinutes)
+    $lastSize = @{}
+    do {
+        foreach ($dir in $Dirs) {
+            if (-not (Test-Path $dir)) { continue }
+            foreach ($f in @(Get-ChildItem $dir -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in @('.apk', '.apkm', '.xapk', '.apks') -and $_.LastWriteTime -ge $Since.AddSeconds(-5) -and $_.Name -match $Hint })) {
+                if (Test-Path ($f.FullName + '.crdownload')) { continue }
+                $key = $f.FullName
+                if ($lastSize[$key] -eq $f.Length -and $f.Length -gt 0) { return $f }   # size stable across two polls
+                $lastSize[$key] = $f.Length
+            }
+        }
+        if (Test-SkipKey) { return $null }
+        Start-Sleep -Seconds 2
+    } while ((Get-Date) -lt $deadline)
+    return $null
+}
 function Test-ApkFile([string]$Path) {
     $fi = Get-Item $Path -ErrorAction SilentlyContinue
     if (-not $fi -or $fi.Length -lt 1MB) { return "файл слишком мал ($(if ($fi) { $fi.Length } else { 0 }) байт) — это не APK" }
@@ -83,7 +108,11 @@ function Test-ApkFile([string]$Path) {
     try {
         Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
         $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
-        try { if (-not ($zip.Entries | Where-Object { $_.FullName -eq 'AndroidManifest.xml' })) { return 'в архиве нет AndroidManifest.xml — это не APK' } } finally { $zip.Dispose() }
+        try {
+            $bundle = ([IO.Path]::GetExtension($Path).ToLower() -in @('.apkm', '.xapk', '.apks'))
+            if ($bundle) { if (-not ($zip.Entries | Where-Object { $_.FullName -match '\.apk$' })) { return 'в бандле нет файлов .apk' } }
+            elseif (-not ($zip.Entries | Where-Object { $_.FullName -eq 'AndroidManifest.xml' })) { return 'в архиве нет AndroidManifest.xml — это не APK' }
+        } finally { $zip.Dispose() }
     } catch { return "архив повреждён: $($_.Exception.Message)" }
     return $null
 }
@@ -103,6 +132,41 @@ foreach ($a in $apps) {
         if ($a.page) { Write-Info "Официальная страница: $($a.page)" }
     }
     elseif ($onTv.Count -gt 0) { $row.Result = "уже установлено ($($onTv -join ', '))"; Write-Ok $row.Result }
+    elseif ($kind -eq 'mirror') {
+        # Human in the loop: the page opens on the PC, the person clicks "Download APK", the script collects the file.
+        $hint = [string]$a.file_hint
+        $pages = @($a.mirror_pages)
+        $existing = @(Get-ChildItem $Folder -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -in @('.apk', '.apkm', '.xapk', '.apks') -and $_.Name -match $hint })
+        if ($ListOnly) {
+            $row.Result = 'план: скачать вручную с APKMirror'
+            Write-Info "Страницы: $($pages -join ' ; ')"; Write-Info "Вариант: $($a.variant_hint)"; Write-Info $a.note
+        }
+        elseif ($existing.Count -gt 0 -and -not $Force) { $row.Result = 'уже в папке apps'; $row.File = $existing[0].FullName; Write-Ok "Уже в папке: $($existing[0].Name)" }
+        else {
+            $since = Get-Date
+            if (-not $NoBrowser) { try { Start-Process $pages[0] | Out-Null } catch { Write-Warn "не удалось открыть браузер: $($_.Exception.Message)" } }
+            Write-Host ""
+            Write-Host "  >>> ${name}: в открывшейся странице APKMirror ($($pages[0])) выберите версию и нажмите «Download APK»." -ForegroundColor Cyan
+            Write-Host "      Вариант: $($a.variant_hint)." -ForegroundColor Cyan
+            if ($pages.Count -gt 1) { Write-Host "      Страница приложения: $($pages[1])" -ForegroundColor Cyan }
+            $profile = if ($env:USERPROFILE) { $env:USERPROFILE } else { [Environment]::GetFolderPath('UserProfile') }
+            $downloads = Join-Path $profile 'Downloads'
+            Write-Host "      Жду файл в «$downloads» или «$Folder» до $WaitMinutes мин. Enter — пропустить это приложение." -ForegroundColor Cyan
+            $file = if ($WaitMinutes -gt 0) { Wait-ForDownloadedApk -Hint $hint -Since $since -Dirs @($downloads, $Folder) -TimeoutMinutes $WaitMinutes } else { $null }
+            if ($file) {
+                $dest = Join-Path $Folder $file.Name
+                if ($file.FullName -ne $dest) { Move-Item -Force $file.FullName $dest }
+                $problem = Test-ApkFile $dest
+                if ($problem) { Remove-Item $dest -Force -ErrorAction SilentlyContinue; $row.Result = "файл отклонён: $problem"; Write-Fail "$name — $problem" }
+                else {
+                    $fi = Get-Item $dest
+                    $row.Result = 'скачано вручную с APKMirror'; $row.File = $dest; $row.SizeMb = [math]::Round($fi.Length / 1MB, 1)
+                    $row.Sha256 = (Get-FileHash $dest -Algorithm SHA256).Hash.ToLower()
+                    Write-Ok "Файл принят: $dest ($($row.SizeMb) МБ)"
+                }
+            } else { $row.Result = 'пропущено: файл не появился'; Write-Warn "$name — файл не появился; положите его в $Folder и запустите APPS.cmd" }
+        }
+    }
     else {
         $out = Join-Path $Folder ([string]$a.file)
         if ($ListOnly) {

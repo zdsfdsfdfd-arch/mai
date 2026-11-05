@@ -489,7 +489,7 @@ class HomeActivity : Activity() {
             HomeGuardService.noteUserLaunch(if (entry.isWeb) entry.component.packageName else entry.packageName)
             if (entry.isWeb && !repo.resolves(repo.launchIntent(entry))) { toast(getString(R.string.toast_web_no_browser)); return }
             startActivity(repo.launchIntent(entry))
-            Logs.event("launch", "pkg" to entry.packageName, "ok" to true)
+            Logs.event("launch", "pkg" to entry.packageName, "ok" to true, "via" to (if (entry.isWeb) entry.component.packageName + " " + entry.url else entry.component.flattenToShortString()))
         } catch (t: Throwable) {
             Logs.event("launch", "pkg" to entry.packageName, "ok" to false, "error" to t.javaClass.simpleName)
             toast(getString(R.string.toast_launch_failed, entry.label))

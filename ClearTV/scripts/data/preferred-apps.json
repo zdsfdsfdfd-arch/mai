@@ -110,14 +110,11 @@
     {
       "name": "Chrome",
       "keywords": [
-        "chrome",
-        "браузер",
-        "browser"
+        "chrome"
       ],
       "packages": [
         "com.android.chrome",
-        "com.chrome.beta",
-        "ru.sberdevices.starbrowser"
+        "com.chrome.beta"
       ]
     }
   ]

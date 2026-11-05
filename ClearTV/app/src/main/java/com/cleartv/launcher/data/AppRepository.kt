@@ -130,7 +130,11 @@ class AppRepository(private val context: Context) {
     fun accent(entry: AppEntry): Int? = synchronized(accents) { accents[entry.packageName] }
 
     fun launchIntent(entry: AppEntry): Intent {
-        if (entry.isWeb) return Intent(Intent.ACTION_VIEW, Uri.parse(entry.url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (entry.isWeb) {
+            // Pin the browser found at discovery time: a chooser dialog is not usable from a TV remote.
+            return Intent(Intent.ACTION_VIEW, Uri.parse(entry.url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addCategory(Intent.CATEGORY_BROWSABLE).setPackage(entry.component.packageName)
+        }
         val intent = pm.getLeanbackLaunchIntentForPackage(entry.packageName)
             ?: pm.getLaunchIntentForPackage(entry.packageName)
             ?: Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(entry.component)

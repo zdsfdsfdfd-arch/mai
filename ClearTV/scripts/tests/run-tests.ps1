@@ -50,10 +50,16 @@ Check 'Get-PreferredAppPackages: owner list loaded (VK Video, YouTube)' ((@(Get-
 Check 'Select-ApkLink: relative link on the official domain, foreign hosts ignored' (((Select-ApkLink '<a href="https://cdn.evil.example/x.apk">bad</a> <a class="btn" href="/static/apps/rutube-tv.apk?v=3">APK</a>' 'https://rutube.ru/androidtv/' @('rutube.ru')) -eq 'https://rutube.ru/static/apps/rutube-tv.apk?v=3') -and ($null -eq (Select-ApkLink '<a href="https://cdn.evil.example/x.apk">bad</a>' 'https://rutube.ru/androidtv/' @('rutube.ru'))))
 Check 'Test-HostAllowed: exact host and subdomains only' ((Test-HostAllowed 'objects.githubusercontent.com' @('github.com', 'githubusercontent.com')) -and -not (Test-HostAllowed 'github.com.evil.example' @('github.com')))
 $src = @(Get-AppSources)
-Check 'app-sources.json: 10 owner apps, direct entries only from github.com/rutube.ru with url/file/hosts, Twitch manual (official only)' ($src.Count -eq 10 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -and $_.file -and $_.hosts }).Count -eq 3 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -notmatch '^https://(github\.com|rutube\.ru)/' }).Count -eq 0 -and (($src | Where-Object id -eq 'twitch').kind -eq 'manual'))
-Check 'app-sources.json: Netflix and Spotify are tried only on the vendors own pages/hosts' ((($src | Where-Object id -eq 'netflix').page -match '^https://help\.netflix\.com/') -and (($src | Where-Object id -eq 'netflix').hosts -contains 'netflix.com') -and (($src | Where-Object id -eq 'spotify').page -match '^https://www\.spotify\.com/') -and (($src | Where-Object id -eq 'spotify').hosts -contains 'spotify.com'))
+Check 'app-sources.json: 11 owner entries, direct entries only from github.com/rutube.ru with url/file/hosts, Twitch via APKMirror (official builds)' ($src.Count -eq 11 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -and $_.file -and $_.hosts }).Count -eq 3 -and @($src | Where-Object { $_.kind -eq 'direct' -and $_.url -notmatch '^https://(github\.com|rutube\.ru)/' }).Count -eq 0 -and (($src | Where-Object id -eq 'twitch').kind -eq 'mirror'))
+Check 'app-sources.json: APKMirror entries (owner decision) open apkmirror.com pages only, with file hints and expected packages' (@($src | Where-Object { $_.kind -eq 'mirror' }).Count -eq 7 -and @($src | Where-Object { $_.kind -eq 'mirror' -and (@($_.mirror_pages | Where-Object { $_ -notmatch '^https://www\.apkmirror\.com/' }).Count -gt 0 -or -not $_.file_hint -or -not $_.packages) }).Count -eq 0)
+$mirrorOut = & (Join-Path $scripts 'get-apps.ps1') -Ip 192.168.1.50 -Only netflix -Folder (Join-Path $tmp 'apps-mirror') -WaitMinutes 0 -NoBrowser -Yes *>&1 | Out-String
+Check 'get-apps mirror: no browser, zero wait -> honest "file did not appear", no crash' ($mirrorOut -match 'файл не появился')
+$mirrorDir = Join-Path $tmp 'apps-mirror2'; New-Item -ItemType Directory -Path $mirrorDir -Force | Out-Null
+Set-Content (Join-Path $mirrorDir 'com.netflix.mediaclient_9.apk') 'placeholder'
+$mirrorOut2 = & (Join-Path $scripts 'get-apps.ps1') -Ip 192.168.1.50 -Only netflix -Folder $mirrorDir -WaitMinutes 0 -NoBrowser -Yes *>&1 | Out-String
+Check 'get-apps mirror: a matching file already in apps is reported, not re-requested' ($mirrorOut2 -match 'Уже в папке')
 $plan = & (Join-Path $scripts 'get-apps.ps1') -ListOnly -Folder (Join-Path $tmp 'apps-plan') *>&1 | Out-String
-Check 'get-apps -ListOnly: plans SmartTube/Happ/RUTUBE, explains Twitch/Netflix/HBO/Apple/Spotify/Chrome, no network' (($plan -match 'smarttube_stable\.apk') -and ($plan -match 'Happ\.apk') -and ($plan -match 'rutube\.ru/androidtv/latest') -and ($plan -match 'Netflix') -and ($plan -match 'tv\.twitch\.android\.app') -and ($plan -match 'официального APK нет|не публикует APK'))
+Check 'get-apps -ListOnly: plans SmartTube/Happ/RUTUBE and APKMirror pages for the rest, no network' (($plan -match 'smarttube_stable\.apk') -and ($plan -match 'Happ\.apk') -and ($plan -match 'rutube\.ru/androidtv/latest') -and ($plan -match 'apkmirror\.com') -and ($plan -match 'armeabi-v7a'))
 $ev = ConvertFrom-LogcatEvents "I ClearTV : EVT focus row=apps index=0 pkg=a`nI ClearTV : MARK abc`nI ClearTV : EVT launch pkg=com.x ok=true`n" 'MARK abc'
 Check 'ConvertFrom-LogcatEvents after marker' ($ev.Count -eq 1 -and $ev[0].Name -eq 'launch' -and $ev[0].Fields['ok'] -eq 'true')
 $pk = ConvertFrom-DumpsysPackages (Get-Content (Join-Path $env:CLEARTV_FAKE_FIXTURES 'dumpsys_package_packages.txt') -Raw)
@@ -158,6 +164,14 @@ Check 'install-apps: APK installed and journaled without an automatic rollback' 
 $emptyDir = Join-Path $tmp 'apps-empty'; New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
 $outApps = & (Join-Path $scripts 'install-apps.ps1') -Ip 192.168.1.50 -Folder $emptyDir -Yes *>&1 | Out-String
 Check 'install-apps: empty folder is a no-op' ($outApps -match 'нет APK')
+$bundleDir = Join-Path $tmp 'apps-bundle'; New-Item -ItemType Directory -Path (Join-Path $bundleDir 'src') -Force | Out-Null
+foreach ($n in @('base.apk', 'split_config.armeabi_v7a.apk', 'split_config.arm64_v8a.apk', 'split_config.xhdpi.apk', 'split_config.xxhdpi.apk', 'split_config.ru.apk', 'split_config.de.apk')) { Set-Content (Join-Path (Join-Path $bundleDir 'src') $n) 'x' }
+Compress-Archive -Path (Join-Path (Join-Path $bundleDir 'src') '*') -DestinationPath (Join-Path $bundleDir 'bundle.zip') -Force
+Move-Item (Join-Path $bundleDir 'bundle.zip') (Join-Path $bundleDir 'Netflix.apkm') -Force
+Remove-Item (Join-Path $bundleDir 'src') -Recurse -Force
+& (Join-Path $scripts 'install-apps.ps1') -Ip 192.168.1.50 -Folder $bundleDir -Yes *> (Join-Path $tmp 'install-bundle.log')
+$bundleCall = @(Get-Content (Join-Path $env:CLEARTV_FAKE_STATE 'calls.log') | Where-Object { $_ -match 'install-multiple' })[-1]
+Check 'install-apps: .apkm bundle installed with install-multiple using only base + armeabi_v7a + xhdpi + ru splits' ($bundleCall -and $bundleCall -match 'base\.apk' -and $bundleCall -match 'armeabi_v7a' -and $bundleCall -match 'xhdpi' -and $bundleCall -match 'config\.ru' -and $bundleCall -notmatch 'arm64_v8a' -and $bundleCall -notmatch 'xxhdpi' -and $bundleCall -notmatch 'config\.de') "got: $bundleCall"
 
 Write-Host "== 6. verify.ps1 smoke run (fake device, time-scaled)"
 & (Join-Path $scripts 'verify.ps1') -Ip 192.168.1.50 *> (Join-Path $tmp 'verify.log')

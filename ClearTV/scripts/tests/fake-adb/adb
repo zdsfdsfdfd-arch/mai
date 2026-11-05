@@ -19,6 +19,7 @@ case "$cmd" in
   devices) echo "List of devices attached"; echo "192.168.1.50:5555      device product:salute_tv model:SBER_TV_FAKE device:sbertv transport_id:1"; exit 0 ;;
   get-state) echo "device"; exit 0 ;;
   install) echo "Performing Streamed Install"; echo "Success"; echo installed > "$STATE/installed"; exit 0 ;;
+  install-multiple) echo "Performing Streamed Install"; echo "Success"; exit 0 ;;
   push) echo "1 file pushed, 0 skipped."; exit 0 ;;
   pull) : > "${args[2]}"; echo "1 file pulled, 0 skipped."; exit 0 ;;
   logcat) [ -f "$STATE/logcat.txt" ] && cat "$STATE/logcat.txt"; exit 0 ;;

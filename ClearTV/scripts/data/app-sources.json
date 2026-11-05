@@ -1,5 +1,5 @@
 {
-  "about": "Откуда get-apps.ps1 берёт установщики приложений владельца. Только официальные источники самих разработчиков (их GitHub Releases или их сайт); никаких APK-агрегаторов. kind: direct — постоянная ссылка на файл; page — официальная страница, с которой скрипт берёт ссылку на .apk (только с разрешённых доменов); manual — официального способа установить APK нет, выводится честное пояснение; none — уже есть на телевизоре. Проверено 2026-11-05: README yuliskov/SmartTube, README Happ-proxy/happ-android и его файл release, workflow crackededed/Xtra, страницы rutube.ru/androidtv и happ.su (поиск). Хэши не закреплены: ссылки указывают на последнюю версию, скрипт записывает SHA-256 скачанного файла в reports/apps-download.md.",
+  "about": "Откуда get-apps.ps1 берёт установщики приложений владельца. Только официальные источники самих разработчиков (их GitHub Releases или их сайт); никаких APK-агрегаторов. kind: direct — постоянная ссылка на файл; page — официальная страница, с которой скрипт берёт ссылку на .apk (только с разрешённых доменов); manual — официального способа установить APK нет, выводится честное пояснение; none — уже есть на телевизоре. Проверено 2026-11-05: README yuliskov/SmartTube, README Happ-proxy/happ-android и его файл release, workflow crackededed/Xtra, страницы rutube.ru/androidtv и happ.su (поиск). Хэши не закреплены: ссылки указывают на последнюю версию, скрипт записывает SHA-256 скачанного файла в reports/apps-download.md. kind mirror (по решению владельца, 2026-11-05): скрипт открывает страницу APKMirror в браузере ПК, человек нажимает «Download APK», скрипт сам подхватывает файл из «Загрузок», проверяет, что это APK/бандл, и устанавливает. Скрипт сам с APKMirror ничего не качает (сайт защищён от автоматики, и файлы подписаны разработчиками — APKMirror сверяет подписи).",
   "apps": [
     {
       "id": "youtube",
@@ -26,18 +26,46 @@
       "note": "Официального YouTube для Салют ТВ нет (нет сервисов Google). SmartTube — открытый клиент YouTube для Android TV (GPL); автор просит качать только с GitHub, не с APK-сайтов."
     },
     {
-      "id": "twitch",
-      "name": "Twitch",
-      "kind": "manual",
-      "page": "https://www.twitch.tv/downloads/",
+      "id": "youtube_app",
+      "name": "YouTube (официальное приложение)",
+      "kind": "mirror",
+      "mirror_pages": [
+        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=youtube",
+        "https://www.apkmirror.com/apk/google-inc/youtube/"
+      ],
+      "file_hint": "youtube",
+      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт",
       "packages": [
-        "tv.twitch.android.app"
+        "com.google.android.youtube",
+        "com.google.android.youtube.tv"
       ],
       "skip_if_installed": [
-        "tv.twitch.android.app"
+        "com.google.android.youtube",
+        "com.google.android.youtube.tv"
       ],
-      "source": "Twitch Interactive распространяет приложение только через Google Play и Amazon Appstore; прямого APK на twitch.tv нет",
-      "note": "Нужен официальный APK Twitch для Android TV (пакет tv.twitch.android.app): скачайте его на ПК и положите в папку apps — установится и встанет на главный экран. Сторонние клиенты (Xtra) больше не ставятся и удаляются с телевизора. Пока официального приложения нет, на экране карточка «Twitch — веб-версия в браузере» (twitch.tv)."
+      "source": "APKMirror (подписанные Google сборки); владелец сообщил, что обычный YouTube на этом телевизоре у него работал",
+      "note": "Официальный YouTube рассчитан на сервисы Google; без них может ругаться или работать частично. SmartTube остаётся как запасной клиент. Если поставите YouTube, ClearTV покажет его вместо SmartTube."
+    },
+    {
+      "id": "twitch",
+      "name": "Twitch",
+      "kind": "mirror",
+      "mirror_pages": [
+        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=twitch",
+        "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
+      ],
+      "file_hint": "twitch",
+      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; версия для Android TV — если есть",
+      "packages": [
+        "tv.twitch.android.app",
+        "tv.twitch.android.viewer"
+      ],
+      "skip_if_installed": [
+        "tv.twitch.android.app",
+        "tv.twitch.android.viewer"
+      ],
+      "source": "APKMirror (подписанные Twitch Interactive сборки); сам Twitch вне Google Play/Amazon не раздаёт",
+      "note": "Официальный Twitch. Сторонние клиенты не ставятся (Xtra удалён по решению владельца). Пока приложения нет — карточка веб-версии."
     },
     {
       "id": "happ",
@@ -101,17 +129,13 @@
     {
       "id": "netflix",
       "name": "Netflix",
-      "kind": "page",
-      "page": "https://help.netflix.com/en/node/57688",
-      "source": "справочная страница Netflix help.netflix.com/en/node/57688 — проверено 2026-11-05 10:42: страница называется «This app is not compatible with your device», ссылки на APK нет; скрипт продолжает проверять её при каждом запуске",
-      "note": "Если Netflix не раздаёт APK на своей странице, на экране остаётся карточка «Netflix — веб-версия в браузере». Сервис не работает в России и проверяет сертификацию устройства: нужен зарубежный аккаунт и VPN, качество может быть ограничено.",
-      "fallback_page": "https://help.netflix.com/en/node/57688",
-      "hosts": [
-        "netflix.com",
-        "nflxext.com",
-        "nflximg.net"
+      "kind": "mirror",
+      "mirror_pages": [
+        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=netflix",
+        "https://www.apkmirror.com/apk/netflix-inc/netflix/"
       ],
-      "file": "Netflix-official.apk",
+      "file_hint": "netflix",
+      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; версия для Android TV — если есть, иначе телефонная",
       "packages": [
         "com.netflix.ninja",
         "com.netflix.mediaclient"
@@ -119,37 +143,66 @@
       "skip_if_installed": [
         "com.netflix.ninja",
         "com.netflix.mediaclient"
-      ]
+      ],
+      "source": "APKMirror (подписанные Netflix сборки); сам Netflix APK вне магазинов больше не раздаёт (страница 57688 проверена 10:42)",
+      "note": "Netflix проверяет сертификацию устройства и DRM — на Салют ТВ может сказать «устройство не поддерживается» или играть в SD; в России сервис не работает без зарубежного аккаунта и VPN. Пока приложения нет — карточка веб-версии."
     },
     {
       "id": "hbomax",
       "name": "HBO Max",
-      "kind": "manual",
-      "page": "",
-      "source": "распространяется только через магазины приложений",
-      "note": "Официального APK нет; на Салют ТВ установить легально и надёжно нечем. На экране остаётся карточка «веб-версия в браузере» (tv.apple.com / max.com): воспроизведение зависит от браузера, региона и аккаунта."
+      "kind": "mirror",
+      "mirror_pages": [
+        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=max+hbo"
+      ],
+      "file_hint": "max|hbo",
+      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; версия для Android TV — если есть",
+      "packages": [
+        "com.wbd.stream",
+        "com.hbo.hbonow",
+        "eu.hbogo.androidtv",
+        "com.hbo.go"
+      ],
+      "skip_if_installed": [
+        "com.wbd.stream",
+        "com.hbo.hbonow",
+        "eu.hbogo.androidtv",
+        "com.hbo.go"
+      ],
+      "source": "APKMirror (подписанные Warner Bros. Discovery сборки)",
+      "note": "Max требует сервисы Google и DRM L1 — на Салют ТВ, скорее всего, не запустится; в России недоступен. Пока приложения нет — карточка веб-версии."
     },
     {
       "id": "appletv",
       "name": "Apple TV",
-      "kind": "manual",
-      "page": "",
-      "source": "приложение Apple TV выходит только на сертифицированных платформах",
-      "note": "Только Google TV, Fire TV, консоли и телевизоры партнёров; на Салют ТВ недоступно. На экране остаётся карточка «веб-версия в браузере» (tv.apple.com / max.com): воспроизведение зависит от браузера, региона и аккаунта."
+      "kind": "mirror",
+      "mirror_pages": [
+        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=apple+tv"
+      ],
+      "file_hint": "apple",
+      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; приложение существует только для Android TV",
+      "packages": [
+        "com.apple.atve.androidtv.appletv",
+        "com.apple.atve.sony.appletv",
+        "com.apple.atve.amazon.appletv"
+      ],
+      "skip_if_installed": [
+        "com.apple.atve.androidtv.appletv",
+        "com.apple.atve.sony.appletv",
+        "com.apple.atve.amazon.appletv"
+      ],
+      "source": "APKMirror (подписанные Apple сборки)",
+      "note": "Apple TV работает только на сертифицированных устройствах; на Салют ТВ, скорее всего, покажет «не поддерживается». В России сервис недоступен. Пока приложения нет — карточка веб-версии."
     },
     {
       "id": "spotify",
       "name": "Spotify",
-      "kind": "page",
-      "page": "https://www.spotify.com/download/android/",
-      "source": "страница spotify.com/download/android — проверено 2026-11-05 10:42: прямой ссылки на APK нет (только Google Play); скрипт продолжает проверять её при каждом запуске",
-      "note": "Мобильная версия Spotify пультом управляется неудобно; без ссылки на экране остаётся карточка «Spotify — веб-версия в браузере». Сервис приостановил работу в России: нужен зарубежный аккаунт и VPN.",
-      "fallback_page": "https://www.spotify.com/download/android/",
-      "hosts": [
-        "spotify.com",
-        "scdn.co"
+      "kind": "mirror",
+      "mirror_pages": [
+        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=spotify",
+        "https://www.apkmirror.com/apk/spotify-ltd/spotify/"
       ],
-      "file": "Spotify-official.apk",
+      "file_hint": "spotify",
+      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; есть отдельная версия для Android TV",
       "packages": [
         "com.spotify.tv.android",
         "com.spotify.music",
@@ -159,15 +212,30 @@
         "com.spotify.tv.android",
         "com.spotify.music",
         "com.spotify.lite"
-      ]
+      ],
+      "source": "APKMirror (подписанные Spotify сборки); владелец сообщил, что Spotify на этом телевизоре у него работал",
+      "note": "В России Spotify не обслуживает аккаунты — нужен зарубежный аккаунт и VPN (Happ). Телефонная версия управляется пультом хуже, чем версия для Android TV."
     },
     {
       "id": "chrome",
       "name": "Chrome",
-      "kind": "manual",
-      "page": "",
-      "source": "Google распространяет Chrome только через Google Play",
-      "note": "Google распространяет Chrome только через Google Play. Правило «Chrome» в ClearTV принимает браузер Сбера (ru.sberdevices.starbrowser): карточка браузера есть в ряду."
+      "kind": "mirror",
+      "mirror_pages": [
+        "https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=chrome",
+        "https://www.apkmirror.com/apk/google-inc/chrome/"
+      ],
+      "file_hint": "chrome",
+      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт",
+      "packages": [
+        "com.android.chrome",
+        "com.chrome.beta"
+      ],
+      "skip_if_installed": [
+        "com.android.chrome",
+        "com.chrome.beta"
+      ],
+      "source": "APKMirror (подписанные Google сборки)",
+      "note": "Chrome не рассчитан на пульт, но ставится и работает как обычный браузер."
     }
   ],
   "retired": [
