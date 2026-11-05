@@ -103,7 +103,7 @@
       "name": "Netflix",
       "kind": "page",
       "page": "https://help.netflix.com/en/node/57688",
-      "source": "справочная страница Netflix для устройств без Google Play (если на ней есть ссылка на APK с домена netflix.com)",
+      "source": "справочная страница Netflix help.netflix.com/en/node/57688 — проверено 2026-11-05 10:42: страница называется «This app is not compatible with your device», ссылки на APK нет; скрипт продолжает проверять её при каждом запуске",
       "note": "Если Netflix не раздаёт APK на своей странице, на экране остаётся карточка «Netflix — веб-версия в браузере». Сервис не работает в России и проверяет сертификацию устройства: нужен зарубежный аккаунт и VPN, качество может быть ограничено.",
       "fallback_page": "https://help.netflix.com/en/node/57688",
       "hosts": [
@@ -142,7 +142,7 @@
       "name": "Spotify",
       "kind": "page",
       "page": "https://www.spotify.com/download/android/",
-      "source": "страница загрузки Spotify для Android (если на ней есть прямая ссылка на APK с домена spotify.com/scdn.co)",
+      "source": "страница spotify.com/download/android — проверено 2026-11-05 10:42: прямой ссылки на APK нет (только Google Play); скрипт продолжает проверять её при каждом запуске",
       "note": "Мобильная версия Spotify пультом управляется неудобно; без ссылки на экране остаётся карточка «Spotify — веб-версия в браузере». Сервис приостановил работу в России: нужен зарубежный аккаунт и VPN.",
       "fallback_page": "https://www.spotify.com/download/android/",
       "hosts": [
