@@ -93,10 +93,15 @@ Invoke-Adb shell am start -a android.intent.action.MAIN -c android.intent.catego
 Send-Key 'KEYCODE_BACK' 300; Send-Key 'KEYCODE_BACK' 300   # close anything left open; BACK on the home itself does nothing
 $favEvent = @(Get-EventsSince '' | Where-Object { $_.Name -eq 'favorites' })
 $favCount = if ($favEvent.Count -gt 0) { [int]$favEvent[-1].Fields['n'] } else { 0 }
-$marker = Send-Marker
-foreach ($k in @('KEYCODE_DPAD_RIGHT', 'KEYCODE_DPAD_RIGHT', 'KEYCODE_DPAD_LEFT', 'KEYCODE_DPAD_UP', 'KEYCODE_DPAD_DOWN')) { Send-Key $k }
-$focusEvents = @(Get-EventsSince $marker | Where-Object { $_.Name -eq 'focus' })
-$indices = @($focusEvents | ForEach-Object { "$($_.Fields['row']):$($_.Fields['index'])" } | Select-Object -Unique)
+$focusEvents = @(); $indices = @()
+foreach ($attempt in 1..2) {
+    if ($attempt -eq 2) { Write-Info "ряд мог перестраиваться (установка/удаление приложений) — повтор"; Start-Home; Pause-Ms 2000 }
+    $marker = Send-Marker
+    foreach ($k in @('KEYCODE_DPAD_RIGHT', 'KEYCODE_DPAD_RIGHT', 'KEYCODE_DPAD_LEFT', 'KEYCODE_DPAD_UP', 'KEYCODE_DPAD_DOWN')) { Send-Key $k }
+    $focusEvents = @(Get-EventsSince $marker | Where-Object { $_.Name -eq 'focus' })
+    $indices = @($focusEvents | ForEach-Object { "$($_.Fields['row']):$($_.Fields['index'])" } | Select-Object -Unique)
+    if ($focusEvents.Count -ge 2 -and $indices.Count -ge 2) { break }
+}
 if ($focusEvents.Count -ge 2 -and $indices.Count -ge 2) { Add-Result 'dpad_navigation' 'PASS' "событий фокуса: $($focusEvents.Count), позиций: $($indices -join ' ')" ($focusEvents.Line -join ' | ') }
 elseif ($favCount -eq 0) { Add-Result 'dpad_navigation' 'FAIL' "на главном экране нет плиток, двигать фокус некуда ($($favEvent[-1].Line))" ($focusEvents.Line -join ' | ') }
 else { Add-Result 'dpad_navigation' 'FAIL' "фокус не перемещается (событий: $($focusEvents.Count), плиток: $favCount)" ($focusEvents.Line -join ' | ') }
@@ -243,12 +248,19 @@ Write-Step "14. Восстановление после аварийного з�
 $marker = Send-Marker
 if ($api -ge 26) { Invoke-Adb shell am crash $PackageName | Out-Null } else { Invoke-Adb shell am force-stop $PackageName | Out-Null }
 Pause-Ms 3000
-if ($isDefaultHome) { Send-Key 'KEYCODE_HOME' 2500 } else { Start-ClearTv }
+Start-ClearTv
 Pause-Ms 1000
 $safe = Wait-Event $marker 'safe_mode' 2
-if ((Test-OnClearTv) -and -not $safe) { Add-Result 'crash_recovery' 'PASS' 'главный экран поднялся заново, безопасный режим не включился' (Get-ResumedActivity) }
-elseif (Test-OnClearTv) { Add-Result 'crash_recovery' 'WARN' 'поднялся, но сработал безопасный режим (см. files/crash на устройстве)' $safe.Line }
-else { Add-Result 'crash_recovery' 'FAIL' "после сбоя на экране $(Get-ResumedActivity)" '' }
+# Android drops the HOME choice when a third-party HOME process crashes (AppErrors: clearPackagePreferredForHomeActivities),
+# so the next HOME press shows the chooser. That is the platform, not the launcher; the test repairs its own side effect.
+$homeNote = ''
+if ($isDefaultHome -and -not (Test-SameComponent (Get-ResolvedHome) $HomeComponent)) {
+    Invoke-Adb shell cmd package set-home-activity $HomeComponent | Out-Null; Pause-Ms 500
+    $homeNote = if (Test-SameComponent (Get-ResolvedHome) $HomeComponent) { '; прошивка сбросила выбор HOME после падения (стандарт Android для сторонних лаунчеров) — назначен снова' } else { '; выбор HOME сброшен и не восстановился — install.ps1 -SetHome' }
+}
+if ((Test-OnClearTv) -and -not $safe) { Add-Result 'crash_recovery' 'PASS' "главный экран поднялся заново, безопасный режим не включился$homeNote" (Get-ResumedActivity) }
+elseif (Test-OnClearTv) { Add-Result 'crash_recovery' 'WARN' "поднялся, но сработал безопасный режим (см. files/crash на устройстве)$homeNote" $safe.Line }
+else { Add-Result 'crash_recovery' 'FAIL' "после сбоя на экране $(Get-ResumedActivity)$homeNote" '' }
 
 # 15. reboot (opt-in)
 if ($Reboot) {

@@ -19,7 +19,7 @@ import com.cleartv.launcher.util.Logs
  */
 class HomeGuardService : AccessibilityService() {
 
-    private var homePackages: Set<String> = emptySet()
+    private var homeClasses: Map<String, Set<String>> = emptyMap()   // package -> HOME activity class names
     private var homePackagesAt = 0L
     private var lastBounceAt = 0L
     private var lastResolverAt = 0L
@@ -49,10 +49,14 @@ class HomeGuardService : AccessibilityService() {
             return
         }
         if (now - homePackagesAt > 60_000L) {
-            homePackages = app.apps.homeCandidates().map { it.packageName }.toSet() - packageName
+            // Only the HOME activities themselves: com.android.tv.settings also owns FallbackHome, and bouncing its
+            // Settings screens locked the owner out of system settings (seen on a real TV).
+            homeClasses = app.apps.homeCandidates().filter { it.packageName != packageName }
+                .groupBy({ it.packageName }, { it.className }).mapValues { it.value.toSet() }
             homePackagesAt = now
         }
-        if (pkg !in homePackages) return
+        val cls = event.className?.toString() ?: return
+        if (homeClasses[pkg]?.contains(cls) != true) return
         if (now - (userLaunches[pkg] ?: 0L) < USER_LAUNCH_GRACE_MS) return
         if (now - lastBounceAt < 3_000L) return
         lastBounceAt = now

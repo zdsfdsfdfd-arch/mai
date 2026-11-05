@@ -118,8 +118,11 @@ class Prefs(context: Context) {
      */
     fun undoSafeModeAfterUpdate(versionCode: Int): Boolean {
         val applied = safeModeAppliedVersion
-        if (applied == 0 || applied == versionCode) return false
-        val e = sp.edit().remove(K_SAFE_APPLIED_VERSION).putString(K_CRASHES, "")
+        // Builds before 0.1.5 did not record which version applied safe mode; "reduce motion" that the owner never
+        // touched can only have come from it, so it is undone once (sets the marker so a real choice later stays).
+        val leftover = applied == 0 && reducedMotion && !reducedMotionUserSet && !sp.getBoolean(K_MOTION_MIGRATED, false)
+        if (!leftover && (applied == 0 || applied == versionCode)) return false
+        val e = sp.edit().remove(K_SAFE_APPLIED_VERSION).putString(K_CRASHES, "").putBoolean(K_MOTION_MIGRATED, true)
         var undone = false
         if (!reducedMotionUserSet && reducedMotion) { e.putBoolean(K_REDUCED_MOTION, false); undone = true }
         e.apply()
@@ -131,10 +134,14 @@ class Prefs(context: Context) {
     /** Back to the automatic row order (preferred apps first); hidden apps are kept. */
     fun autoLayout() { sp.edit().remove(K_FAVORITES).remove(K_FAV_TOUCHED).apply() }
 
-    /** True when the process crashed within [withinMs]: the guard and the keeper stand down so a broken build cannot fight the TV. */
+    /**
+     * True when the process crashed at least twice within [withinMs]: the guard and the keeper stand down so a broken
+     * build cannot fight the TV. A single crash does not count — Android itself drops the HOME choice when a
+     * third-party HOME process crashes, and the keeper must be free to put it back.
+     */
     fun crashedRecently(withinMs: Long = 2 * 60 * 1000L): Boolean {
-        val last = crashHistory.maxOrNull() ?: return false
-        return System.currentTimeMillis() - last < withinMs
+        val now = System.currentTimeMillis()
+        return crashHistory.count { now - it < withinMs } >= 2
     }
 
     fun addListener(onChange: (String) -> Unit): SharedPreferences.OnSharedPreferenceChangeListener {
@@ -180,6 +187,7 @@ class Prefs(context: Context) {
         const val K_REDUCED_MOTION = "reduced_motion"
         const val K_REDUCED_USER = "reduced_motion_user"
         const val K_SAFE_APPLIED_VERSION = "safe_mode_applied_version"
+        const val K_MOTION_MIGRATED = "motion_migrated"
         const val K_SAFE_MODE = "safe_mode"
         const val K_CRASHES = "crash_history"
         const val K_LAST_FOCUS = "last_focus"

@@ -67,7 +67,8 @@
       "kind": "direct",
       "hosts": [
         "rutube.ru",
-        "rtbcdn.ru"
+        "rtbcdn.ru",
+        "rutubelist.ru"
       ],
       "file": "Rutube-AndroidTV.apk",
       "packages": [
@@ -78,7 +79,7 @@
         "ru.rutube.app",
         "ru.rutube.tv"
       ],
-      "source": "Официальная страница RUTUBE для Android TV (rutube.ru/androidtv): кнопка «Скачать» ведёт на rutube.ru/androidtv/latest/ — постоянный адрес последней версии (найден в сохранённой странице)",
+      "source": "Официальная страница RUTUBE для Android TV (rutube.ru/androidtv): кнопка «Скачать» ведёт на rutube.ru/androidtv/latest/, откуда переадресация на promo.rutubelist.ru (домен RUTUBE; виден в отчёте загрузки 10:22)",
       "note": "RUTUBE сам раздаёт APK для Android TV 7.0+. Если адрес перестанет отдавать файл, скрипт напечатает страницу — скачайте вручную и положите в папку apps.",
       "url": "https://rutube.ru/androidtv/latest/",
       "fallback_page": "https://rutube.ru/androidtv/"

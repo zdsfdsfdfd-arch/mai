@@ -95,6 +95,8 @@
 | Фокус с верхних кнопок | ▶ на последней кнопке находил карточку за краем экрана (FocusFinder по абсолютным координатам) — ряд без фокуса теперь отдаёт только запомненную карточку |
 | Превью-каналы | VLC и VK Видео регистрируют `TvInputService` для превью на главном экране — это не HDMI/тюнер; критичны только входы с типом из `dumpsys tv_input` |
 | Обновление HOME-приложения | `adb install -r` самого ClearTV сбрасывает выбор HOME: кнопка HOME показывает выбор лаунчера (`android/…ResolverActivity`), процесс лаунчера не защищён от LMK. `install.ps1` возвращает `set-home-activity` сразу после обновления |
-| RUTUBE для Android TV | официальная кнопка «Скачать» на rutube.ru/androidtv ведёт на `https://rutube.ru/androidtv/latest/` (постоянный адрес последней версии; в HTML нет ссылок `.apk`) |
+| Падение HOME-приложения | Android стирает выбор HOME при падении процесса стороннего лаунчера (`AppErrors.handleAppCrash` → `clearPackagePreferredForHomeActivities`): следующий HOME — выбор лаунчера. Хранитель/`install.ps1 -SetHome` возвращают выбор; защита и хранитель отступают только при ≥2 падениях за 2 минуты |
+| Защита главного экрана | сравнивает класс окна с классами HOME-активностей (пакет `com.android.tv.settings` владеет `FallbackHome` и обычными настройками — по пакету нельзя) |
+| RUTUBE для Android TV | официальная кнопка «Скачать» на rutube.ru/androidtv ведёт на `https://rutube.ru/androidtv/latest/` (постоянный адрес последней версии; в HTML нет ссылок `.apk`), переадресация на `promo.rutubelist.ru` |
 | Сборка без SDK (dx) | методы stdlib с invokedynamic заменяются заглушками; фасады stdlib наследуют их — `compareBy(vararg)`, `then`, `nullsFirst/Last` недоступны (проверка сборки с 0.1.4 отклоняет такие ссылки). Падение 0.1.2–0.1.3 на ТВ: `EVT safe_mode on=true reason=crash_loop` |
 | Хранилище | /data 3,0 ГБ, свободно 2,0 ГБ (порог «ротации» приложений Сбера пока далеко) |
