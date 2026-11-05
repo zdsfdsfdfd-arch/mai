@@ -66,7 +66,7 @@ ClearTV/
    ```powershell
    .\scripts\build.ps1 -InstallSdk
    ```
-   Можно пропустить и использовать готовый `dist\ClearTV-0.1.8-debug.apk` (собран без SDK, см. `reports\build-report-nosdk.md`).
+   Можно пропустить и использовать готовый `dist\ClearTV-0.1.9-debug.apk` (собран без SDK, см. `reports\build-report-nosdk.md`).
 4. Установка и запуск вручную (ClearTV появится и в списке приложений штатного лаунчера):
    ```powershell
    .\scripts\install.ps1 -Ip 192.168.1.50

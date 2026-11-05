@@ -20,15 +20,24 @@ object PreferredApps {
             Rule(keywords, packages)
         }
 
-    /** Installed entries that match a rule, one per rule, in rule order. */
+    /**
+     * Installed entries that match a rule, one per rule, in rule order: a real app by package name first, then a
+     * real app by label keyword (store builds carry package ids nobody can list in advance — HBO Max arrived as
+     * com.wbd.hbomax), and only then the "web:" stand-in card.
+     */
     fun pick(context: Context, entries: List<AppEntry>): List<AppEntry> {
         val byPkg = entries.associateBy { it.packageName }
         val result = ArrayList<AppEntry>()
         for (rule in rules(context)) {
-            val match = rule.packages.firstNotNullOfOrNull { byPkg[it] }
-                ?: entries.firstOrNull { e -> val l = e.label.lowercase(); rule.keywords.any { it in l } }
+            val real = rule.packages.filter { !it.startsWith(WEB_PREFIX) }
+            val web = rule.packages.filter { it.startsWith(WEB_PREFIX) }
+            val match = real.firstNotNullOfOrNull { byPkg[it] }
+                ?: entries.firstOrNull { e -> !e.isWeb && rule.keywords.any { it in e.label.lowercase() } }
+                ?: web.firstNotNullOfOrNull { byPkg[it] }
             if (match != null && result.none { it.packageName == match.packageName }) result += match
         }
         return result
     }
+
+    private const val WEB_PREFIX = "web:"
 }

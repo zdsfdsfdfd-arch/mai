@@ -8,9 +8,10 @@
       Mirrored for the PC scripts in scripts/data/preferred-apps.json (clean.ps1 never touches these).
     -->
     <string-array name="preferred_apps" translatable="false">
-        <item>youtube|ютуб|smarttube=com.google.android.youtube.tv,com.google.android.youtube,org.smarttube.stable,org.smarttube.beta,app.smarttube,app.smarttube.fdroid,com.teamsmart.videomanager.tv,com.liskovsoft.smarttubetv.beta,ru.sberdevices.startube</item>
-        <item>netflix=com.netflix.ninja,com.netflix.mediaclient,web:netflix</item>
-        <item>hbo max|hbo=com.wbd.stream,com.hbo.hbonow,eu.hbogo.androidtv,com.hbo.go,web:hbomax</item>
+        <item>youtube|ютуб=com.google.android.youtube.tv,com.google.android.youtube,ru.sberdevices.startube</item>
+        <item>smarttube=org.smarttube.stable,org.smarttube.beta,app.smarttube,app.smarttube.fdroid,com.teamsmart.videomanager.tv,com.liskovsoft.smarttubetv.beta</item>
+        <item>netflix=com.netflix.mediaclient,com.netflix.ninja,web:netflix</item>
+        <item>hbo max|hbo=com.wbd.hbomax,com.wbd.stream,com.hbo.hbonow,eu.hbogo.androidtv,com.hbo.go,web:hbomax</item>
         <item>apple tv=com.apple.atve.androidtv.appletv,com.apple.atve.sony.appletv,com.apple.atve.amazon.appletv,web:appletv</item>
         <item>spotify=com.spotify.tv.android,com.spotify.music,com.spotify.lite,web:spotify</item>
         <item>happ=su.happ.proxyutility,com.happproxy</item>

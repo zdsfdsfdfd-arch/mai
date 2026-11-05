@@ -44,7 +44,7 @@
         "com.google.android.youtube.tv"
       ],
       "source": "APKMirror (подписанные Google сборки); владелец сообщил, что обычный YouTube на этом телевизоре у него работал",
-      "note": "Официальный YouTube рассчитан на сервисы Google; без них может ругаться или работать частично. SmartTube остаётся как запасной клиент. Если поставите YouTube, ClearTV покажет его вместо SmartTube."
+      "note": "Официальный YouTube для Android TV у владельца установился, но видео по Wi-Fi через VPN не шло; SmartTube показывается отдельной карточкой и остаётся рабочим вариантом."
     },
     {
       "id": "twitch",
@@ -55,7 +55,7 @@
         "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
       ],
       "file_hint": "twitch",
-      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; версия для Android TV — если есть",
+      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; версия для Android TV — если есть; НЕ берите сборку для Fire TV/Amazon (ошибка «Amazon Appstore required») — нужна обычная Google-сборка Twitch (телефонная tv.twitch.android.app или Android TV без пометки Amazon)",
       "packages": [
         "tv.twitch.android.app",
         "tv.twitch.android.viewer"
@@ -65,7 +65,7 @@
         "tv.twitch.android.viewer"
       ],
       "source": "APKMirror (подписанные Twitch Interactive сборки); сам Twitch вне Google Play/Amazon не раздаёт",
-      "note": "Официальный Twitch. Сторонние клиенты не ставятся (Xtra удалён по решению владельца). Пока приложения нет — карточка веб-версии."
+      "note": "Сборка tv.twitch.android.viewer 13.0.0.1 оказалась Amazon-овской (требует Amazon Appstore). Возьмите обычную Twitch (телефонная tv.twitch.android.app, armeabi-v7a) — она ставится и играет; управление пультом терпимое."
     },
     {
       "id": "happ",
@@ -135,17 +135,17 @@
         "https://www.apkmirror.com/apk/netflix-inc/netflix/"
       ],
       "file_hint": "netflix",
-      "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; версия для Android TV — если есть, иначе телефонная",
+      "variant_hint": "ТЕЛЕФОННАЯ версия (пакет com.netflix.mediaclient), не «Android TV» (com.netflix.ninja — на этом ТВ сказала «версия не поддерживается»); лучше 8.x или старше, armeabi-v7a, nodpi; управление пультом неудобно, качество SD",
       "packages": [
-        "com.netflix.ninja",
-        "com.netflix.mediaclient"
+        "com.netflix.mediaclient",
+        "com.netflix.ninja"
       ],
       "skip_if_installed": [
-        "com.netflix.ninja",
-        "com.netflix.mediaclient"
+        "com.netflix.mediaclient",
+        "com.netflix.ninja"
       ],
       "source": "APKMirror (подписанные Netflix сборки); сам Netflix APK вне магазинов больше не раздаёт (страница 57688 проверена 10:42)",
-      "note": "Netflix проверяет сертификацию устройства и DRM — на Салют ТВ может сказать «устройство не поддерживается» или играть в SD; в России сервис не работает без зарубежного аккаунта и VPN. Пока приложения нет — карточка веб-версии."
+      "note": "Версия Netflix для Android TV (ninja) требует сертификацию Netflix и на Салют ТВ не запускается (проверено 20:35). Телефонная версия проверяет только Play Protect — старые сборки (8.x и ниже) на несертифицированных устройствах обычно работают в SD. Нужен зарубежный аккаунт и VPN."
     },
     {
       "id": "hbomax",
@@ -157,19 +157,21 @@
       "file_hint": "max|hbo",
       "variant_hint": "для этого телевизора: armeabi-v7a (или universal/noarch), nodpi или xhdpi (320 dpi), Android 13; лучше «APK», бандл «.apkm» тоже подойдёт; версия для Android TV — если есть",
       "packages": [
+        "com.wbd.hbomax",
         "com.wbd.stream",
         "com.hbo.hbonow",
         "eu.hbogo.androidtv",
         "com.hbo.go"
       ],
       "skip_if_installed": [
+        "com.wbd.hbomax",
         "com.wbd.stream",
         "com.hbo.hbonow",
         "eu.hbogo.androidtv",
         "com.hbo.go"
       ],
       "source": "APKMirror (подписанные Warner Bros. Discovery сборки)",
-      "note": "Max требует сервисы Google и DRM L1 — на Салют ТВ, скорее всего, не запустится; в России недоступен. Пока приложения нет — карточка веб-версии."
+      "note": "Установлена сборка com.wbd.hbomax (7.14) — ClearTV 0.1.9 знает этот пакет и показывает приложение вместо веб-карточки. Требует зарубежный аккаунт и VPN; DRM-проверка на стороне сервиса."
     },
     {
       "id": "appletv",

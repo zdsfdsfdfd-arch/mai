@@ -5,19 +5,26 @@
       "name": "YouTube",
       "keywords": [
         "youtube",
-        "ютуб",
-        "smarttube"
+        "ютуб"
       ],
       "packages": [
         "com.google.android.youtube.tv",
         "com.google.android.youtube",
+        "ru.sberdevices.startube"
+      ]
+    },
+    {
+      "name": "SmartTube",
+      "keywords": [
+        "smarttube"
+      ],
+      "packages": [
         "org.smarttube.stable",
         "org.smarttube.beta",
         "app.smarttube",
         "app.smarttube.fdroid",
         "com.teamsmart.videomanager.tv",
-        "com.liskovsoft.smarttubetv.beta",
-        "ru.sberdevices.startube"
+        "com.liskovsoft.smarttubetv.beta"
       ]
     },
     {
@@ -26,8 +33,8 @@
         "netflix"
       ],
       "packages": [
-        "com.netflix.ninja",
-        "com.netflix.mediaclient"
+        "com.netflix.mediaclient",
+        "com.netflix.ninja"
       ]
     },
     {
@@ -37,6 +44,7 @@
         "hbo"
       ],
       "packages": [
+        "com.wbd.hbomax",
         "com.wbd.stream",
         "com.hbo.hbonow",
         "eu.hbogo.androidtv",
