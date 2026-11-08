@@ -53,13 +53,23 @@ export default {
         <div class="num-xl"><span data-count="2685" data-duration="1800">2 685</span></div>
         <p><b>автомобилей за 13 лет</b> выпустила Toyota с 1937 по 1950 год</p>
       </div>
-      <div class="jp-vs" data-r="fade" style="--i:6">vs</div>
+      <div class="jp-vs" data-r="fade" style="--i:6"><span>vs</span></div>
       <div class="jp-num" data-r style="--i:7">
         <div class="num-xl accent"><span data-count="7000" data-duration="1800">7 000</span></div>
         <p><b>автомобилей в день</b> выпускал завод Ford River Rouge в 1950 году</p>
       </div>
       <p class="jp-source caption" data-r="fade" style="--i:9">Womack, Jones, Roos · The Machine That Changed the World, 1990</p>
     </div>
+
+    <figure class="jp-eiji" data-r style="--i:11">
+      <div class="jp-eiji__pic photo photo--archive grain">${img('eiji')}</div>
+      <figcaption>
+        <span class="label accent">1950 · поездка в США</span>
+        <b>Эйдзи Тоёда</b>
+        <span class="jp-eiji__meta">1913–2013 · позже президент Toyota</span>
+        <p>Три месяца изучал завод Ford River Rouge и сделал вывод: копировать американскую систему в Японии нельзя.</p>
+      </figcaption>
+    </figure>
 
     <div class="jp-turn">
       <span class="jp-turn__a" data-r="left" style="--i:10">Условия не позволяли копировать американскую модель</span>

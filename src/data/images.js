@@ -59,7 +59,7 @@ export const images = {
   ohno: {
     file: 'images/taiichi-ohno.jpg',
     alt: 'Чёрно-белый портрет',
-    title: 'Портрет на слайде «Тайити Оно»',
+    title: 'Портрет на слайде «Тайно Дернул»',
     author: 'Личный архив',
     license: 'личное фото',
   },
@@ -78,6 +78,14 @@ export const images = {
     author: 'Личный архив',
     license: 'личное фото',
     position: '50% 20%',
+  },
+  eiji: {
+    file: 'images/portrait-eiji.jpg',
+    alt: 'Чёрно-белый портрет',
+    title: 'Портрет на слайде «Эйдзи Тоёда»',
+    author: 'Личный архив',
+    license: 'личное фото',
+    position: '50% 30%',
   },
   sakichi: {
     file: 'images/sakichi-toyoda.jpg',

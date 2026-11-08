@@ -89,22 +89,26 @@
   position: absolute;
   left: 1080px;
   right: var(--m-x);
-  top: 214px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  top: 200px;
+  display: grid;
+  grid-template-columns: 1fr 64px 1fr;
+  column-gap: 20px;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
 }
 
-.jp-num {
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
+.jp-num .num-xl {
+  font-size: 124px;
+}
+
+.jp-num .num-xl.accent {
+  color: var(--accent);
 }
 
 .jp-num p {
   margin-top: 16px;
-  font-size: 21px;
+  font-size: 19px;
   line-height: 1.4;
   color: var(--fog);
-  max-width: 560px;
 }
 
 .jp-num p b {
@@ -112,30 +116,79 @@
   font-weight: 500;
 }
 
-.jp-num .num-xl.accent {
-  color: var(--accent);
-}
-
 .jp-vs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   font-family: var(--f-mono);
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--steel);
-  display: flex;
-  align-items: center;
-  gap: 16px;
 }
 
+.jp-vs::before,
 .jp-vs::after {
   content: '';
   flex: 1;
-  height: 1px;
-  background: var(--ink-3);
+  width: 1px;
+  background: #3a3a3e;
 }
 
 .jp-source {
-  margin-top: 8px;
+  grid-column: 1 / -1;
+  margin-top: 22px;
+}
+
+/* Eiji Toyoda: the trip that showed copying Ford would not work */
+.jp-eiji {
+  position: absolute;
+  left: 1080px;
+  right: var(--m-x);
+  top: 590px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 26px;
+  align-items: end;
+  padding-top: 26px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
+}
+
+.jp-eiji__pic {
+  width: 150px;
+  height: 190px;
+}
+
+.jp-eiji figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jp-eiji b {
+  font-family: var(--f-display);
+  font-size: 32px;
+  font-weight: 540;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--snow);
+}
+
+.jp-eiji__meta {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+.jp-eiji p {
+  margin-top: 4px;
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--fog);
 }
 
 .jp-turn {
