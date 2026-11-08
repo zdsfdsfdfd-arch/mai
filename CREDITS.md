@@ -1,6 +1,6 @@
 # Источники фотографий
 
-Все фотографии взяты с [Wikimedia Commons](https://commons.wikimedia.org) и используются
+Фотографии взяты с [Wikimedia Commons](https://commons.wikimedia.org) (кроме личного портрета) и используются
 на условиях указанных лицензий. Исторические снимки находятся в общественном достоянии (Public domain).
 Для снимков под лицензиями CC BY / CC BY-SA указаны авторы; изображения обрезаны,
 уменьшены и тонированы (ч/б, затемнение) для оформления слайдов.
@@ -13,7 +13,7 @@
 | Генри Форд (около 1919) | Fred Hartsook | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Henry_ford_1919.jpg) |
 | Ford Model T (1910) | Harry Shipler | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:1910Ford-T.jpg) |
 | Хатиодзи (префектура Токио) после авианалётов, август 1945 | Исикава Коё (Ishikawa Kōyō) | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Photo-TokyoAirRaids-1945-8-2-Hachi%C5%8Dji-View-1.png) |
-| Тайити Оно (опубликовано в 1958) | Toyota Motor Co. (история компании) | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Ohno-Taiichi-1.jpg) |
+| Портрет на слайде «Тайити Оно» | Личный архив | личное фото | — |
 | Сакити Тоёда (до 1930) | Автор неизвестен | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sakichi_Toyoda.jpg) |
 | Киитиро Тоёда (до 1952) | Автор неизвестен | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Kiichiro_Toyoda.jpg) |
 | Автоматический ткацкий станок Toyoda, тип G | Daderot | CC0 | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Toyoda_Automatic_Loom_-_National_Museum_of_Nature_and_Science,_Tokyo_-_DSC07343.JPG) |

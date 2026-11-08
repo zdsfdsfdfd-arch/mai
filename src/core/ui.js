@@ -119,7 +119,7 @@ export function buildCredits(images, base) {
         <div>
           <b>${img.title}</b>
           <span>${img.author} · ${img.license}</span><br>
-          <a href="${img.source}" target="_blank" rel="noopener">${img.source.replace('https://', '')}</a>
+          ${img.source ? `<a href="${img.source}" target="_blank" rel="noopener">${img.source.replace('https://', '')}</a>` : ''}
         </div>
       </li>`,
     )

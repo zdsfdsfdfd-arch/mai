@@ -3,12 +3,12 @@ import { writeFileSync } from 'node:fs';
 import { images } from '../src/data/images.js';
 
 const rows = Object.values(images)
-  .map((i) => `| ${i.title} | ${i.author} | ${i.license} | [Wikimedia Commons](${i.source}) |`)
+  .map((i) => `| ${i.title} | ${i.author} | ${i.license} | ${i.source ? `[Wikimedia Commons](${i.source})` : '—'} |`)
   .join('\n');
 
 const md = `# Источники фотографий
 
-Все фотографии взяты с [Wikimedia Commons](https://commons.wikimedia.org) и используются
+Фотографии взяты с [Wikimedia Commons](https://commons.wikimedia.org) (кроме личного портрета) и используются
 на условиях указанных лицензий. Исторические снимки находятся в общественном достоянии (Public domain).
 Для снимков под лицензиями CC BY / CC BY-SA указаны авторы; изображения обрезаны,
 уменьшены и тонированы (ч/б, затемнение) для оформления слайдов.

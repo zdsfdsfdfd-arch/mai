@@ -58,11 +58,10 @@ export const images = {
   },
   ohno: {
     file: 'images/taiichi-ohno.jpg',
-    alt: 'Портрет Тайити Оно',
-    title: 'Тайити Оно (опубликовано в 1958)',
-    author: 'Toyota Motor Co. (история компании)',
-    license: 'Public domain',
-    source: 'https://commons.wikimedia.org/wiki/File:Ohno-Taiichi-1.jpg',
+    alt: 'Чёрно-белый портрет',
+    title: 'Портрет на слайде «Тайити Оно»',
+    author: 'Личный архив',
+    license: 'личное фото',
   },
   sakichi: {
     file: 'images/sakichi-toyoda.jpg',
