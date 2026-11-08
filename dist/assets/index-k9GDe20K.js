@@ -25,7 +25,7 @@
       <div class="progress-ticks">
         ${Array.from({length:a},(s,e)=>`<button type="button" data-goto="${e}" aria-label="Слайд ${e+1}"></button>`).join("")}
       </div>
-    </div>`,t}function z(a){const t=h("div",{class:"overlay",id:"overview",role:"dialog","aria-modal":"true","aria-label":"Содержание"});return t.innerHTML=`
+    </div>`,t}function D(a){const t=h("div",{class:"overlay",id:"overview",role:"dialog","aria-modal":"true","aria-label":"Содержание"});return t.innerHTML=`
     <div class="overlay-panel">
       <div class="overlay-head">
         <h2>Содержание</h2>
@@ -38,7 +38,7 @@
             <span class="t">${s.title}</span>
           </button>`).join("")}
       </div>
-    </div>`,t}function D(){const a=h("aside",{class:"notes",id:"notes","aria-label":"Заметки докладчика"});return a.innerHTML=`
+    </div>`,t}function z(){const a=h("aside",{class:"notes",id:"notes","aria-label":"Заметки докладчика"});return a.innerHTML=`
     <div class="notes-inner">
       <div class="notes-label">Заметки докладчика<br><span class="muted">N — скрыть</span></div>
       <div class="notes-text"></div>
@@ -67,16 +67,18 @@
         <button class="overlay-close" type="button" data-close>Закрыть · Esc</button>
       </div>
       <ul class="credits-list">${e}</ul>
-    </div>`,s}const R=()=>window.matchMedia("(prefers-reduced-motion: reduce)").matches,V=a=>1-Math.pow(1-a,3);function w(a,t=0){const s=a.toFixed(t),[e,n]=s.split("."),o=e.length>4?e.replace(/\B(?=(\d{3})+(?!\d))/g," "):e;return n?`${o},${n}`:o}const M=new WeakMap;function W(a){a.querySelectorAll("[data-count]").forEach(t=>{const s=parseFloat(t.dataset.count),e=parseFloat(t.dataset.from??"0"),n=parseInt(t.dataset.decimals??"0",10),o=parseInt(t.dataset.duration??"1600",10),l=parseInt(t.dataset.delay??"350",10);if(cancelAnimationFrame(M.get(t)),R()){t.textContent=w(s,n);return}t.textContent=w(e,n);const r=performance.now()+l,d=y=>{const g=Math.min(1,Math.max(0,(y-r)/o));t.textContent=w(e+(s-e)*V(g),n),g<1&&M.set(t,requestAnimationFrame(d))};M.set(t,requestAnimationFrame(d))})}function K(a){a.querySelectorAll("[data-count]").forEach(t=>{cancelAnimationFrame(M.get(t)),t.textContent=w(parseFloat(t.dataset.count),parseInt(t.dataset.decimals??"0",10))})}const J=1920,U=1080,G=2600;class X{constructor(t,s,{images:e={},base:n="./"}={}){this.root=t,this.slides=s,this.images=e,this.base=n,this.index=-1,this.step=0,this.locked=!1}mount(){const{root:t,slides:s}=this;this.stage=h("div",{class:"stage","data-dir":"fwd"}),this.track=h("div",{class:"slides"}),this.sections=s.map((n,o)=>{const l=h("section",{class:`slide slide--${n.id}`,"data-theme":n.theme||"dark","data-index":o,"aria-roledescription":"слайд","aria-label":`${o+1} из ${s.length}: ${n.title}`});return l.innerHTML=n.html({base:this.base,img:this.img.bind(this)}),this.track.appendChild(l),l}),this.chrome=q(s.length),this.stage.append(this.track,this.chrome),this.overview=z(s),this.notes=D(),this.help=B(),this.credits=N(this.images,this.base),this.toast=h("div",{class:"toast",role:"status"},"→ или Пробел — дальше · H — управление"),t.append(this.stage,this.notes,this.overview,this.help,this.credits,this.toast),this.$={chapterWrap:this.chrome.querySelector(".chrome-chapter"),chapterNum:this.chrome.querySelector(".chrome-chapter .num"),chapterName:this.chrome.querySelector(".chrome-chapter .name"),counter:this.chrome.querySelector(".counter .cur"),fill:this.chrome.querySelector(".progress-fill"),progress:this.chrome.querySelector(".progress"),dots:this.chrome.querySelector(".step-dots"),prev:this.chrome.querySelector('[data-action="prev"]'),next:this.chrome.querySelector('[data-action="next"]'),notesText:this.notes.querySelector(".notes-text")},this.bind(),this.fit();const e=this.indexFromHash();return this.go(e??0,{instant:!0}),setTimeout(()=>this.toast.classList.add("is-show"),900),setTimeout(()=>this.toast.classList.remove("is-show"),5200),this.pokeIdle(),this}img(t,{alt:s,className:e="",position:n}={}){const o=this.images[t];if(!o)throw new Error(`Unknown image: ${t}`);const l=n||o.position,r=l?` style="object-position:${l}"`:"",d=e?` class="${e}"`:"";return`<img src="${this.base}${o.file}" alt="${s??o.alt}"${d} decoding="async" draggable="false"${r}>`}fit(){const t=this.root.clientWidth,s=this.root.clientHeight,e=Math.min(t/J,s/U);this.stage.style.setProperty("--scale",String(e))}stepsOf(t){return Math.max(1,this.slides[t]?.steps||1)}next(){if(this.step<this.stepsOf(this.index)-1)return this.setStep(this.step+1);this.index<this.slides.length-1&&this.go(this.index+1)}prev(){if(this.step>0)return this.setStep(this.step-1);this.index>0&&this.go(this.index-1,{step:this.stepsOf(this.index-1)-1})}go(t,{step:s=0,instant:e=!1}={}){const n=Math.max(0,Math.min(this.slides.length-1,t));if(n===this.index){this.setStep(s);return}const o=this.index,l=this.sections[o],r=this.sections[n],d=this.slides[n];this.stage.dataset.dir=n>o?"fwd":"back",l&&(l.classList.remove("is-active"),l.classList.add("is-leaving"),clearTimeout(l._leaveTimer),l._leaveTimer=setTimeout(()=>l.classList.remove("is-leaving"),750),l.setAttribute("aria-hidden","true"),l.inert=!0),r.classList.remove("is-leaving"),r.offsetWidth,e&&(r.style.transition="none"),r.classList.add("is-active"),r.removeAttribute("aria-hidden"),r.inert=!1,e&&requestAnimationFrame(()=>r.style.transition=""),this.index=n,this.step=-1,this.setStep(s,{silent:!0}),this.stage.classList.toggle("is-light",d.theme==="light"),W(r),l&&setTimeout(()=>K(l),800),d.onEnter?.(r,this),this.updateChrome(d,o===-1),this.updateHash()}setStep(t,{silent:s=!1}={}){const e=this.stepsOf(this.index)-1,n=Math.max(0,Math.min(e,t));if(n===this.step&&!s)return;this.step=n;const o=this.sections[this.index];o.dataset.step=String(n),this.slides[this.index].onStep?.(o,n,this),this.renderDots(),this.updateProgress(),this.updateNav()}updateChrome(t,s){const{chapterWrap:e,chapterNum:n,chapterName:o,counter:l,notesText:r}=this.$,d=()=>{n.textContent=f(this.index+1),o.textContent=t.chapter,e.classList.remove("is-swapping")};s?d():(e.classList.add("is-swapping"),setTimeout(d,260)),l.textContent=f(this.index+1),r.innerHTML=(t.notes||"").trim().split(/\n\s*\n/).map(y=>`<p>${y.trim()}</p>`).join(""),this.overview.querySelectorAll(".overview-item").forEach((y,g)=>y.classList.toggle("is-current",g===this.index)),this.$.progress.setAttribute("aria-valuenow",String(this.index+1))}updateProgress(){const t=this.slides.length,s=this.stepsOf(this.index),e=s>1?this.step/s:0,n=(this.index+e+1)/t*100;this.$.fill.style.width=`${Math.min(100,n)}%`}renderDots(){const t=this.stepsOf(this.index);this.$.dots.innerHTML=t>1?Array.from({length:t},(s,e)=>`<i class="${e<=this.step?"on":""}"></i>`).join(""):""}updateNav(){const t=this.index===0&&this.step===0,s=this.index===this.slides.length-1&&this.step===this.stepsOf(this.index)-1;this.$.prev.disabled=t,this.$.next.disabled=s}updateHash(){const t=`#slide-${this.index+1}`;try{location.hash!==t&&history.replaceState(null,"",t)}catch{}}indexFromHash(){const t=/^#slide-(\d+)$/.exec(location.hash);if(!t)return null;const s=parseInt(t[1],10)-1;return s>=0&&s<this.slides.length?s:null}openOverlay(t){[this.overview,this.help,this.credits].forEach(e=>e!==t&&e.classList.remove("is-open")),t.classList.add("is-open"),this.activeOverlay=t;const s=t.querySelector(".is-current")||t.querySelector("[data-close]");setTimeout(()=>s?.focus({preventScroll:!0}),50)}closeOverlay(){return this.activeOverlay?(this.activeOverlay.classList.remove("is-open"),this.activeOverlay=null,!0):!1}toggleOverlay(t){this.activeOverlay===t?this.closeOverlay():this.openOverlay(t)}toggleNotes(){this.notes.classList.toggle("is-open")}async toggleFullscreen(){try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch{}}pokeIdle(){this.root.classList.remove("is-idle"),clearTimeout(this.idleTimer),this.idleTimer=setTimeout(()=>this.root.classList.add("is-idle"),G)}bind(){window.addEventListener("resize",()=>this.fit()),window.addEventListener("hashchange",()=>{const o=this.indexFromHash();o!=null&&o!==this.index&&this.go(o)}),document.addEventListener("keydown",o=>this.onKey(o)),document.addEventListener("mousemove",()=>this.pokeIdle(),{passive:!0}),this.root.addEventListener("click",o=>{const l=o.target.closest("[data-action],[data-goto],[data-close],[data-step-to]");if(!l)return;if(l.hasAttribute("data-close"))return void this.closeOverlay();if(l.dataset.goto!=null)return this.closeOverlay(),void this.go(parseInt(l.dataset.goto,10));if(l.dataset.stepTo!=null)return void this.setStep(parseInt(l.dataset.stepTo,10));const r=l.dataset.action;r==="next"?this.next():r==="prev"?this.prev():r==="overview"?this.toggleOverlay(this.overview):r==="credits"?this.toggleOverlay(this.credits):r==="help"&&this.toggleOverlay(this.help)}),[this.overview,this.help,this.credits].forEach(o=>o.addEventListener("click",l=>{l.target===o&&this.closeOverlay()}));let t=0,s=0,e=0;this.stage.addEventListener("touchstart",o=>{const l=o.touches[0];t=l.clientX,s=l.clientY,e=Date.now()},{passive:!0}),this.stage.addEventListener("touchend",o=>{const l=o.changedTouches[0],r=l.clientX-t,d=l.clientY-s;Date.now()-e<700&&Math.abs(r)>40&&Math.abs(r)>Math.abs(d)*1.3&&(r<0?this.next():this.prev())},{passive:!0});let n=0;window.addEventListener("wheel",o=>{if(this.activeOverlay)return;const l=Math.abs(o.deltaY)>Math.abs(o.deltaX)?o.deltaY:o.deltaX;if(Math.abs(l)<24)return;const r=Date.now();r<n||(n=r+900,l>0?this.next():this.prev())},{passive:!0})}onKey(t){if(t.metaKey||t.ctrlKey||t.altKey)return;const s=t.key;if(this.pokeIdle(),s==="Escape")return this.closeOverlay()?t.preventDefault():this.notes.classList.contains("is-open")?this.toggleNotes():this.openOverlay(this.overview);if(this.activeOverlay){(s==="o"||s==="O"||s==="щ"||s==="Щ")&&this.activeOverlay===this.overview&&this.closeOverlay(),(s==="i"||s==="I"||s==="ш"||s==="Ш")&&this.activeOverlay===this.credits&&this.closeOverlay(),(s==="h"||s==="H"||s==="?"||s==="р"||s==="Р")&&this.activeOverlay===this.help&&this.closeOverlay();return}const e=document.activeElement?.tagName==="BUTTON";switch(s){case"ArrowRight":case"ArrowDown":case"PageDown":return t.preventDefault(),this.next();case"ArrowLeft":case"ArrowUp":case"PageUp":return t.preventDefault(),this.prev();case" ":case"Spacebar":return e?void 0:(t.preventDefault(),t.shiftKey?this.prev():this.next());case"Enter":return e?void 0:(t.preventDefault(),this.next());case"Home":return t.preventDefault(),this.go(0);case"End":return t.preventDefault(),this.go(this.slides.length-1)}const o={f:"fs",F:"fs",а:"fs",А:"fs",n:"notes",N:"notes",т:"notes",Т:"notes",o:"overview",O:"overview",щ:"overview",Щ:"overview",h:"help",H:"help","?":"help",р:"help",Р:"help",i:"credits",I:"credits",ш:"credits",Ш:"credits"}[s];o==="fs"?this.toggleFullscreen():o==="notes"?this.toggleNotes():o==="overview"?this.toggleOverlay(this.overview):o==="help"?this.toggleOverlay(this.help):o==="credits"&&this.toggleOverlay(this.credits)}}const $=[{x:112,year:"1913",label:"Ford"},{x:560,year:"1950-е",label:"Toyota"},{x:1010,year:"1988",label:"Lean"},{x:1460,year:"2020-е",label:"Smart Factory"}],Y={id:"cover",chapter:"Обложка",title:"История возникновения Lean Production",theme:"dark",notes:`
-    Сегодня мы проследим, как появилась концепция Lean Production — бережливого производства.
-    Путь займёт больше ста лет: от конвейера Генри Форда в 1913 году до «умных» заводов 2020-х.
+    </div>`,s}const R=()=>window.matchMedia("(prefers-reduced-motion: reduce)").matches,V=a=>1-Math.pow(1-a,3);function w(a,t=0){const s=a.toFixed(t),[e,n]=s.split("."),o=e.length>4?e.replace(/\B(?=(\d{3})+(?!\d))/g," "):e;return n?`${o},${n}`:o}const M=new WeakMap;function W(a){a.querySelectorAll("[data-count]").forEach(t=>{const s=parseFloat(t.dataset.count),e=parseFloat(t.dataset.from??"0"),n=parseInt(t.dataset.decimals??"0",10),o=parseInt(t.dataset.duration??"1600",10),l=parseInt(t.dataset.delay??"350",10);if(cancelAnimationFrame(M.get(t)),R()){t.textContent=w(s,n);return}t.textContent=w(e,n);const r=performance.now()+l,d=y=>{const g=Math.min(1,Math.max(0,(y-r)/o));t.textContent=w(e+(s-e)*V(g),n),g<1&&M.set(t,requestAnimationFrame(d))};M.set(t,requestAnimationFrame(d))})}function K(a){a.querySelectorAll("[data-count]").forEach(t=>{cancelAnimationFrame(M.get(t)),t.textContent=w(parseFloat(t.dataset.count),parseInt(t.dataset.decimals??"0",10))})}const J=1920,U=1080,G=2600;class X{constructor(t,s,{images:e={},base:n="./"}={}){this.root=t,this.slides=s,this.images=e,this.base=n,this.index=-1,this.step=0,this.locked=!1}mount(){const{root:t,slides:s}=this;this.stage=h("div",{class:"stage","data-dir":"fwd"}),this.track=h("div",{class:"slides"}),this.sections=s.map((n,o)=>{const l=h("section",{class:`slide slide--${n.id}`,"data-theme":n.theme||"dark","data-index":o,"aria-roledescription":"слайд","aria-label":`${o+1} из ${s.length}: ${n.title}`});return l.innerHTML=n.html({base:this.base,img:this.img.bind(this)}),this.track.appendChild(l),l}),this.chrome=q(s.length),this.stage.append(this.track,this.chrome),this.overview=D(s),this.notes=z(),this.help=B(),this.credits=N(this.images,this.base),this.toast=h("div",{class:"toast",role:"status"},"→ или Пробел — дальше · H — управление"),t.append(this.stage,this.notes,this.overview,this.help,this.credits,this.toast),this.$={chapterWrap:this.chrome.querySelector(".chrome-chapter"),chapterNum:this.chrome.querySelector(".chrome-chapter .num"),chapterName:this.chrome.querySelector(".chrome-chapter .name"),counter:this.chrome.querySelector(".counter .cur"),fill:this.chrome.querySelector(".progress-fill"),progress:this.chrome.querySelector(".progress"),dots:this.chrome.querySelector(".step-dots"),prev:this.chrome.querySelector('[data-action="prev"]'),next:this.chrome.querySelector('[data-action="next"]'),notesText:this.notes.querySelector(".notes-text")},this.bind(),this.fit();const e=this.indexFromHash();return this.go(e??0,{instant:!0}),setTimeout(()=>this.toast.classList.add("is-show"),900),setTimeout(()=>this.toast.classList.remove("is-show"),5200),this.pokeIdle(),this}img(t,{alt:s,className:e="",position:n}={}){const o=this.images[t];if(!o)throw new Error(`Unknown image: ${t}`);const l=n||o.position,r=l?` style="object-position:${l}"`:"",d=e?` class="${e}"`:"";return`<img src="${this.base}${o.file}" alt="${s??o.alt}"${d} decoding="async" draggable="false"${r}>`}fit(){const t=this.root.clientWidth,s=this.root.clientHeight,e=Math.min(t/J,s/U);this.stage.style.setProperty("--scale",String(e))}stepsOf(t){return Math.max(1,this.slides[t]?.steps||1)}next(){if(this.step<this.stepsOf(this.index)-1)return this.setStep(this.step+1);this.index<this.slides.length-1&&this.go(this.index+1)}prev(){if(this.step>0)return this.setStep(this.step-1);this.index>0&&this.go(this.index-1,{step:this.stepsOf(this.index-1)-1})}go(t,{step:s=0,instant:e=!1}={}){const n=Math.max(0,Math.min(this.slides.length-1,t));if(n===this.index){this.setStep(s);return}const o=this.index,l=this.sections[o],r=this.sections[n],d=this.slides[n];this.stage.dataset.dir=n>o?"fwd":"back",l&&(l.classList.remove("is-active"),l.classList.add("is-leaving"),clearTimeout(l._leaveTimer),l._leaveTimer=setTimeout(()=>l.classList.remove("is-leaving"),750),l.setAttribute("aria-hidden","true"),l.inert=!0),r.classList.remove("is-leaving"),r.offsetWidth,e&&(r.style.transition="none"),r.classList.add("is-active"),r.removeAttribute("aria-hidden"),r.inert=!1,e&&requestAnimationFrame(()=>r.style.transition=""),this.index=n,this.step=-1,this.setStep(s,{silent:!0}),this.stage.classList.toggle("is-light",d.theme==="light"),W(r),l&&setTimeout(()=>K(l),800),d.onEnter?.(r,this),this.updateChrome(d,o===-1),this.updateHash()}setStep(t,{silent:s=!1}={}){const e=this.stepsOf(this.index)-1,n=Math.max(0,Math.min(e,t));if(n===this.step&&!s)return;this.step=n;const o=this.sections[this.index];o.dataset.step=String(n),this.slides[this.index].onStep?.(o,n,this),this.renderDots(),this.updateProgress(),this.updateNav()}updateChrome(t,s){const{chapterWrap:e,chapterNum:n,chapterName:o,counter:l,notesText:r}=this.$,d=()=>{n.textContent=f(this.index+1),o.textContent=t.chapter,e.classList.remove("is-swapping")};s?d():(e.classList.add("is-swapping"),setTimeout(d,260)),l.textContent=f(this.index+1),r.innerHTML=(t.notes||"").trim().split(/\n\s*\n/).map(y=>`<p>${y.trim()}</p>`).join(""),this.overview.querySelectorAll(".overview-item").forEach((y,g)=>y.classList.toggle("is-current",g===this.index)),this.$.progress.setAttribute("aria-valuenow",String(this.index+1))}updateProgress(){const t=this.slides.length,s=this.stepsOf(this.index),e=s>1?this.step/s:0,n=(this.index+e+1)/t*100;this.$.fill.style.width=`${Math.min(100,n)}%`}renderDots(){const t=this.stepsOf(this.index);this.$.dots.innerHTML=t>1?Array.from({length:t},(s,e)=>`<i class="${e<=this.step?"on":""}"></i>`).join(""):""}updateNav(){const t=this.index===0&&this.step===0,s=this.index===this.slides.length-1&&this.step===this.stepsOf(this.index)-1;this.$.prev.disabled=t,this.$.next.disabled=s}updateHash(){const t=`#slide-${this.index+1}`;try{location.hash!==t&&history.replaceState(null,"",t)}catch{}}indexFromHash(){const t=/^#slide-(\d+)$/.exec(location.hash);if(!t)return null;const s=parseInt(t[1],10)-1;return s>=0&&s<this.slides.length?s:null}openOverlay(t){[this.overview,this.help,this.credits].forEach(e=>e!==t&&e.classList.remove("is-open")),t.classList.add("is-open"),this.activeOverlay=t;const s=t.querySelector(".is-current")||t.querySelector("[data-close]");setTimeout(()=>s?.focus({preventScroll:!0}),50)}closeOverlay(){return this.activeOverlay?(this.activeOverlay.classList.remove("is-open"),this.activeOverlay=null,!0):!1}toggleOverlay(t){this.activeOverlay===t?this.closeOverlay():this.openOverlay(t)}toggleNotes(){this.notes.classList.toggle("is-open")}async toggleFullscreen(){try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch{}}pokeIdle(){this.root.classList.remove("is-idle"),clearTimeout(this.idleTimer),this.idleTimer=setTimeout(()=>this.root.classList.add("is-idle"),G)}bind(){window.addEventListener("resize",()=>this.fit()),window.addEventListener("hashchange",()=>{const o=this.indexFromHash();o!=null&&o!==this.index&&this.go(o)}),document.addEventListener("keydown",o=>this.onKey(o)),document.addEventListener("mousemove",()=>this.pokeIdle(),{passive:!0}),this.root.addEventListener("click",o=>{const l=o.target.closest("[data-action],[data-goto],[data-close],[data-step-to]");if(!l)return;if(l.hasAttribute("data-close"))return void this.closeOverlay();if(l.dataset.goto!=null)return this.closeOverlay(),void this.go(parseInt(l.dataset.goto,10));if(l.dataset.stepTo!=null)return void this.setStep(parseInt(l.dataset.stepTo,10));const r=l.dataset.action;r==="next"?this.next():r==="prev"?this.prev():r==="overview"?this.toggleOverlay(this.overview):r==="credits"?this.toggleOverlay(this.credits):r==="help"&&this.toggleOverlay(this.help)}),[this.overview,this.help,this.credits].forEach(o=>o.addEventListener("click",l=>{l.target===o&&this.closeOverlay()}));let t=0,s=0,e=0;this.stage.addEventListener("touchstart",o=>{const l=o.touches[0];t=l.clientX,s=l.clientY,e=Date.now()},{passive:!0}),this.stage.addEventListener("touchend",o=>{const l=o.changedTouches[0],r=l.clientX-t,d=l.clientY-s;Date.now()-e<700&&Math.abs(r)>40&&Math.abs(r)>Math.abs(d)*1.3&&(r<0?this.next():this.prev())},{passive:!0});let n=0;window.addEventListener("wheel",o=>{if(this.activeOverlay)return;const l=Math.abs(o.deltaY)>Math.abs(o.deltaX)?o.deltaY:o.deltaX;if(Math.abs(l)<24)return;const r=Date.now();r<n||(n=r+900,l>0?this.next():this.prev())},{passive:!0})}onKey(t){if(t.metaKey||t.ctrlKey||t.altKey)return;const s=t.key;if(this.pokeIdle(),s==="Escape")return this.closeOverlay()?t.preventDefault():this.notes.classList.contains("is-open")?this.toggleNotes():this.openOverlay(this.overview);if(this.activeOverlay){(s==="o"||s==="O"||s==="щ"||s==="Щ")&&this.activeOverlay===this.overview&&this.closeOverlay(),(s==="i"||s==="I"||s==="ш"||s==="Ш")&&this.activeOverlay===this.credits&&this.closeOverlay(),(s==="h"||s==="H"||s==="?"||s==="р"||s==="Р")&&this.activeOverlay===this.help&&this.closeOverlay();return}const e=document.activeElement?.tagName==="BUTTON";switch(s){case"ArrowRight":case"ArrowDown":case"PageDown":return t.preventDefault(),this.next();case"ArrowLeft":case"ArrowUp":case"PageUp":return t.preventDefault(),this.prev();case" ":case"Spacebar":return e?void 0:(t.preventDefault(),t.shiftKey?this.prev():this.next());case"Enter":return e?void 0:(t.preventDefault(),this.next());case"Home":return t.preventDefault(),this.go(0);case"End":return t.preventDefault(),this.go(this.slides.length-1)}const o={f:"fs",F:"fs",а:"fs",А:"fs",n:"notes",N:"notes",т:"notes",Т:"notes",o:"overview",O:"overview",щ:"overview",Щ:"overview",h:"help",H:"help","?":"help",р:"help",Р:"help",i:"credits",I:"credits",ш:"credits",Ш:"credits"}[s];o==="fs"?this.toggleFullscreen():o==="notes"?this.toggleNotes():o==="overview"?this.toggleOverlay(this.overview):o==="help"?this.toggleOverlay(this.help):o==="credits"&&this.toggleOverlay(this.credits)}}const $=[{x:112,year:"1913",label:"Ford"},{x:560,year:"1950-е",label:"Toyota"},{x:1010,year:"1988",label:"Lean"},{x:1460,year:"2020-е",label:"Smart Factory"}],Y={id:"cover",chapter:"Обложка",title:"История возникновения Lean Production",theme:"dark",notes:`
+    Сегодня разберём, как появилась концепция Lean Production — бережливое производство.
+    Путь длиной больше ста лет: от конвейера Генри Форда в 1913 году до «умных» заводов 2020-х.
+    Спойлер: больше всех ауры в этой истории нафармят японцы.
 
     Главный вопрос презентации: почему подход, придуманный на японском автозаводе после войны,
-    сегодня используют больницы, банки, IT-компании и даже школы?
+    сегодня используют больницы, банки, IT-компании и даже школы? Начинай спокойно и уверенно,
+    как сигма на собеседовании: первые десять секунд решают, будет класс слушать или листать ленту.
 
     Фото на обложке сделано в 2011 году на заводе во Фримонте (Калифорния). С 1984 по 2010 год
     здесь работал NUMMI — совместный завод General Motors и Toyota, где американские инженеры
-    учились производственной системе Toyota.
+    учились производственной системе Toyota. Красные роботы — не для красоты, они правда такие.
   `,html:({img:a})=>`
     <div class="cover-photo photo photo--modern kb grain" data-r="fade" style="--i:0">
       ${a("cover")}
@@ -121,15 +123,16 @@
       <i class="cover-jp__dot"></i>
     </div>
   `},i=(a,t="")=>`<path d="${a}" pathLength="1" class="draw ${t}"/>`,c=(a,t,s,e,n="",o=0)=>`<rect x="${a}" y="${t}" width="${s}" height="${e}" rx="${o}" pathLength="1" class="draw ${n}"/>`,p=(a,t,s,e="")=>`<circle cx="${a}" cy="${t}" r="${s}" pathLength="1" class="draw ${e}"/>`,Z={value:i("M14 24 22 12h20l8 12-18 28z")+i("M14 24h36")+i("M26 24l6 28 6-28","ac")+i("M22 12l4 12 6-12 6 12 4-12","ac"),nowaste:i("M6 32h14M44 32h14")+p(32,32,11,"ac")+i("M27 27l10 10M37 27 27 37","ac"),kaizen:i("M8 54h12V44h12V34h12V24h12")+i("M36 10h16v16","ac")+i("M52 10 34 28","ac"),people:p(24,21,7)+i("M11 50c0-9 5-14 13-14s13 5 13 14")+p(43,24,6,"ac")+i("M38 37c1.5-.7 3.2-1 5-1 6.5 0 10 5 10 12","ac"),flow:i("M6 32h50")+i("M50 26l6 6-6 6")+c(12,24,12,12)+c(30,24,12,12,"ac"),batch:c(8,40,16,14)+c(24,40,16,14)+c(40,40,16,14)+c(16,26,16,14)+c(32,26,16,14)+c(24,12,16,14,"ac"),warehouse:i("M8 26 32 12l24 14v28H8z")+i("M18 54V34h28v20")+i("M18 41h28M18 48h28","ac"),hourglass:i("M18 9h28M18 55h28")+i("M21 9c0 12 11 15 11 23S21 43 21 55M43 9c0 12-11 15-11 23s11 11 11 23")+i("M26 49h12l-6-6z","ac"),demand:i("M8 56h48M8 56V8")+i("M12 44c8-2 12-16 20-16s12 14 20 8","ac")+i("M12 34h42"),overproduction:c(8,40,14,14)+c(22,40,14,14)+c(15,26,14,14)+c(42,10,14,14,"ac")+i("M49 14v6M46 17h6","ac")+i("M36 54h20","ac"),waiting:p(32,35,19)+i("M32 24v11l8 6","ac")+i("M26 8h12M32 8v8"),transport:c(8,8,14,14)+i("M15 26v8h34v9H15v9h33","ac")+i("M44 47l5 5-5 5","ac"),overprocessing:p(27,35,9)+i("M27 19v5M27 46v5M11 35h5M38 35h5M15.7 23.7l3.5 3.5M34.8 42.8l3.5 3.5M15.7 46.3l3.5-3.5M34.8 27.2l3.5-3.5")+i("M50 6v12M44 12h12M53 26v8M49 30h8","ac"),inventory:i("M10 8v48M54 8v48M10 23h44M10 39h44M10 56h44")+c(14,13,10,10)+c(27,15,8,8)+c(38,28,12,11,"ac")+c(14,45,12,11)+c(30,45,10,11),motion:p(18,12,5)+i("M18 18v16M18 34l-7 18M18 34l7 18M18 24l-8 8M18 24l9 7")+i("M34 48c4-14 10-24 22-31","ac")+i("M49 14l7 3-2 7","ac"),defects:i("M32 7l21 12v26L32 57 11 45V19z")+i("M31 7l-5 14 9 7-7 10 7 8-4 11","ac"),talent:i("M24 42c-6-4-10-10-10-17a18 18 0 0 1 36 0c0 7-4 13-10 17v6H24z")+i("M26 55h12")+i("M27 35l5-9 5 9M29 31h6","ac"),kanban:c(14,7,36,50,"",2)+i("M20 17h24M20 25h16M20 33h20")+c(20,42,11,8,"ac"),crisis:i("M22 9S10 26 10 34a12 12 0 0 0 24 0c0-8-12-25-12-25z")+i("M47 14v34M41 42l6 6 6-6","ac"),globe:p(32,32,22)+i("M10 32h44M32 10c-8 8-8 36 0 44M32 10c8 8 8 36 0 44")+i("M15 20c11 4 23 4 34 0","ac"),book:i("M8 14c8-2 16-2 24 4v36c-8-6-16-6-24-4z")+i("M56 14c-8-2-16-2-24 4v36c8-6 16-6 24-4z")+i("M39 25h10M39 32h10","ac"),cross:c(9,9,46,46,"",4)+i("M27 18h10v9h9v10h-9v9H27v-9h-9V27h9z","ac"),screen:c(7,10,50,34,"",2)+i("M24 10v34M40 10v34M24 54h16M32 44v10")+c(11,16,9,6,"ac")+c(28,16,8,6)+c(11,26,9,6)+c(44,16,9,6),chip:c(18,18,28,28,"",3)+i("M26 10v8M32 10v8M38 10v8M26 46v8M32 46v8M38 46v8M10 26h8M10 32h8M10 38h8M46 26h8M46 32h8M46 38h8")+c(26,26,12,12,"ac",1),car:i("M6 43V32l9-13h25l11 13h7v11z")+i("M15 32h36M27 19v13")+p(18,45,5,"ac")+p(45,45,5,"ac"),factory:i("M8 54V30l12 8v-8l12 8v-8l12 8V12h8v42z")+i("M16 46h6M28 46h6M40 46h6","ac"),medicine:i("M32 53S10 39 10 24a11 11 0 0 1 22-3 11 11 0 0 1 22 3c0 15-22 29-22 29z")+i("M15 32h9l4-8 6 14 4-6h11","ac"),code:c(7,11,50,42,"",3)+i("M7 20h50")+i("M26 30l-6 6 6 6M38 30l6 6-6 6","ac"),truck:i("M5 15h33v27H5zM38 25h11l9 9v8H38z")+p(16,46,5,"ac")+p(47,46,5,"ac"),bank:i("M8 24 32 10l24 14z")+i("M10 48h44M7 55h50")+i("M16 28v16M26 28v16M38 28v16M48 28v16")+i("M28 19h8","ac"),restaurant:i("M9 44h46M14 44a18 18 0 0 1 36 0")+i("M32 26v-5M28 21h8")+i("M7 51h50","ac"),education:i("M4 24 32 12l28 12-28 12z")+i("M16 30v12c8 6 24 6 32 0V30")+i("M58 25v15","ac"),automation:p(32,32,7)+i("M32 15v5M32 44v5M15 32h5M44 32h5")+i("M50 20A22 22 0 0 0 13 23M14 44a22 22 0 0 0 37-3","ac")+i("M13 14v9h9M51 50v-9h-9","ac"),iot:p(32,42,4,"ac")+i("M23 33a13 13 0 0 1 18 0M16 26a23 23 0 0 1 32 0M9 19a33 33 0 0 1 46 0")+i("M32 46v10M24 56h16"),data:i("M14 14c0-3.3 8-6 18-6s18 2.7 18 6-8 6-18 6-18-2.7-18-6z")+i("M14 14v36c0 3.3 8 6 18 6s18-2.7 18-6V14")+i("M14 26c0 3.3 8 6 18 6s18-2.7 18-6","ac")+i("M14 38c0 3.3 8 6 18 6s18-2.7 18-6"),robot:i("M8 56h28M14 56v-6h16v6")+i("M22 50 30 29l17-7")+p(30,29,3.5)+p(22,50,3.5)+i("M47 22l7-7M47 22l7 5","ac")};function b(a,{size:t=56,cls:s=""}={}){const e=Z[a];if(!e)throw new Error(`Unknown icon: ${a}`);return`<svg class="icon ${s}" viewBox="0 0 64 64" width="${t}" height="${t}" aria-hidden="true">${e}</svg>`}const Q=[{icon:"value",title:"Ценность",text:"Понять, за что клиент действительно готов платить"},{icon:"nowaste",title:"Без потерь",text:"Убрать действия, которые не добавляют ценности"},{icon:"kaizen",title:"Кайдзен",text:"Улучшать процесс понемногу — каждый день"},{icon:"people",title:"Уважение к людям",text:"Лучшие идеи — у тех, кто делает работу"},{icon:"flow",title:"Поток",text:"Работа движется без очередей и остановок"}],T=[["w",15],["v",4],["w",22],["v",3],["w",27],["v",4],["w",14],["v",3],["w",8]],tt={id:"what",chapter:"Понятие",title:"Что такое Lean Production?",theme:"light",notes:`
-    Lean в переводе с английского — «стройный», «без лишнего жира». В русском языке прижился термин
-    «бережливое производство».
+    Lean в переводе с английского — «стройный», «без лишнего». В русском прижилось «бережливое производство».
+    Только не путать с ленью. Хотя ленивые люди часто первыми придумывают, как убрать лишние действия, — это база.
 
     Посмотрите на схему: в обычном процессе ценность для клиента создают только короткие красные отрезки.
-    Всё серое — ожидание, перемещения, склады, переделки. Lean не заставляет людей работать быстрее —
-    он убирает серое. Ценности столько же, а процесс становится короче.
+    Всё серое — ожидание, перемещения, склады, переделки. Примерно как утро перед школой: сорок минут
+    сборов, из них полезных минуты три. Lean не заставляет работать быстрее — он убирает серое.
+    Ценности столько же, а процесс становится короче.
 
     Пять идей внизу — основа подхода: ценность, устранение потерь, постоянное улучшение (кайдзен),
-    уважение к людям и непрерывный поток.
+    уважение к людям и непрерывный поток. Их можно не зубрить, но звучат они солидно.
   `,html:()=>`
     <div class="what-head">
       <p class="eyebrow" data-r style="--i:0"><b>Понятие</b> lean — «стройный, без лишнего»</p>
@@ -192,11 +195,12 @@
     В первой половине XX века промышленность жила по логике массового производства:
     чем больше одинаковых изделий выпускается за раз, тем дешевле обходится каждое.
 
-    Поэтому заводы делали огромные партии, а готовая продукция и детали месяцами лежали на складах.
+    Поэтому заводы делали огромные партии, а продукция и детали месяцами лежали на складах.
+    Это как гардероб из сорока одинаковых чёрных худи: вещей вроде много, а надеть нечего.
     Если спрос менялся, перестроиться было трудно и дорого.
 
     Lean переворачивает эту логику: не «произвести много и потом продать», а «произвести ровно то,
-    что нужно клиенту, и тогда, когда нужно».
+    что нужно клиенту, и тогда, когда нужно». Слово «вытягивает» скажи с нажимом — это главное слово слайда.
   `,html:({img:a})=>`
     <figure class="bl-photo photo photo--archive kb grain" data-r="mask" style="--i:0">
       ${a("massprod")}
@@ -258,12 +262,14 @@
     Эта схема показывает главное отличие массового производства от Lean.
 
     Слева — логика «толкающего» завода: модели выпускаются заранее, большими партиями, и кажется,
-    что у каждой найдётся свой покупатель.
+    что у каждой найдётся свой покупатель. Самоуверенность уровня «да это точно залетит».
 
     Справа — как выбирает реальный клиент: спрос собирается на нескольких моделях, которые лучше всего
-    отвечают его ожиданиям по качеству, цене и срокам. Всё остальное оседает на складе — это запасы
-    и перепроизводство, два вида потерь из списка Тайити Оно.
+    отвечают ожиданиям по качеству, цене и срокам. Все стрелки летят к трём лучшим, остальные сидят
+    на складе без внимания. Жёстко, но это рынок. Можно спросить класс, кто купил бы самую скучную
+    модель, — тишина будет лучшим доказательством.
 
+    Всё, что осталось на складе, — это запасы и перепроизводство, два вида потерь из списка Тайити Оно.
     Отсюда вывод Lean: не «толкать» продукцию на склад, а производить то, что «вытягивает» клиент.
   `,html:()=>`
     <div class="pp-head">
@@ -296,12 +302,14 @@
     В 1913 году на заводе в Хайленд-Парке заработал движущийся сборочный конвейер:
     машина сама ехала мимо рабочих, а каждый выполнял одну простую операцию.
 
-    К 1914 году время сборки шасси сократилось примерно с 12,5 часа до 93 минут. Всего выпустили
-    около 15 миллионов Model T, а цена упала с 850 до менее чем 300 долларов.
+    К 1914 году время сборки шасси сократилось примерно с 12,5 часа до 93 минут. Это меньше,
+    чем полнометражный фильм: Форд за это время собирал шасси, а мы обычно только выбираем, что посмотреть.
+    Всего выпустили около 15 миллионов Model T, а цена упала с 850 до менее чем 300 долларов.
 
     Форд заложил основу современной эффективности: конвейер, стандартизация, разделение операций.
-    Но его система была рассчитана на огромные партии одинаковых машин — отсюда знаменитая фраза
-    про любой цвет, «если он чёрный».
+    Но его система была рассчитана на огромные партии одинаковых машин. Цитату про чёрный цвет
+    читай голосом человека, у которого 15 миллионов одинаковых машин и ноль сомнений:
+    минимализм уровня «я художник, я так вижу».
   `,html:({img:a})=>`
     <figure class="ford-photo photo photo--archive kb grain" data-r="mask" style="--i:0">
       ${a("fordline")}
@@ -352,10 +360,12 @@
 
     Цифры из исследования MIT показывают масштаб разрыва: Toyota за 13 лет, с 1937 по 1950 год,
     выпустила 2 685 автомобилей. Завод Ford River Rouge в 1950 году выпускал около 7 000 машин в день.
+    После этих цифр сделай паузу. Нормальная реакция класса — «окак», и это правильная реакция:
+    примерно как сравнить канал на 12 подписчиков с MrBeast.
 
-    В 1950 году Эйдзи Тоёда изучал завод Ford в США и пришёл к выводу: копировать американскую
-    систему в Японии бессмысленно. Нужен свой подход — производить разные модели небольшими партиями
-    и без потерь.
+    В 1950 году Эйдзи Тоёда три месяца изучал завод Ford в США и пришёл к выводу: копировать
+    американскую систему в Японии бессмысленно. Нужен свой подход — разные модели небольшими партиями
+    и без потерь. Посмотреть на конкурента и сказать «мы сделаем по-своему» — это +1000 к ауре.
   `,html:({img:a})=>`
     <div class="jp-photo photo photo--archive kb grain" data-r="fade" style="--i:0">
       ${a("tokyo")}
@@ -409,12 +419,14 @@
     </div>
   `},ct=[{key:"sakichi",name:"Сакити Тоёда",years:"1867–1930",text:"Изобрёл ткацкий станок, который сам останавливается при обрыве нити. Отсюда идея дзидока."},{key:"kiichiro",name:"Киитиро Тоёда",years:"1894–1952",text:"Основал Toyota Motor (1937) и сформулировал принцип Just-in-Time."},{key:"shingo",name:"Сигео Синго",years:"1909–1990",text:"Инженер-консультант: быстрая переналадка SMED и защита от ошибок poka-yoke."}],dt={id:"tps",chapter:"Toyota Production System",title:"Toyota Production System: люди и два столпа",theme:"dark",steps:2,notes:`
     Шаг 1 — люди. Корни TPS — в ткацком станке Сакити Тоёды: он сам останавливался, если рвалась нить.
+    По сути, первая в истории машина с функцией «что-то пошло не так, я на паузе» — только полезная.
     Его сын Киитиро основал автомобильную компанию Toyota и сформулировал идею «точно вовремя».
     Систему в цехах построил инженер Тайити Оно: с конца 1940-х по 1970-е он ввёл канбан,
     описал семь видов потерь и метод «пяти почему». Сигео Синго добавил быструю переналадку
-    оборудования и защиту от ошибок.
+    оборудования и защиту от ошибок. Цитату Оно читай медленно, с интонацией мудрого сенсея.
 
     Шаг 2 — два столпа TPS. Just-in-Time: производить только то, что нужно, когда нужно и сколько нужно.
+    Это как прийти на урок ровно со звонком, только у Toyota это стратегия, а не везение.
     Jidoka: автоматизация с человеческим контролем — при любой проблеме линия останавливается,
     чтобы брак не пошёл дальше. В основании — стандартная работа, выравнивание и кайдзен.
   `,onStep(a,t){a.querySelectorAll(".tps-tab").forEach((s,e)=>s.setAttribute("aria-selected",String(e===t)))},html:({img:a})=>`
@@ -516,10 +528,15 @@
     и деньги, но не делает продукт ценнее для клиента.
 
     Самой опасной Оно считал перепроизводство: оно порождает остальные потери — запасы,
-    транспортировку, ожидание.
+    транспортировку, ожидание. Свежий пример: фабрика наделала гору Лабубу, а мода уже прошла.
+    Это перепроизводство и запасы в одном флаконе.
 
-    Нажмите на любую карточку, чтобы увидеть пример из жизни. Сегодня к семи видам часто добавляют
-    восьмой — неиспользованный потенциал людей: идеи сотрудников, которые никто не спросил.
+    Нажмите на любую карточку, чтобы увидеть пример из жизни. Можно спросить класс, какой вид потерь
+    самый частый в школе. Ответ «ожидание звонка» засчитывается автоматически. А лишние движения —
+    это когда третий раз за день ищешь зарядку по всей квартире.
+
+    Сегодня к семи видам часто добавляют восьмой — неиспользованный потенциал людей: идеи
+    сотрудников, которые никто не спросил.
   `,onEnter(a){a.querySelectorAll(".waste.is-open").forEach(t=>{t.classList.remove("is-open"),t.setAttribute("aria-expanded","false")}),!a.dataset.bound&&(a.dataset.bound="1",a.addEventListener("click",t=>{const s=t.target.closest(".waste");if(!s)return;const e=!s.classList.contains("is-open");a.querySelectorAll(".waste.is-open").forEach(n=>{n.classList.remove("is-open"),n.setAttribute("aria-expanded","false")}),s.classList.toggle("is-open",e),s.setAttribute("aria-expanded",String(e))}))},html:()=>`
     <div class="ws-head">
       <p class="eyebrow" data-r style="--i:0"><b>Муда</b> классификация Тайити Оно</p>
@@ -557,8 +574,11 @@
 
     В 1988 году участник программы Джон Крафчик в своей статье назвал такой подход «lean» —
     «стройный, бережливый». А в 1990 году вышла книга Джеймса Вумека, Дэниела Джонса и Дэниела Руса
-    «The Machine That Changed the World» («Машина, которая изменила мир»). После неё термин
-    Lean Production стал известен во всём мире.
+    «The Machine That Changed the World». Toyota сорок лет строила систему, исследователи придумали
+    ей название — и всё, слово в каждом учебнике. Маркетинг решает.
+
+    Блок «½»: вдвое меньше усилий, площадей и времени при том же результате. Если бы так же работала
+    домашка, это была бы имба.
   `,html:({img:a})=>`
     <div class="tm-intro">
       <p class="eyebrow" data-r style="--i:0"><b>1988–1990</b> MIT, США</p>
@@ -621,7 +641,11 @@
     в Калифорнии. В 1990-е появляется слово Lean и выходят ключевые книги.
 
     В 2000-е Lean выходит за пределы заводов — в больницы, банки, логистику. В 2010-е — в IT:
-    Lean Startup, Agile, Kanban-доски. Сегодня Lean соединяется с данными, ИИ и роботизацией.
+    Эрик Рис пишет «The Lean Startup», появляются Agile и Kanban-доски. Теперь каждый стартап
+    немного Toyota, только с пуфиками и смузи.
+
+    Красный клин внизу показывает, как Lean разлетелся по миру. Примерно как любой мем:
+    сначала один завод, через пару лет его знают все отрасли.
   `,html:({img:a})=>`
     <div class="tl-head">
       <p class="eyebrow" data-r style="--i:0"><b>80 лет</b> развития</p>
@@ -683,6 +707,9 @@
     и наводят порядок в операционных. Банки ускоряют одобрение кредитов. IT-команды работают
     с Kanban-досками и выпускают продукт маленькими шагами. Рестораны продумывают рабочее место повара.
 
+    Пример поближе: очередь в школьной столовой — идеальный кандидат на Lean-проект.
+    Можно даже предложить его директору и получить плюс к репутации.
+
     Главная мысль слайда: Lean — это не набор инструментов для заводов. Это способ смотреть
     на любую работу как на процесс, который можно сделать понятнее, быстрее и без лишнего.
   `,html:({img:a})=>`
@@ -711,11 +738,12 @@
     большими данными, искусственным интеллектом и роботами.
 
     Важно понимать порядок. Lean сначала убирает ненужные процессы. Технологии потом помогают
-    делать нужные процессы быстрее, точнее и дешевле. Если автоматизировать процесс с потерями,
-    потери тоже станут автоматическими — и быстрыми.
+    делать нужные процессы быстрее, точнее и дешевле. Если автоматизировать бардак, получится
+    автоматический бардак. Скажи это уверенно — звучит как цитата великого человека.
 
     Так появляется «умный завод»: датчики следят за станками, ИИ замечает брак и предсказывает
-    поломки заранее, а люди занимаются улучшениями.
+    поломки заранее, а люди занимаются улучшениями. Да, ИИ тут генерирует не итальянский брейнрот,
+    а прогнозы, чтобы станок не сломался в пятницу вечером.
   `,html:({img:a})=>`
     <figure class="tc-photo photo photo--modern kb grain" data-r="fade" style="--i:0">
       ${a("smartfactory")}
@@ -758,7 +786,11 @@
     международное имя Lean Production, культура постоянного улучшения — и сегодня умные заводы.
 
     Главная мысль: Lean — это не просто технология производства. Это культура, в которой каждый
-    каждый день немного улучшает свою работу. Спасибо за внимание!
+    каждый день немного улучшает свою работу. Слово «кайдзен» произноси с уважением, а после
+    финальной фразы помолчи пару секунд — так делают спикеры TED, и это работает.
+
+    Спасибо за внимание! Если вопросов нет, это идеальный Lean: ноль лишних действий.
+    Можно уходить с аурой.
   `,html:()=>`
     <div class="fn-kanji jp" aria-hidden="true" data-r="blur" style="--i:0">改善</div>
 
