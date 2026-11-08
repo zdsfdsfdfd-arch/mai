@@ -93,7 +93,7 @@ export const images = {
     title: 'Портрет на слайде «Эрик Рис»',
     author: 'Личный архив',
     license: 'личное фото',
-    position: '50% 40%',
+    position: '50% 35%',
   },
   sakichi: {
     file: 'images/sakichi-toyoda.jpg',
