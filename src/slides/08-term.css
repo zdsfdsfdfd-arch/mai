@@ -232,3 +232,46 @@
   color: var(--snow);
   font-weight: 500;
 }
+
+/* Author of the term */
+.tm-author {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 26px;
+  align-items: end;
+}
+
+.tm-author__pic {
+  width: 150px;
+  height: 190px;
+}
+
+.tm-author figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tm-author b {
+  font-family: var(--f-display);
+  font-size: 32px;
+  font-weight: 540;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--snow);
+}
+
+.tm-author__meta {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.tm-author p {
+  margin-top: 4px;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--fog);
+}

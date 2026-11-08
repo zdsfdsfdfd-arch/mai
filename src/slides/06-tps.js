@@ -14,8 +14,7 @@ const founders = [
     text: 'Основал Toyota Motor (1937) и сформулировал принцип Just-in-Time.',
   },
   {
-    key: null,
-    jp: '新郷重夫',
+    key: 'shingo',
     name: 'Сигео Синго',
     years: '1909–1990',
     text: 'Инженер-консультант: быстрая переналадка SMED и защита от ошибок poka-yoke.',

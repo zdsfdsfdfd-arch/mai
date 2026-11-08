@@ -27,11 +27,21 @@ export default {
     «The Machine That Changed the World» («Машина, которая изменила мир»). После неё термин
     Lean Production стал известен во всём мире.
   `,
-  html: () => `
+  html: ({ img }) => `
     <div class="tm-intro">
       <p class="eyebrow" data-r style="--i:0"><b>1988–1990</b> MIT, США</p>
       <h2 class="h1" data-r style="--i:1">Откуда взялось слово «Lean»</h2>
       <p class="lead" data-r style="--i:2">Система Toyota работала десятилетиями, прежде чем у неё появилось международное имя.</p>
+
+      <figure class="tm-author" data-r style="--i:4">
+        <div class="tm-author__pic photo photo--archive grain">${img('krafcik')}</div>
+        <figcaption>
+          <span class="label accent">Автор термина</span>
+          <b>Джон Крафчик</b>
+          <span class="tm-author__meta">исследователь MIT · 1988</span>
+          <p>В статье «Triumph of the Lean Production System» первым назвал систему Toyota словом «lean».</p>
+        </figcaption>
+      </figure>
 
       <div class="tm-half" data-r style="--i:9">
         <div class="tm-half__num">½</div>

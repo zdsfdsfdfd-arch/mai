@@ -63,6 +63,22 @@ export const images = {
     author: 'Личный архив',
     license: 'личное фото',
   },
+  shingo: {
+    file: 'images/portrait-shingo.jpg',
+    alt: 'Чёрно-белый портрет',
+    title: 'Портрет на слайде «Сигео Синго»',
+    author: 'Личный архив',
+    license: 'личное фото',
+    position: '50% 30%',
+  },
+  krafcik: {
+    file: 'images/portrait-krafcik.jpg',
+    alt: 'Чёрно-белый портрет',
+    title: 'Портрет на слайде «Джон Крафчик»',
+    author: 'Личный архив',
+    license: 'личное фото',
+    position: '50% 20%',
+  },
   sakichi: {
     file: 'images/sakichi-toyoda.jpg',
     alt: 'Портрет Сакити Тоёды',
