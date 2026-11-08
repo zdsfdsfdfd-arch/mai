@@ -1,4 +1,4 @@
-import './08-term.css';
+import './09-term.css';
 
 const steps = [
   { when: '1948–1975', title: 'Toyota Production System', text: 'Система рождается в цехах Toyota. Снаружи её называют просто «японскими методами».' },

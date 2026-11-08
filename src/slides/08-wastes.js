@@ -1,4 +1,4 @@
-import './07-wastes.css';
+import './08-wastes.css';
 import { icon } from './icons.js';
 
 const wastes = [

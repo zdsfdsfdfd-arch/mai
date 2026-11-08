@@ -1,4 +1,4 @@
-import './04-ford.css';
+import './05-ford.css';
 
 export default {
   id: 'ford',

@@ -1,4 +1,4 @@
-import './11-tech.css';
+import './12-tech.css';
 import { icon } from './icons.js';
 
 const stack = [

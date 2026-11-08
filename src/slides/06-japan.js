@@ -1,4 +1,4 @@
-import './05-japan.css';
+import './06-japan.css';
 
 const problems = [
   ['Нехватка ресурсов', 'сырья, энергии и оборудования'],

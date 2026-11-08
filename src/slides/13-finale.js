@@ -1,4 +1,4 @@
-import './12-finale.css';
+import './13-finale.css';
 
 const chain = [
   { name: 'Ford', when: '1913', note: 'конвейер' },

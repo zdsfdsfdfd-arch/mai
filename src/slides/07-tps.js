@@ -1,4 +1,4 @@
-import './06-tps.css';
+import './07-tps.css';
 
 const founders = [
   {

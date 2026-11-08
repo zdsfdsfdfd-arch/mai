@@ -1,4 +1,4 @@
-import './09-timeline.css';
+import './10-timeline.css';
 import { icon } from './icons.js';
 
 const eras = [
@@ -7,7 +7,7 @@ const eras = [
   { when: '1980-е', icon: 'globe', title: 'Запад учится', text: 'GM и Toyota открывают совместный завод NUMMI (1984). Методы Toyota изучают в США и Европе.' },
   { when: '1990-е', icon: 'book', title: 'Слово «Lean»', text: 'Книги «The Machine That Changed the World» (1990) и «Lean Thinking» (1996).' },
   { when: '2000-е', icon: 'cross', title: 'За пределами заводов', text: 'Lean приходит в больницы, банки, логистику и сервис. Появляется Lean Six Sigma.' },
-  { when: '2010-е', icon: 'screen', title: 'Lean + digital', text: 'Lean Startup, Agile и Kanban-доски в IT. Процессы становятся цифровыми.' },
+  { when: '2010-е', icon: 'screen', photo: 'ries', title: 'Lean + digital', text: 'Эрик Рис (на фото) пишет «The Lean Startup» (2011). Agile и Kanban-доски в IT.' },
   { when: '2020-е', icon: 'chip', title: 'Lean + AI', text: 'Industry 4.0: датчики, данные, ИИ и роботы помогают убирать потери.' },
 ];
 
@@ -27,7 +27,7 @@ export default {
     В 2000-е Lean выходит за пределы заводов — в больницы, банки, логистику. В 2010-е — в IT:
     Lean Startup, Agile, Kanban-доски. Сегодня Lean соединяется с данными, ИИ и роботизацией.
   `,
-  html: () => `
+  html: ({ img }) => `
     <div class="tl-head">
       <p class="eyebrow" data-r style="--i:0"><b>80 лет</b> развития</p>
       <h2 class="h1" data-r style="--i:1">Как развивался Lean</h2>
@@ -45,7 +45,11 @@ export default {
             (e, i) => `
           <li class="tl-era ${i === eras.length - 1 ? 'is-now' : ''}" style="--k:${i}">
             <div class="tl-era__top" data-r style="--i:${i * 2.4 + 3}">
-              <span class="tl-era__icon" style="--draw-delay:${700 + i * 330}ms">${icon(e.icon, { size: 60 })}</span>
+              ${
+                e.photo
+                  ? `<span class="tl-era__photo photo photo--archive grain">${img(e.photo)}</span>`
+                  : `<span class="tl-era__icon" style="--draw-delay:${700 + i * 330}ms">${icon(e.icon, { size: 60 })}</span>`
+              }
               <span class="tl-era__when">${e.when}</span>
             </div>
             <span class="tl-node">${i === eras.length - 1 ? '<span class="pulse"></span>' : ''}</span>

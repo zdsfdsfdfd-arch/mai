@@ -1,0 +1,164 @@
+.pp-head {
+  position: absolute;
+  left: var(--m-x);
+  top: var(--m-top);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pp-head .h1 {
+  font-size: 76px;
+  white-space: nowrap;
+}
+
+.pp-panel {
+  position: absolute;
+  top: 296px;
+  width: 820px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 22px;
+  border-top: 1px solid var(--paper-line);
+}
+
+.pp-panel:first-of-type {
+  left: var(--m-x);
+}
+
+.pp-panel--pull {
+  right: var(--m-x);
+  border-top-color: var(--accent);
+}
+
+.pp-panel figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pp-panel figcaption b {
+  font-family: var(--f-display);
+  font-size: 28px;
+  font-weight: 520;
+  letter-spacing: -0.02em;
+  color: var(--graphite);
+}
+
+.pp-svg {
+  display: block;
+  width: 820px;
+  height: auto;
+  overflow: visible;
+}
+
+.pp-col {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  fill: var(--slate);
+}
+
+.pp-product rect,
+.pp-product path,
+.pp-customer circle,
+.pp-customer path {
+  fill: none;
+  stroke: var(--graphite);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.pp-product.is-picked rect {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+}
+
+.pp-product.is-picked path {
+  stroke: var(--accent);
+}
+
+.pp-product.is-unsold rect,
+.pp-product.is-unsold path {
+  stroke: #a9a9a4;
+}
+
+.pp-shelf {
+  fill: rgba(0, 0, 0, 0.035);
+  stroke: #b9b9b4;
+  stroke-dasharray: 4 4;
+}
+
+.pp-bracket {
+  fill: none;
+  stroke: var(--slate);
+  stroke-width: 1.2;
+}
+
+.pp-shelf-label {
+  font-family: var(--f-text);
+  font-size: 17px;
+  fill: var(--slate);
+}
+
+.pp-shelf-label.is-strong {
+  font-weight: 600;
+  fill: var(--graphite);
+}
+
+.pp-arrow path {
+  stroke-width: 1.4;
+}
+
+.pp-arrow polygon {
+  opacity: 0;
+  transition: opacity 300ms ease var(--hd, 0ms);
+}
+
+.is-active .pp-arrow polygon {
+  opacity: 1;
+}
+
+.slide:not(.is-active):not(.is-leaving) .pp-arrow polygon {
+  transition: none;
+}
+
+.pp-arrow.is-push path {
+  stroke: #8d8d92;
+}
+
+.pp-arrow.is-push polygon {
+  fill: #8d8d92;
+}
+
+.pp-arrow.is-pull path {
+  stroke: var(--accent);
+  stroke-opacity: 0.75;
+}
+
+.pp-arrow.is-pull polygon {
+  fill: var(--accent);
+}
+
+.pp-caption {
+  position: absolute;
+  left: var(--m-x);
+  right: var(--m-x);
+  top: 902px;
+  font-size: 24px;
+  line-height: 1.4;
+  color: var(--slate);
+}
+
+.pp-caption b {
+  color: var(--graphite);
+  font-weight: 600;
+}
+
+.pp-caption span {
+  margin-left: 10px;
+  color: var(--accent);
+  font-weight: 500;
+}

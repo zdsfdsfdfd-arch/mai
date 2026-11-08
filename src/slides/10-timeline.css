@@ -183,3 +183,10 @@
   bottom: 118px;
   color: var(--fog);
 }
+
+.tl-era__photo {
+  display: block;
+  width: 104px;
+  height: 98px;
+  margin-bottom: -6px;
+}

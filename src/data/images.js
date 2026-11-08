@@ -87,6 +87,14 @@ export const images = {
     license: 'личное фото',
     position: '50% 30%',
   },
+  ries: {
+    file: 'images/portrait-ries.jpg',
+    alt: 'Чёрно-белый портрет',
+    title: 'Портрет на слайде «Эрик Рис»',
+    author: 'Личный архив',
+    license: 'личное фото',
+    position: '50% 40%',
+  },
   sakichi: {
     file: 'images/sakichi-toyoda.jpg',
     alt: 'Портрет Сакити Тоёды',

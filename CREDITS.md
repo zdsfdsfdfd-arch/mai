@@ -17,6 +17,7 @@
 | Портрет на слайде «Сигео Синго» | Личный архив | личное фото | — |
 | Портрет на слайде «Джон Крафчик» | Личный архив | личное фото | — |
 | Портрет на слайде «Эйдзи Тоёда» | Личный архив | личное фото | — |
+| Портрет на слайде «Эрик Рис» | Личный архив | личное фото | — |
 | Сакити Тоёда (до 1930) | Автор неизвестен | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sakichi_Toyoda.jpg) |
 | Киитиро Тоёда (до 1952) | Автор неизвестен | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Kiichiro_Toyoda.jpg) |
 | Автоматический ткацкий станок Toyoda, тип G | Daderot | CC0 | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Toyoda_Automatic_Loom_-_National_Museum_of_Nature_and_Science,_Tokyo_-_DSC07343.JPG) |
