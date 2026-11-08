@@ -59,9 +59,9 @@ export const images = {
   ohno: {
     file: 'images/taiichi-ohno.jpg',
     alt: 'Чёрно-белый портрет',
-    title: 'Портрет на слайде «Тайно Дернул»',
-    author: 'Личный архив',
-    license: 'личное фото',
+    title: 'Портрет на слайде «Тайити Оно»',
+    author: 'фото предоставил автор презентации',
+    license: 'источник не указан',
   },
   shingo: {
     file: 'images/portrait-shingo.jpg',

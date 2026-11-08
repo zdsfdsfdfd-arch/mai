@@ -13,7 +13,7 @@
 | Генри Форд (около 1919) | Fred Hartsook | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Henry_ford_1919.jpg) |
 | Ford Model T (1910) | Harry Shipler | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:1910Ford-T.jpg) |
 | Хатиодзи (префектура Токио) после авианалётов, август 1945 | Исикава Коё (Ishikawa Kōyō) | Public domain | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Photo-TokyoAirRaids-1945-8-2-Hachi%C5%8Dji-View-1.png) |
-| Портрет на слайде «Тайно Дернул» | Личный архив | личное фото | — |
+| Портрет на слайде «Тайити Оно» | фото предоставил автор презентации | источник не указан | — |
 | Портрет на слайде «Сигео Синго» | Личный архив | личное фото | — |
 | Портрет на слайде «Джон Крафчик» | Личный архив | личное фото | — |
 | Портрет на слайде «Эйдзи Тоёда» | Личный архив | личное фото | — |
