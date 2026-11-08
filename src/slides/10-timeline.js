@@ -7,7 +7,7 @@ const eras = [
   { when: '1980-е', icon: 'globe', title: 'Запад учится', text: 'GM и Toyota открывают совместный завод NUMMI (1984). Методы Toyota изучают в США и Европе.' },
   { when: '1990-е', icon: 'book', title: 'Слово «Lean»', text: 'Книги «The Machine That Changed the World» (1990) и «Lean Thinking» (1996).' },
   { when: '2000-е', icon: 'cross', title: 'За пределами заводов', text: 'Lean приходит в больницы, банки, логистику и сервис. Появляется Lean Six Sigma.' },
-  { when: '2010-е', icon: 'screen', photo: 'ries', title: 'Lean + digital', text: 'Эрик Рис (на фото) пишет «The Lean Startup» (2011). Agile и Kanban-доски в IT.' },
+  { when: '2010-е', icon: 'screen', title: 'Lean + digital', text: 'Lean Startup (Эрик Рис, 2011), Agile и Kanban-доски в IT. Процессы становятся цифровыми.' },
   { when: '2020-е', icon: 'chip', title: 'Lean + AI', text: 'Industry 4.0: датчики, данные, ИИ и роботы помогают убирать потери.' },
 ];
 
@@ -31,8 +31,18 @@ export default {
     <div class="tl-head">
       <p class="eyebrow" data-r style="--i:0"><b>80 лет</b> развития</p>
       <h2 class="h1" data-r style="--i:1">Как развивался Lean</h2>
+      <p class="tl-lead lead" data-r style="--i:2">От одного японского завода — к способу работы по всему миру.</p>
     </div>
-    <p class="tl-aside lead" data-r style="--i:2">От одного японского завода — к способу работы по всему миру.</p>
+
+    <figure class="tl-person" data-r style="--i:3">
+      <div class="tl-person__pic photo photo--archive grain">${img('ries')}</div>
+      <figcaption>
+        <span class="label accent">2011 · Lean Startup</span>
+        <b>Эрик Рис</b>
+        <span class="tl-person__meta">предприниматель, автор книги</span>
+        <p>В книге «The Lean Startup» перенёс идеи Toyota в стартапы и IT: делать продукт маленькими шагами и проверять каждый на клиентах.</p>
+      </figcaption>
+    </figure>
 
     <div class="tl">
       <svg class="tl-line" viewBox="0 0 1696 4" preserveAspectRatio="none" aria-hidden="true">

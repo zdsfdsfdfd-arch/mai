@@ -7,13 +7,56 @@
   gap: 26px;
 }
 
-.tl-aside {
-  position: absolute;
-  right: var(--m-x);
-  top: 236px;
-  width: 560px;
+.tl-lead {
   font-size: 26px;
   color: var(--steel);
+}
+
+/* Person card, same as the other portraits in the deck */
+.tl-person {
+  position: absolute;
+  right: var(--m-x);
+  top: 136px;
+  width: 640px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 26px;
+  align-items: end;
+}
+
+.tl-person__pic {
+  width: 150px;
+  height: 190px;
+}
+
+.tl-person figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tl-person b {
+  font-family: var(--f-display);
+  font-size: 32px;
+  font-weight: 540;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--snow);
+}
+
+.tl-person__meta {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.tl-person p {
+  margin-top: 4px;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--fog);
 }
 
 .tl {
@@ -184,10 +227,3 @@
   color: var(--fog);
 }
 
-.tl-era__photo {
-  display: block;
-  flex: none;
-  width: 116px;
-  height: 143px;
-  margin-bottom: -4px;
-}
