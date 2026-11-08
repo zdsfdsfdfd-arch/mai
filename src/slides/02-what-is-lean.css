@@ -1,0 +1,249 @@
+.slide--what .what-head {
+  position: absolute;
+  left: var(--m-x);
+  top: var(--m-top);
+  width: 820px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.slide--what .what-head .lead {
+  max-width: 740px;
+}
+
+.slide--what .ink {
+  color: var(--graphite);
+  font-weight: 500;
+}
+
+/* Formula: value ↑ / waste ↓ */
+.what-formula {
+  position: absolute;
+  left: var(--m-x);
+  top: 556px;
+  width: 740px;
+  display: flex;
+  flex-direction: column;
+}
+
+.what-formula__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 8px 0;
+  border-top: 1px solid var(--paper-line);
+}
+
+.what-formula__row:last-child {
+  border-bottom: 1px solid var(--paper-line);
+}
+
+.what-formula__k {
+  font-size: 26px;
+  color: var(--graphite);
+}
+
+.what-formula__v {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--f-display);
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--graphite);
+}
+
+.what-formula__v::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+}
+
+.what-formula__v.is-up {
+  color: var(--accent);
+}
+
+.what-formula__v.is-up::before {
+  border-bottom: 16px solid var(--accent);
+}
+
+.what-formula__v.is-down::before {
+  border-top: 16px solid var(--slate);
+}
+
+/* Diagram */
+.what-diagram {
+  position: absolute;
+  left: 1010px;
+  top: 150px;
+  width: 798px;
+  padding: 40px 44px 36px;
+  background: #f4f4f1;
+  border: 1px solid var(--paper-line);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.what-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.what-bar-label {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--graphite);
+}
+
+.what-bar {
+  display: flex;
+  height: 46px;
+  gap: 2px;
+}
+
+.what-bar i {
+  display: block;
+  height: 100%;
+  width: calc(var(--g, 1) * 1px);
+  flex: 0 0 auto;
+}
+
+.what-bar i.v {
+  background: var(--accent);
+}
+
+.what-bar i.w {
+  background: repeating-linear-gradient(135deg, #b9b9b4 0 2px, #d6d6d1 2px 8px);
+}
+
+.what-bar-note {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--slate);
+  opacity: 0;
+  transition: opacity 600ms ease 3000ms;
+}
+
+.what-bar-note b {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.is-active .what-bar-note {
+  opacity: 1;
+}
+
+.is-lean i.w {
+  transition: width 1400ms var(--ease-in-out) calc(1700ms + var(--k, 0) * 40ms);
+}
+
+.is-active .is-lean i.w {
+  width: 8px !important;
+}
+
+.what-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--paper-line);
+  font-size: 17px;
+  color: var(--slate);
+}
+
+.what-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.what-legend i {
+  width: 16px;
+  height: 16px;
+}
+
+.what-legend i.v {
+  background: var(--accent);
+}
+
+.what-legend i.w {
+  background: repeating-linear-gradient(135deg, #b9b9b4 0 2px, #d6d6d1 2px 6px);
+}
+
+/* Principles along the flow line */
+.what-principles {
+  position: absolute;
+  left: var(--m-x);
+  right: var(--m-x);
+  top: 806px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 40px;
+}
+
+.what-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30px;
+  height: 12px;
+}
+
+.what-line svg {
+  width: 100%;
+  height: 12px;
+  display: block;
+}
+
+.what-line path {
+  stroke: var(--graphite);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.what-principle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--graphite);
+}
+
+.what-node {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 2px solid var(--accent);
+}
+
+.what-principle .icon {
+  margin-top: 4px;
+  color: var(--graphite);
+}
+
+.what-principle h3 {
+  font-family: var(--f-display);
+  font-size: 28px;
+  font-weight: 540;
+  letter-spacing: -0.02em;
+  color: var(--graphite);
+}
+
+.what-principle p {
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--slate);
+  max-width: 280px;
+}

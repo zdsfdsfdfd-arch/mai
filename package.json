@@ -1,0 +1,18 @@
+{
+  "name": "lean-production-history",
+  "version": "1.0.0",
+  "description": "Интерактивная веб-презентация «История возникновения Lean Production»",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "fonts:jp": "python3 scripts/subset-jp-font.py",
+    "check": "node scripts/check.mjs",
+    "credits": "node scripts/credits.mjs"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  },
+  "type": "module",
+  "private": true
+}

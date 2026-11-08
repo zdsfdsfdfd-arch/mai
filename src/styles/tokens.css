@@ -1,0 +1,53 @@
+/*
+  Design system — «Поток» (Flow)
+  Layout: fixed 1920×1080 stage, 112px side margins, 12-col rhythm;
+  one vermilion "flow line" runs through every slide.
+
+  The deck commits to its own look (black / white / grey + one signal colour),
+  so tokens are not theme-switched: each slide picks dark or light itself.
+*/
+:root {
+  color-scheme: dark;
+
+  /* Colour */
+  --ink: #0d0d0e;          /* main dark ground (cool near-black) */
+  --ink-2: #161618;        /* raised dark surface */
+  --ink-3: #222225;        /* dark hairlines, inactive tracks */
+  --steel: #8b8b90;        /* secondary text on dark */
+  --fog: #c9c9cc;          /* body text on dark */
+  --snow: #f4f4f2;         /* headlines on dark */
+  --paper: #e9e9e6;        /* light ground (cold washi grey) */
+  --paper-2: #dededa;      /* light raised surface */
+  --paper-line: #c4c4bf;   /* hairlines on light */
+  --graphite: #1b1b1d;     /* text on light */
+  --slate: #5d5d62;        /* secondary text on light */
+  --accent: #ec4219;       /* signal vermilion — the only colour */
+  --accent-soft: rgba(236, 66, 25, 0.14);
+
+  /* Type */
+  --f-display: 'Geologica', 'Golos Text', 'Segoe UI', system-ui, sans-serif;
+  --f-text: 'Golos Text', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --f-jp: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+
+  /* Type scale (stage pixels) */
+  --t-mega: 132px;
+  --t-h1: 88px;
+  --t-h2: 56px;
+  --t-h3: 34px;
+  --t-lead: 30px;
+  --t-body: 22px;
+  --t-small: 18px;
+  --t-label: 14px;
+
+  /* Space */
+  --m-x: 112px;            /* side margin */
+  --m-top: 128px;          /* top content line (below chrome) */
+  --m-bottom: 112px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-slide: 900ms;
+  --stagger: 80ms;
+}

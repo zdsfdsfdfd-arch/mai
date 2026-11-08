@@ -1,0 +1,4 @@
+node_modules
+.check
+*.log
+.DS_Store

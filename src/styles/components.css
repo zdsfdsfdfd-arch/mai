@@ -1,0 +1,348 @@
+/* ───────────────────────── Shared slide components ───────────────────────── */
+
+.frame {
+  position: absolute;
+  inset: var(--m-top) var(--m-x) var(--m-bottom);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--f-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.eyebrow b {
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.eyebrow::after {
+  content: '';
+  width: 64px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+[data-theme='light'] .eyebrow {
+  color: var(--slate);
+}
+
+.h1 {
+  font-family: var(--f-display);
+  font-size: var(--t-h1);
+  font-weight: 560;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  color: var(--snow);
+  text-wrap: balance;
+}
+
+.h2 {
+  font-family: var(--f-display);
+  font-size: var(--t-h2);
+  font-weight: 520;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: var(--snow);
+  text-wrap: balance;
+}
+
+.h3 {
+  font-family: var(--f-display);
+  font-size: var(--t-h3);
+  font-weight: 520;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--snow);
+}
+
+[data-theme='light'] :is(.h1, .h2, .h3) {
+  color: var(--graphite);
+}
+
+.lead {
+  font-size: var(--t-lead);
+  line-height: 1.38;
+  color: var(--fog);
+  max-width: 30em;
+  text-wrap: pretty;
+}
+
+[data-theme='light'] .lead {
+  color: var(--slate);
+}
+
+.body {
+  font-size: var(--t-body);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.small {
+  font-size: var(--t-small);
+  line-height: 1.5;
+}
+
+.label {
+  font-family: var(--f-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+[data-theme='light'] .label {
+  color: var(--slate);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.muted {
+  color: var(--steel);
+}
+
+[data-theme='light'] .muted {
+  color: var(--slate);
+}
+
+.jp {
+  font-family: var(--f-jp);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.jp-vertical {
+  writing-mode: vertical-rl;
+  font-family: var(--f-jp);
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: 0.5em;
+  color: var(--steel);
+}
+
+/* Big numerals */
+.num-xl {
+  font-family: var(--f-display);
+  font-weight: 250;
+  font-size: 168px;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+  color: var(--snow);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.num-l {
+  font-family: var(--f-display);
+  font-weight: 300;
+  font-size: 96px;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  color: var(--snow);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+[data-theme='light'] :is(.num-xl, .num-l) {
+  color: var(--graphite);
+}
+
+/* Photos */
+.photo {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink-2);
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo--archive img {
+  filter: grayscale(1) contrast(1.1) brightness(0.9);
+}
+
+.photo--modern img {
+  filter: saturate(0.55) contrast(1.05) brightness(0.85);
+}
+
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+}
+
+.caption {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--steel);
+}
+
+.caption b {
+  color: var(--fog);
+  font-weight: 500;
+}
+
+.photo .caption {
+  position: absolute;
+  left: 28px;
+  bottom: 24px;
+  right: 28px;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+}
+
+.photo .caption b {
+  color: #fff;
+}
+
+/* Chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border: 1px solid var(--ink-3);
+  border-radius: 40px;
+  font-size: var(--t-small);
+  color: var(--fog);
+  white-space: nowrap;
+}
+
+.chip i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+[data-theme='light'] .chip {
+  border-color: var(--paper-line);
+  color: var(--graphite);
+}
+
+/* Inline arrow (drawn, so it never falls back to a system glyph) */
+.arr {
+  display: inline-block;
+  position: relative;
+  width: 1.1em;
+  height: 1px;
+  background: currentColor;
+  vertical-align: 0.32em;
+  margin: 0 0.35em;
+}
+
+.arr::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 0.38em;
+  height: 0.38em;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: translate(-0.02em, -50%) rotate(45deg);
+}
+
+/* Hairline rule */
+.rule {
+  height: 1px;
+  background: var(--ink-3);
+}
+
+[data-theme='light'] .rule {
+  background: var(--paper-line);
+}
+
+/* Line icons */
+.icon {
+  width: 56px;
+  height: 56px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.icon .ac {
+  stroke: var(--accent);
+}
+
+.icon .acf {
+  fill: var(--accent);
+  stroke: none;
+}
+
+/* Hanko-style seal */
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--f-jp);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
+}
+
+/* Pulse dot for "now" */
+.pulse {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.pulse::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  animation: pulse 2.4s var(--ease-out) infinite;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse::after {
+    animation: none;
+  }
+}

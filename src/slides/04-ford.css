@@ -1,0 +1,142 @@
+.slide--ford .ford-photo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1000px;
+  height: 1080px;
+}
+
+.slide--ford .ford-photo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(13, 13, 14, 0.75) 0%, rgba(13, 13, 14, 0) 16%),
+    linear-gradient(90deg, rgba(13, 13, 14, 0) 70%, rgba(13, 13, 14, 0.9) 100%),
+    linear-gradient(0deg, rgba(13, 13, 14, 0.8) 0%, rgba(13, 13, 14, 0) 35%);
+}
+
+.slide--ford .ford-photo .caption {
+  left: var(--m-x);
+  bottom: 96px;
+}
+
+.slide--ford .ford-car {
+  position: absolute;
+  left: 600px;
+  top: 676px;
+  width: 440px;
+  height: 292px;
+  z-index: 3;
+  outline: 10px solid var(--ink);
+}
+
+.slide--ford .ford-car .caption {
+  left: 18px;
+  bottom: 14px;
+  font-size: 12px;
+}
+
+.slide--ford .ford-car::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 40%);
+}
+
+.ford-main {
+  position: absolute;
+  left: 1110px;
+  right: var(--m-x);
+  top: var(--m-top);
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+
+.ford-person {
+  display: grid;
+  grid-template-columns: 128px 1fr;
+  gap: 30px;
+  align-items: end;
+}
+
+.ford-portrait {
+  width: 128px;
+  height: 164px;
+}
+
+.ford-person .h1 {
+  font-size: 76px;
+}
+
+.ford-who {
+  margin-top: 14px;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.ford-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+  padding-top: 30px;
+  border-top: 1px solid var(--ink-3);
+}
+
+.ford-stat .num-l {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.ford-stat .num-l small {
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--accent);
+}
+
+.ford-stat p {
+  margin-top: 12px;
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--fog);
+  max-width: 300px;
+}
+
+.slide--ford .chip {
+  font-size: 17px;
+  padding: 9px 16px;
+}
+
+.ford-quote {
+  padding-left: 26px;
+  border-left: 2px solid var(--accent);
+}
+
+.ford-quote p {
+  font-family: var(--f-display);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--snow);
+  text-wrap: balance;
+}
+
+.ford-quote footer {
+  margin-top: 14px;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--steel);
+}
+
+.ford-quote footer span {
+  color: var(--fog);
+}

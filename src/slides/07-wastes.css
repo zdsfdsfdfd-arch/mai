@@ -1,0 +1,155 @@
+.ws-head {
+  position: absolute;
+  left: var(--m-x);
+  top: var(--m-top);
+  width: 940px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ws-kanji {
+  position: absolute;
+  right: 140px;
+  top: 74px;
+  font-size: 240px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #d9d9d5;
+  user-select: none;
+}
+
+.ws-kanji::after {
+  content: '';
+  position: absolute;
+  right: -32px;
+  bottom: 44px;
+  width: 22px;
+  height: 22px;
+  background: var(--accent);
+}
+
+.ws-hint {
+  position: absolute;
+  right: var(--m-x);
+  top: 404px;
+}
+
+.ws-grid {
+  position: absolute;
+  left: var(--m-x);
+  right: var(--m-x);
+  top: 440px;
+  bottom: 104px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
+}
+
+.ws-grid > li {
+  min-width: 0;
+}
+
+.waste,
+.ws-extra {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  padding: 24px 26px;
+  text-align: left;
+  background: #f5f5f2;
+  border: 1px solid var(--paper-line);
+  overflow: hidden;
+  color: var(--graphite);
+}
+
+.waste {
+  transition:
+    opacity 700ms var(--ease-out) var(--d),
+    transform 900ms var(--ease-out) var(--d),
+    border-color 250ms ease,
+    background 250ms ease,
+    box-shadow 300ms ease;
+}
+
+.is-active .waste:hover {
+  border-color: var(--graphite);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.35);
+}
+
+.waste__n {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+.waste__icon {
+  position: absolute;
+  right: 18px;
+  top: 16px;
+  color: var(--graphite);
+}
+
+.waste__title {
+  margin-top: auto;
+  font-family: var(--f-display);
+  font-size: 28px;
+  font-weight: 540;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--graphite);
+  text-wrap: balance;
+}
+
+.waste__text {
+  margin-top: 10px;
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--slate);
+}
+
+.waste__example {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px 26px;
+  background: var(--graphite);
+  color: var(--snow);
+  font-size: 21px;
+  line-height: 1.4;
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 550ms var(--ease-out);
+}
+
+.waste__example .label {
+  color: var(--accent);
+}
+
+.waste.is-open .waste__example {
+  clip-path: inset(0 0 0 0);
+}
+
+.ws-extra {
+  background: transparent;
+  border-style: dashed;
+}
+
+.ws-extra .waste__n {
+  color: var(--slate);
+}
+
+.ws-extra .waste__title {
+  font-size: 24px;
+}
+
+.ws-extra .waste__text {
+  font-size: 17px;
+}

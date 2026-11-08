@@ -1,0 +1,185 @@
+.tl-head {
+  position: absolute;
+  left: var(--m-x);
+  top: var(--m-top);
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.tl-aside {
+  position: absolute;
+  right: var(--m-x);
+  top: 236px;
+  width: 560px;
+  font-size: 26px;
+  color: var(--steel);
+}
+
+.tl {
+  position: absolute;
+  left: var(--m-x);
+  right: var(--m-x);
+  top: 400px;
+  bottom: var(--m-bottom);
+}
+
+.tl-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 176px;
+  width: 100%;
+  height: 4px;
+  overflow: visible;
+}
+
+.tl-line path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.tl-line__base {
+  stroke: var(--ink-3);
+  stroke-width: 1;
+}
+
+.tl-line__run {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.tl-eras {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 24px;
+}
+
+.tl-era {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tl-era__top {
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.tl-era__icon {
+  color: var(--fog);
+}
+
+.tl-era__when {
+  font-family: var(--f-display);
+  font-size: 38px;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: var(--snow);
+  white-space: nowrap;
+}
+
+.tl-node {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 11px 0 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--ink);
+  transform: scale(0);
+  transition: transform 450ms var(--ease-out) calc(450ms + var(--k) * 370ms);
+}
+
+.is-active .tl-node {
+  transform: scale(1);
+}
+
+.tl-era.is-now .tl-node {
+  border: 0;
+  background: transparent;
+}
+
+.tl-era.is-now .tl-node .pulse {
+  position: absolute;
+  inset: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.tl-era__body {
+  padding-top: 30px;
+}
+
+.tl-era__body h3 {
+  font-family: var(--f-display);
+  font-size: 25px;
+  font-weight: 540;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: var(--snow);
+}
+
+.tl-era__body p {
+  margin-top: 12px;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--fog);
+}
+
+.tl-era.is-now .tl-era__when,
+.tl-era.is-now h3 {
+  color: var(--accent);
+}
+
+.tl-era.is-now .tl-era__icon {
+  color: var(--snow);
+}
+
+/* Scope of use: a wedge that widens with every decade */
+.tl-scope {
+  position: absolute;
+  left: var(--m-x);
+  right: var(--m-x);
+  top: 846px;
+  height: 110px;
+}
+
+.tl-scope__shape {
+  height: 110px;
+}
+
+.tl-scope svg {
+  display: block;
+  width: 100%;
+  height: 110px;
+}
+
+.tl-scope figcaption {
+  position: absolute;
+  inset: auto 0 -2px 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.tl-scope figcaption .label:first-child {
+  position: absolute;
+  left: 0;
+  bottom: 72px;
+}
+
+.tl-scope figcaption .label:last-child {
+  position: absolute;
+  right: 0;
+  bottom: 118px;
+  color: var(--fog);
+}

@@ -1,0 +1,165 @@
+.slide--cover .cover-photo {
+  position: absolute;
+  inset: 0 0 0 560px;
+}
+
+/* The photo is pre-graded: black & white with only the red robots left in colour. */
+.slide--cover .cover-photo img {
+  filter: contrast(1.08) brightness(0.62);
+}
+
+.slide--cover .cover-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, var(--ink) 0%, var(--ink) 30%, rgba(13, 13, 14, 0.82) 46%, rgba(13, 13, 14, 0.25) 72%, rgba(13, 13, 14, 0.15) 100%),
+    linear-gradient(0deg, rgba(13, 13, 14, 0.95) 0%, rgba(13, 13, 14, 0) 34%);
+}
+
+.slide--cover .cover-flow {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: visible;
+}
+
+.cover-flow__main {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.cover-flow__faint {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1;
+}
+
+.cover-station line {
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1;
+}
+
+.cover-station circle {
+  fill: var(--ink);
+  stroke: var(--accent);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+  transition: transform 500ms var(--ease-out) calc(900ms + var(--i) * 260ms);
+}
+
+.cover-station circle.is-now {
+  fill: var(--accent);
+}
+
+.is-active .cover-station circle {
+  transform: scale(1);
+}
+
+.cover-runner {
+  fill: #fff;
+  opacity: 0;
+  transition: opacity 600ms ease 2400ms;
+}
+
+.is-active .cover-runner {
+  opacity: 0.9;
+}
+
+.cover-stations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cover-station-label {
+  position: absolute;
+  top: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.cover-station-label span {
+  text-transform: none;
+}
+
+.cover-station-label b {
+  font-weight: 500;
+  color: var(--snow);
+}
+
+.cover-station-label:last-child {
+  transform: none;
+}
+
+.slide--cover .cover-text {
+  position: absolute;
+  left: var(--m-x);
+  top: 236px;
+  width: 1300px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.cover-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--f-display);
+  color: var(--snow);
+}
+
+.cover-title__a {
+  font-size: 84px;
+  font-weight: 280;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--fog);
+  padding-bottom: 6px;
+}
+
+.cover-title__b {
+  font-size: 176px;
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+  padding-bottom: 14px;
+}
+
+.cover-sub {
+  max-width: 760px;
+  font-size: 30px;
+  line-height: 1.38;
+  color: var(--fog);
+  text-wrap: balance;
+}
+
+.cover-jp {
+  position: absolute;
+  right: 104px;
+  top: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.cover-jp .jp-vertical {
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 0 14px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.8);
+}
+
+.cover-jp__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+}
