@@ -1,4 +1,4 @@
-(function(){"use strict";const T='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',H='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',b=e=>String(e).padStart(2,"0");function p(e,t={},s=""){const a=document.createElement(e);for(const[l,i]of Object.entries(t))i===!1||i==null||a.setAttribute(l,i===!0?"":i);return s&&(a.innerHTML=s),a}function j(e){const t=p("div",{class:"chrome","aria-hidden":"false"});return t.innerHTML=`
+(function(){"use strict";const T='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',j='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',b=s=>String(s).padStart(2,"0");function p(s,t={},e=""){const a=document.createElement(s);for(const[l,i]of Object.entries(t))i===!1||i==null||a.setAttribute(l,i===!0?"":i);return e&&(a.innerHTML=e),a}function H(s){const t=p("div",{class:"chrome","aria-hidden":"false"});return t.innerHTML=`
     <div class="chrome-top">
       <div class="chrome-brand"><i></i><span>Сеть малого офиса · Курсовая работа</span></div>
       <div class="chrome-chapter"><span class="num"></span><span class="name"></span></div>
@@ -13,46 +13,46 @@
       <div class="chrome-right">
         <div class="step-dots" aria-hidden="true"></div>
         <button class="menu-btn" type="button" data-action="overview" aria-label="Содержание">Содержание</button>
-        <div class="counter" aria-live="polite"><b class="cur">01</b> / ${b(e)}</div>
+        <div class="counter" aria-live="polite"><b class="cur">01</b> / ${b(s)}</div>
         <div class="nav-btns">
           <button class="nav-btn" type="button" data-action="prev" aria-label="Предыдущий слайд">${T}</button>
-          <button class="nav-btn" type="button" data-action="next" aria-label="Следующий слайд">${H}</button>
+          <button class="nav-btn" type="button" data-action="next" aria-label="Следующий слайд">${j}</button>
         </div>
       </div>
     </div>
-    <div class="progress" role="progressbar" aria-label="Прогресс презентации" aria-valuemin="1" aria-valuemax="${e}">
+    <div class="progress" role="progressbar" aria-label="Прогресс презентации" aria-valuemin="1" aria-valuemax="${s}">
       <div class="progress-fill"></div>
       <div class="progress-ticks">
-        ${Array.from({length:e},(s,a)=>`<button type="button" data-goto="${a}" aria-label="Слайд ${a+1}"></button>`).join("")}
+        ${Array.from({length:s},(e,a)=>`<button type="button" data-goto="${a}" aria-label="Слайд ${a+1}"></button>`).join("")}
       </div>
-    </div>`,t}function O(e){const t=p("div",{class:"overlay",id:"overview",role:"dialog","aria-modal":"true","aria-label":"Содержание"});return t.innerHTML=`
+    </div>`,t}function O(s){const t=p("div",{class:"overlay",id:"overview",role:"dialog","aria-modal":"true","aria-label":"Содержание"});return t.innerHTML=`
     <div class="overlay-panel">
       <div class="overlay-head">
         <h2>Содержание</h2>
         <button class="overlay-close" type="button" data-close>Закрыть · Esc</button>
       </div>
       <div class="overview-grid">
-        ${e.map((s,a)=>`
+        ${s.map((e,a)=>`
           <button class="overview-item" type="button" data-goto="${a}">
-            <span class="n">${b(a+1)} · ${s.chapter}</span>
-            <span class="t">${s.title}</span>
+            <span class="n">${b(a+1)} · ${e.chapter}</span>
+            <span class="t">${e.title}</span>
           </button>`).join("")}
       </div>
-    </div>`,t}function P(){const e=p("aside",{class:"notes",id:"notes","aria-label":"Заметки докладчика"});return e.innerHTML=`
+    </div>`,t}function P(){const s=p("aside",{class:"notes",id:"notes","aria-label":"Заметки докладчика"});return s.innerHTML=`
     <div class="notes-inner">
       <div class="notes-label">Заметки докладчика<br><span class="muted">N — скрыть</span></div>
       <div class="notes-text"></div>
-    </div>`,e}function F(){const e=[["Следующий слайд","→ · Пробел · PgDn"],["Предыдущий слайд","← · Shift+Пробел · PgUp"],["Первый / последний","Home · End"],["Содержание","O · Esc"],["Заметки докладчика","N"],["Полный экран","F"],["Источники фотографий","I"],["Эта подсказка","H · ?"]],t=p("div",{class:"overlay",id:"help",role:"dialog","aria-modal":"true","aria-label":"Управление"});return t.innerHTML=`
+    </div>`,s}function F(){const s=[["Следующий слайд","→ · Пробел · PgDn"],["Предыдущий слайд","← · Shift+Пробел · PgUp"],["Первый / последний","Home · End"],["Содержание","O · Esc"],["Заметки докладчика","N"],["Полный экран","F"],["Источники фотографий","I"],["Эта подсказка","H · ?"]],t=p("div",{class:"overlay",id:"help",role:"dialog","aria-modal":"true","aria-label":"Управление"});return t.innerHTML=`
     <div class="overlay-panel" style="width:min(820px,100%)">
       <div class="overlay-head">
         <h2>Управление</h2>
         <button class="overlay-close" type="button" data-close>Закрыть · Esc</button>
       </div>
       <div class="keys">
-        ${e.map(([s,a])=>`<div><span>${s}</span><kbd>${a}</kbd></div>`).join("")}
+        ${s.map(([e,a])=>`<div><span>${e}</span><kbd>${a}</kbd></div>`).join("")}
       </div>
       <p class="muted" style="margin-top:24px;font-size:14px">На телефоне и планшете листайте свайпом влево и вправо.</p>
-    </div>`,t}function R(e,t){const s=p("div",{class:"overlay",id:"credits",role:"dialog","aria-modal":"true","aria-label":"Источники фотографий"}),a=Object.values(e).map(l=>`
+    </div>`,t}function R(s,t){const e=p("div",{class:"overlay",id:"credits",role:"dialog","aria-modal":"true","aria-label":"Источники фотографий"}),a=Object.values(s).map(l=>`
       <li>
         <img src="${t}${l.file}" alt="" loading="lazy">
         <div>
@@ -60,21 +60,21 @@
           <span>${l.author} · ${l.license}</span><br>
           ${l.source?`<a href="${l.source}" target="_blank" rel="noopener">${l.source.replace("https://","")}</a>`:""}
         </div>
-      </li>`).join("");return s.innerHTML=`
+      </li>`).join("");return e.innerHTML=`
     <div class="overlay-panel">
       <div class="overlay-head">
         <h2>Источники фотографий</h2>
         <button class="overlay-close" type="button" data-close>Закрыть · Esc</button>
       </div>
       <ul class="credits-list">${a}</ul>
-    </div>`,s}const V=()=>window.matchMedia("(prefers-reduced-motion: reduce)").matches,I=e=>1-Math.pow(1-e,3);function x(e,t=0){const s=e.toFixed(t),[a,l]=s.split("."),i=a.length>4?a.replace(/\B(?=(\d{3})+(?!\d))/g," "):a;return l?`${i},${l}`:i}const f=new WeakMap;function W(e){e.querySelectorAll("[data-count]").forEach(t=>{const s=parseFloat(t.dataset.count),a=parseFloat(t.dataset.from??"0"),l=parseInt(t.dataset.decimals??"0",10),i=parseInt(t.dataset.duration??"1600",10),c=parseInt(t.dataset.delay??"350",10);if(cancelAnimationFrame(f.get(t)),V()){t.textContent=x(s,l);return}t.textContent=x(a,l);const r=performance.now()+c,d=$=>{const M=Math.min(1,Math.max(0,($-r)/i));t.textContent=x(a+(s-a)*I(M),l),M<1&&f.set(t,requestAnimationFrame(d))};f.set(t,requestAnimationFrame(d))})}function q(e){e.querySelectorAll("[data-count]").forEach(t=>{cancelAnimationFrame(f.get(t)),t.textContent=x(parseFloat(t.dataset.count),parseInt(t.dataset.decimals??"0",10))})}const D=1920,G=1080,Q=2600;class B{constructor(t,s,{images:a={},base:l="./"}={}){this.root=t,this.slides=s,this.images=a,this.base=l,this.index=-1,this.step=0,this.locked=!1}mount(){const{root:t,slides:s}=this;this.stage=p("div",{class:"stage","data-dir":"fwd"}),this.track=p("div",{class:"slides"}),this.sections=s.map((l,i)=>{const c=p("section",{class:`slide slide--${l.id}`,"data-theme":l.theme||"dark","data-index":i,"aria-roledescription":"слайд","aria-label":`${i+1} из ${s.length}: ${l.title}`});return c.innerHTML=l.html({base:this.base,img:this.img.bind(this)}),this.track.appendChild(c),c}),this.chrome=j(s.length),this.stage.append(this.track,this.chrome),this.overview=O(s),this.notes=P(),this.help=F(),this.credits=R(this.images,this.base),this.toast=p("div",{class:"toast",role:"status"},"→ или Пробел — дальше · H — управление"),t.append(this.stage,this.notes,this.overview,this.help,this.credits,this.toast),this.$={chapterWrap:this.chrome.querySelector(".chrome-chapter"),chapterNum:this.chrome.querySelector(".chrome-chapter .num"),chapterName:this.chrome.querySelector(".chrome-chapter .name"),counter:this.chrome.querySelector(".counter .cur"),fill:this.chrome.querySelector(".progress-fill"),progress:this.chrome.querySelector(".progress"),dots:this.chrome.querySelector(".step-dots"),prev:this.chrome.querySelector('[data-action="prev"]'),next:this.chrome.querySelector('[data-action="next"]'),notesText:this.notes.querySelector(".notes-text")},this.bind(),this.fit();const a=this.indexFromHash();return this.go(a??0,{instant:!0}),setTimeout(()=>this.toast.classList.add("is-show"),900),setTimeout(()=>this.toast.classList.remove("is-show"),5200),this.pokeIdle(),this}img(t,{alt:s,className:a="",position:l}={}){const i=this.images[t];if(!i)throw new Error(`Unknown image: ${t}`);const c=l||i.position,r=c?` style="object-position:${c}"`:"",d=a?` class="${a}"`:"";return`<img src="${this.base}${i.file}" alt="${s??i.alt}"${d} decoding="async" draggable="false"${r}>`}fit(){const t=this.root.clientWidth,s=this.root.clientHeight,a=Math.min(t/D,s/G);this.stage.style.setProperty("--scale",String(a))}stepsOf(t){return Math.max(1,this.slides[t]?.steps||1)}next(){if(this.step<this.stepsOf(this.index)-1)return this.setStep(this.step+1);this.index<this.slides.length-1&&this.go(this.index+1)}prev(){if(this.step>0)return this.setStep(this.step-1);this.index>0&&this.go(this.index-1,{step:this.stepsOf(this.index-1)-1})}go(t,{step:s=0,instant:a=!1}={}){const l=Math.max(0,Math.min(this.slides.length-1,t));if(l===this.index){this.setStep(s);return}const i=this.index,c=this.sections[i],r=this.sections[l],d=this.slides[l];this.stage.dataset.dir=l>i?"fwd":"back",c&&(c.classList.remove("is-active"),c.classList.add("is-leaving"),clearTimeout(c._leaveTimer),c._leaveTimer=setTimeout(()=>c.classList.remove("is-leaving"),750),c.setAttribute("aria-hidden","true"),c.inert=!0),r.classList.remove("is-leaving"),r.offsetWidth,a&&(r.style.transition="none"),r.classList.add("is-active"),r.removeAttribute("aria-hidden"),r.inert=!1,a&&requestAnimationFrame(()=>r.style.transition=""),this.index=l,this.step=-1,this.setStep(s,{silent:!0}),this.stage.classList.toggle("is-light",d.theme==="light"),W(r),c&&setTimeout(()=>q(c),800),d.onEnter?.(r,this),this.updateChrome(d,i===-1),this.updateHash()}setStep(t,{silent:s=!1}={}){const a=this.stepsOf(this.index)-1,l=Math.max(0,Math.min(a,t));if(l===this.step&&!s)return;this.step=l;const i=this.sections[this.index];i.dataset.step=String(l),this.slides[this.index].onStep?.(i,l,this),this.renderDots(),this.updateProgress(),this.updateNav()}updateChrome(t,s){const{chapterWrap:a,chapterNum:l,chapterName:i,counter:c,notesText:r}=this.$,d=()=>{l.textContent=b(this.index+1),i.textContent=t.chapter,a.classList.remove("is-swapping")};s?d():(a.classList.add("is-swapping"),setTimeout(d,260)),c.textContent=b(this.index+1),r.innerHTML=(t.notes||"").trim().split(/\n\s*\n/).map($=>`<p>${$.trim()}</p>`).join(""),this.overview.querySelectorAll(".overview-item").forEach(($,M)=>$.classList.toggle("is-current",M===this.index)),this.$.progress.setAttribute("aria-valuenow",String(this.index+1))}updateProgress(){const t=this.slides.length,s=this.stepsOf(this.index),a=s>1?this.step/s:0,l=(this.index+a+1)/t*100;this.$.fill.style.width=`${Math.min(100,l)}%`}renderDots(){const t=this.stepsOf(this.index);this.$.dots.innerHTML=t>1?Array.from({length:t},(s,a)=>`<i class="${a<=this.step?"on":""}"></i>`).join(""):""}updateNav(){const t=this.index===0&&this.step===0,s=this.index===this.slides.length-1&&this.step===this.stepsOf(this.index)-1;this.$.prev.disabled=t,this.$.next.disabled=s}updateHash(){const t=`#slide-${this.index+1}`;try{location.hash!==t&&history.replaceState(null,"",t)}catch{}}indexFromHash(){const t=/^#slide-(\d+)$/.exec(location.hash);if(!t)return null;const s=parseInt(t[1],10)-1;return s>=0&&s<this.slides.length?s:null}openOverlay(t){[this.overview,this.help,this.credits].forEach(a=>a!==t&&a.classList.remove("is-open")),t.classList.add("is-open"),this.activeOverlay=t;const s=t.querySelector(".is-current")||t.querySelector("[data-close]");setTimeout(()=>s?.focus({preventScroll:!0}),50)}closeOverlay(){return this.activeOverlay?(this.activeOverlay.classList.remove("is-open"),this.activeOverlay=null,!0):!1}toggleOverlay(t){this.activeOverlay===t?this.closeOverlay():this.openOverlay(t)}toggleNotes(){this.notes.classList.toggle("is-open")}async toggleFullscreen(){try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch{}}pokeIdle(){this.root.classList.remove("is-idle"),clearTimeout(this.idleTimer),this.idleTimer=setTimeout(()=>this.root.classList.add("is-idle"),Q)}bind(){window.addEventListener("resize",()=>this.fit()),window.addEventListener("hashchange",()=>{const i=this.indexFromHash();i!=null&&i!==this.index&&this.go(i)}),document.addEventListener("keydown",i=>this.onKey(i)),document.addEventListener("mousemove",()=>this.pokeIdle(),{passive:!0}),this.root.addEventListener("click",i=>{const c=i.target.closest("[data-action],[data-goto],[data-close],[data-step-to]");if(!c)return;if(c.hasAttribute("data-close"))return void this.closeOverlay();if(c.dataset.goto!=null)return this.closeOverlay(),void this.go(parseInt(c.dataset.goto,10));if(c.dataset.stepTo!=null)return void this.setStep(parseInt(c.dataset.stepTo,10));const r=c.dataset.action;r==="next"?this.next():r==="prev"?this.prev():r==="overview"?this.toggleOverlay(this.overview):r==="credits"?this.toggleOverlay(this.credits):r==="help"&&this.toggleOverlay(this.help)}),[this.overview,this.help,this.credits].forEach(i=>i.addEventListener("click",c=>{c.target===i&&this.closeOverlay()}));let t=0,s=0,a=0;this.stage.addEventListener("touchstart",i=>{const c=i.touches[0];t=c.clientX,s=c.clientY,a=Date.now()},{passive:!0}),this.stage.addEventListener("touchend",i=>{const c=i.changedTouches[0],r=c.clientX-t,d=c.clientY-s;Date.now()-a<700&&Math.abs(r)>40&&Math.abs(r)>Math.abs(d)*1.3&&(r<0?this.next():this.prev())},{passive:!0});let l=0;window.addEventListener("wheel",i=>{if(this.activeOverlay)return;const c=Math.abs(i.deltaY)>Math.abs(i.deltaX)?i.deltaY:i.deltaX;if(Math.abs(c)<24)return;const r=Date.now();r<l||(l=r+900,c>0?this.next():this.prev())},{passive:!0})}onKey(t){if(t.metaKey||t.ctrlKey||t.altKey)return;const s=t.key;if(this.pokeIdle(),s==="Escape")return this.closeOverlay()?t.preventDefault():this.notes.classList.contains("is-open")?this.toggleNotes():this.openOverlay(this.overview);if(this.activeOverlay){(s==="o"||s==="O"||s==="щ"||s==="Щ")&&this.activeOverlay===this.overview&&this.closeOverlay(),(s==="i"||s==="I"||s==="ш"||s==="Ш")&&this.activeOverlay===this.credits&&this.closeOverlay(),(s==="h"||s==="H"||s==="?"||s==="р"||s==="Р")&&this.activeOverlay===this.help&&this.closeOverlay();return}const a=document.activeElement?.tagName==="BUTTON";switch(s){case"ArrowRight":case"ArrowDown":case"PageDown":return t.preventDefault(),this.next();case"ArrowLeft":case"ArrowUp":case"PageUp":return t.preventDefault(),this.prev();case" ":case"Spacebar":return a?void 0:(t.preventDefault(),t.shiftKey?this.prev():this.next());case"Enter":return a?void 0:(t.preventDefault(),this.next());case"Home":return t.preventDefault(),this.go(0);case"End":return t.preventDefault(),this.go(this.slides.length-1)}const i={f:"fs",F:"fs",а:"fs",А:"fs",n:"notes",N:"notes",т:"notes",Т:"notes",o:"overview",O:"overview",щ:"overview",Щ:"overview",h:"help",H:"help","?":"help",р:"help",Р:"help",i:"credits",I:"credits",ш:"credits",Ш:"credits"}[s];i==="fs"?this.toggleFullscreen():i==="notes"?this.toggleNotes():i==="overview"?this.toggleOverlay(this.overview):i==="help"?this.toggleOverlay(this.help):i==="credits"&&this.toggleOverlay(this.credits)}}const w=[{x:112,year:"Раздел 1",label:"Теория"},{x:560,year:"Раздел 1.3",label:"Рынок"},{x:1010,year:"Раздел 2",label:"Проект сети"},{x:1460,year:"Итог",label:"180 378 ₽"}],U={id:"cover",chapter:"Обложка",title:"Проектирование сетевой инфраструктуры для малого бизнеса",theme:"dark",notes:`
+    </div>`,e}const V=()=>window.matchMedia("(prefers-reduced-motion: reduce)").matches,W=s=>1-Math.pow(1-s,3);function f(s,t=0){const e=s.toFixed(t),[a,l]=e.split("."),i=a.length>4?a.replace(/\B(?=(\d{3})+(?!\d))/g," "):a;return l?`${i},${l}`:i}const w=new WeakMap;function I(s){s.querySelectorAll("[data-count]").forEach(t=>{const e=parseFloat(t.dataset.count),a=parseFloat(t.dataset.from??"0"),l=parseInt(t.dataset.decimals??"0",10),i=parseInt(t.dataset.duration??"1600",10),r=parseInt(t.dataset.delay??"350",10);if(cancelAnimationFrame(w.get(t)),V()){t.textContent=f(e,l);return}t.textContent=f(a,l);const c=performance.now()+r,d=x=>{const S=Math.min(1,Math.max(0,(x-c)/i));t.textContent=f(a+(e-a)*W(S),l),S<1&&w.set(t,requestAnimationFrame(d))};w.set(t,requestAnimationFrame(d))})}function q(s){s.querySelectorAll("[data-count]").forEach(t=>{cancelAnimationFrame(w.get(t)),t.textContent=f(parseFloat(t.dataset.count),parseInt(t.dataset.decimals??"0",10))})}const D=1920,G=1080,Q=2600;class B{constructor(t,e,{images:a={},base:l="./"}={}){this.root=t,this.slides=e,this.images=a,this.base=l,this.index=-1,this.step=0,this.locked=!1}mount(){const{root:t,slides:e}=this;this.stage=p("div",{class:"stage","data-dir":"fwd"}),this.track=p("div",{class:"slides"}),this.sections=e.map((l,i)=>{const r=p("section",{class:`slide slide--${l.id}`,"data-theme":l.theme||"dark","data-index":i,"aria-roledescription":"слайд","aria-label":`${i+1} из ${e.length}: ${l.title}`});return r.innerHTML=l.html({base:this.base,img:this.img.bind(this)}),this.track.appendChild(r),r}),this.chrome=H(e.length),this.stage.append(this.track,this.chrome),this.overview=O(e),this.notes=P(),this.help=F(),this.credits=R(this.images,this.base),this.toast=p("div",{class:"toast",role:"status"},"→ или Пробел — дальше · H — управление"),t.append(this.stage,this.notes,this.overview,this.help,this.credits,this.toast),this.$={chapterWrap:this.chrome.querySelector(".chrome-chapter"),chapterNum:this.chrome.querySelector(".chrome-chapter .num"),chapterName:this.chrome.querySelector(".chrome-chapter .name"),counter:this.chrome.querySelector(".counter .cur"),fill:this.chrome.querySelector(".progress-fill"),progress:this.chrome.querySelector(".progress"),dots:this.chrome.querySelector(".step-dots"),prev:this.chrome.querySelector('[data-action="prev"]'),next:this.chrome.querySelector('[data-action="next"]'),notesText:this.notes.querySelector(".notes-text")},this.bind(),this.fit();const a=this.indexFromHash();return this.go(a??0,{instant:!0}),setTimeout(()=>this.toast.classList.add("is-show"),900),setTimeout(()=>this.toast.classList.remove("is-show"),5200),this.pokeIdle(),this}img(t,{alt:e,className:a="",position:l}={}){const i=this.images[t];if(!i)throw new Error(`Unknown image: ${t}`);const r=l||i.position,c=r?` style="object-position:${r}"`:"",d=a?` class="${a}"`:"";return`<img src="${this.base}${i.file}" alt="${e??i.alt}"${d} decoding="async" draggable="false"${c}>`}fit(){const t=this.root.clientWidth,e=this.root.clientHeight,a=Math.min(t/D,e/G);this.stage.style.setProperty("--scale",String(a))}stepsOf(t){return Math.max(1,this.slides[t]?.steps||1)}next(){if(this.step<this.stepsOf(this.index)-1)return this.setStep(this.step+1);this.index<this.slides.length-1&&this.go(this.index+1)}prev(){if(this.step>0)return this.setStep(this.step-1);this.index>0&&this.go(this.index-1,{step:this.stepsOf(this.index-1)-1})}go(t,{step:e=0,instant:a=!1}={}){const l=Math.max(0,Math.min(this.slides.length-1,t));if(l===this.index){this.setStep(e);return}const i=this.index,r=this.sections[i],c=this.sections[l],d=this.slides[l];this.stage.dataset.dir=l>i?"fwd":"back",r&&(r.classList.remove("is-active"),r.classList.add("is-leaving"),clearTimeout(r._leaveTimer),r._leaveTimer=setTimeout(()=>r.classList.remove("is-leaving"),750),r.setAttribute("aria-hidden","true"),r.inert=!0),c.classList.remove("is-leaving"),c.offsetWidth,a&&(c.style.transition="none"),c.classList.add("is-active"),c.removeAttribute("aria-hidden"),c.inert=!1,a&&requestAnimationFrame(()=>c.style.transition=""),this.index=l,this.step=-1,this.setStep(e,{silent:!0}),this.stage.classList.toggle("is-light",d.theme==="light"),I(c),r&&setTimeout(()=>q(r),800),d.onEnter?.(c,this),this.updateChrome(d,i===-1),this.updateHash()}setStep(t,{silent:e=!1}={}){const a=this.stepsOf(this.index)-1,l=Math.max(0,Math.min(a,t));if(l===this.step&&!e)return;this.step=l;const i=this.sections[this.index];i.dataset.step=String(l),this.slides[this.index].onStep?.(i,l,this),this.renderDots(),this.updateProgress(),this.updateNav()}updateChrome(t,e){const{chapterWrap:a,chapterNum:l,chapterName:i,counter:r,notesText:c}=this.$,d=()=>{l.textContent=b(this.index+1),i.textContent=t.chapter,a.classList.remove("is-swapping")};e?d():(a.classList.add("is-swapping"),setTimeout(d,260)),r.textContent=b(this.index+1),c.innerHTML=(t.notes||"").trim().split(/\n\s*\n/).map(x=>`<p>${x.trim()}</p>`).join(""),this.overview.querySelectorAll(".overview-item").forEach((x,S)=>x.classList.toggle("is-current",S===this.index)),this.$.progress.setAttribute("aria-valuenow",String(this.index+1))}updateProgress(){const t=this.slides.length,e=this.stepsOf(this.index),a=e>1?this.step/e:0,l=(this.index+a+1)/t*100;this.$.fill.style.width=`${Math.min(100,l)}%`}renderDots(){const t=this.stepsOf(this.index);this.$.dots.innerHTML=t>1?Array.from({length:t},(e,a)=>`<i class="${a<=this.step?"on":""}"></i>`).join(""):""}updateNav(){const t=this.index===0&&this.step===0,e=this.index===this.slides.length-1&&this.step===this.stepsOf(this.index)-1;this.$.prev.disabled=t,this.$.next.disabled=e}updateHash(){const t=`#slide-${this.index+1}`;try{location.hash!==t&&history.replaceState(null,"",t)}catch{}}indexFromHash(){const t=/^#slide-(\d+)$/.exec(location.hash);if(!t)return null;const e=parseInt(t[1],10)-1;return e>=0&&e<this.slides.length?e:null}openOverlay(t){[this.overview,this.help,this.credits].forEach(a=>a!==t&&a.classList.remove("is-open")),t.classList.add("is-open"),this.activeOverlay=t;const e=t.querySelector(".is-current")||t.querySelector("[data-close]");setTimeout(()=>e?.focus({preventScroll:!0}),50)}closeOverlay(){return this.activeOverlay?(this.activeOverlay.classList.remove("is-open"),this.activeOverlay=null,!0):!1}toggleOverlay(t){this.activeOverlay===t?this.closeOverlay():this.openOverlay(t)}toggleNotes(){this.notes.classList.toggle("is-open")}async toggleFullscreen(){try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch{}}pokeIdle(){this.root.classList.remove("is-idle"),clearTimeout(this.idleTimer),this.idleTimer=setTimeout(()=>this.root.classList.add("is-idle"),Q)}bind(){window.addEventListener("resize",()=>this.fit()),window.addEventListener("hashchange",()=>{const i=this.indexFromHash();i!=null&&i!==this.index&&this.go(i)}),document.addEventListener("keydown",i=>this.onKey(i)),document.addEventListener("mousemove",()=>this.pokeIdle(),{passive:!0}),this.root.addEventListener("click",i=>{const r=i.target.closest("[data-action],[data-goto],[data-close],[data-step-to]");if(!r)return;if(r.hasAttribute("data-close"))return void this.closeOverlay();if(r.dataset.goto!=null)return this.closeOverlay(),void this.go(parseInt(r.dataset.goto,10));if(r.dataset.stepTo!=null)return void this.setStep(parseInt(r.dataset.stepTo,10));const c=r.dataset.action;c==="next"?this.next():c==="prev"?this.prev():c==="overview"?this.toggleOverlay(this.overview):c==="credits"?this.toggleOverlay(this.credits):c==="help"&&this.toggleOverlay(this.help)}),[this.overview,this.help,this.credits].forEach(i=>i.addEventListener("click",r=>{r.target===i&&this.closeOverlay()}));let t=0,e=0,a=0;this.stage.addEventListener("touchstart",i=>{const r=i.touches[0];t=r.clientX,e=r.clientY,a=Date.now()},{passive:!0}),this.stage.addEventListener("touchend",i=>{const r=i.changedTouches[0],c=r.clientX-t,d=r.clientY-e;Date.now()-a<700&&Math.abs(c)>40&&Math.abs(c)>Math.abs(d)*1.3&&(c<0?this.next():this.prev())},{passive:!0});let l=0;window.addEventListener("wheel",i=>{if(this.activeOverlay)return;const r=Math.abs(i.deltaY)>Math.abs(i.deltaX)?i.deltaY:i.deltaX;if(Math.abs(r)<24)return;const c=Date.now();c<l||(l=c+900,r>0?this.next():this.prev())},{passive:!0})}onKey(t){if(t.metaKey||t.ctrlKey||t.altKey)return;const e=t.key;if(this.pokeIdle(),e==="Escape")return this.closeOverlay()?t.preventDefault():this.notes.classList.contains("is-open")?this.toggleNotes():this.openOverlay(this.overview);if(this.activeOverlay){(e==="o"||e==="O"||e==="щ"||e==="Щ")&&this.activeOverlay===this.overview&&this.closeOverlay(),(e==="i"||e==="I"||e==="ш"||e==="Ш")&&this.activeOverlay===this.credits&&this.closeOverlay(),(e==="h"||e==="H"||e==="?"||e==="р"||e==="Р")&&this.activeOverlay===this.help&&this.closeOverlay();return}const a=document.activeElement?.tagName==="BUTTON";switch(e){case"ArrowRight":case"ArrowDown":case"PageDown":return t.preventDefault(),this.next();case"ArrowLeft":case"ArrowUp":case"PageUp":return t.preventDefault(),this.prev();case" ":case"Spacebar":return a?void 0:(t.preventDefault(),t.shiftKey?this.prev():this.next());case"Enter":return a?void 0:(t.preventDefault(),this.next());case"Home":return t.preventDefault(),this.go(0);case"End":return t.preventDefault(),this.go(this.slides.length-1)}const i={f:"fs",F:"fs",а:"fs",А:"fs",n:"notes",N:"notes",т:"notes",Т:"notes",o:"overview",O:"overview",щ:"overview",Щ:"overview",h:"help",H:"help","?":"help",р:"help",Р:"help",i:"credits",I:"credits",ш:"credits",Ш:"credits"}[e];i==="fs"?this.toggleFullscreen():i==="notes"?this.toggleNotes():i==="overview"?this.toggleOverlay(this.overview):i==="help"?this.toggleOverlay(this.help):i==="credits"&&this.toggleOverlay(this.credits)}}const k=[{x:112,year:"Раздел 1",label:"Теория"},{x:560,year:"Раздел 1.3",label:"Рынок"},{x:1010,year:"Раздел 2",label:"Проект сети"},{x:1460,year:"Итог",label:"180 378 ₽"}],U={id:"cover",chapter:"Обложка",title:"Проектирование сетевой инфраструктуры для малого бизнеса",theme:"dark",notes:`
     Здравствуйте. Тема моей курсовой работы — проектирование сетевой инфраструктуры для малого бизнеса
     на оборудовании российских производителей: построение топологии, выбор моделей и расчёт бюджета.
 
     План доклада: коротко теория и рынок, затем проект сети для конкретного офиса и итоговая смета.
-  `,html:({img:e})=>`
+  `,html:({img:s})=>`
     <div class="cv-photo photo kb grain" data-r="fade" style="--i:0">
-      ${e("cover")}
+      ${s("cover")}
     </div>
     <div class="cv-shade"></div>
 
@@ -85,10 +85,10 @@
         d="M1920 740 C 1720 750, 1640 868, 1460 868"/>
       <path class="draw cv-flow__main" pathLength="1" style="--draw-delay:350ms;--draw-dur:2000ms"
         d="M112 868 H 1808"/>
-      ${w.map((t,s)=>`
-        <g class="cv-station" style="--i:${s}">
+      ${k.map((t,e)=>`
+        <g class="cv-station" style="--i:${e}">
           <line x1="${t.x}" y1="852" x2="${t.x}" y2="884"/>
-          <circle cx="${t.x}" cy="868" r="${s===w.length-1?7:4}" class="${s===w.length-1?"is-now":""}"/>
+          <circle cx="${t.x}" cy="868" r="${e===k.length-1?7:4}" class="${e===k.length-1?"is-now":""}"/>
         </g>`).join("")}
       <circle class="cv-runner" r="5">
         <animateMotion dur="7s" repeatCount="indefinite" path="M112 868 H 1808" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.45 0 0.55 1"/>
@@ -96,8 +96,8 @@
     </svg>
 
     <div class="cv-stations">
-      ${w.map((t,s)=>`
-        <div class="cv-station-label" style="left:${t.x}px;--i:${s+7}" data-r="fade">
+      ${k.map((t,e)=>`
+        <div class="cv-station-label" style="left:${t.x}px;--i:${e+7}" data-r="fade">
           <span>${t.year}</span><b>${t.label}</b>
         </div>`).join("")}
     </div>
@@ -117,28 +117,28 @@
       <div><dt>Руководитель</dt><dd>Е. Д. Волкова</dd></div>
       <div><dt>Специальность</dt><dd>09.02.06 Сетевое и системное администрирование</dd></div>
     </dl>
-  `},v=(e,t,s=10)=>`
+  `},v=(s,t,e=10)=>`
   <div class="turn">
-    <span class="turn__a" data-r="left" style="--i:${s}">${e}</span>
+    <span class="turn__a" data-r="left" style="--i:${e}">${s}</span>
     <span class="turn__line" aria-hidden="true">
       <svg viewBox="0 0 100 20" preserveAspectRatio="none"><path class="draw" pathLength="1" d="M0 10 H100" style="--draw-delay:1500ms;--draw-dur:900ms"/></svg>
       <i></i>
     </span>
-    <span class="turn__b" data-r="right" style="--i:${s+5}">${t}</span>
-  </div>`,S=(e,t=4,s=!1)=>`
-  <ul class="plist${s?" plist--num":""}">
-    ${e.map(([a,l],i)=>`
+    <span class="turn__b" data-r="right" style="--i:${e+5}">${t}</span>
+  </div>`,L=(s,t=4,e=!1)=>`
+  <ul class="plist${e?" plist--num":""}">
+    ${s.map(([a,l],i)=>`
       <li data-r style="--i:${i+t}">
-        ${s?`<em>${String(i+1).padStart(2,"0")}</em>`:"<i></i>"}
+        ${e?`<em>${String(i+1).padStart(2,"0")}</em>`:"<i></i>"}
         <div><b>${a}</b>${l?`<span>${l}</span>`:""}</div>
       </li>`).join("")}
-  </ul>`,m=(e,t,s=14,a=-2)=>`
-  <div class="meme" style="${t};--i:${s}" data-r="scale"><span style="--tilt:${a}deg">${e}</span></div>`,L=(e,t,s,a,l=12,i=2)=>`
+  </ul>`,m=(s,t,e=14,a=-2)=>`
+  <div class="meme" style="${t};--i:${e}" data-r="scale"><span style="--tilt:${a}deg">${s}</span></div>`,u=(s,t,e,a,l=12,i=2)=>`
   <figure class="memecard" style="${a};--i:${l}" data-r="scale">
     <div class="memecard__in" style="--tilt:${i}deg">
-      ${e}
+      ${s}
       ${t?`<b class="memecard__t">${t}</b>`:""}
-      ${s?`<b class="memecard__b">${s}</b>`:""}
+      ${e?`<b class="memecard__b">${e}</b>`:""}
     </div>
   </figure>`,Y=[["Сеть «как получилось»","бытовой роутер и одна сеть на всех: бухгалтерия рядом со смартфонами гостей"],["После 2022 года","западные производители ушли; параллельный импорт — без гарантии и обновлений"],["Российские линейки выросли","«Элтекс», QTECH и SNR выпускают оборудование и для небольших офисов"]],K={id:"goal",chapter:"Актуальность и цель",title:"Актуальность и цель работы",theme:"light",notes:`
     Во многих небольших офисах сеть собрана из бытового роутера и одной общей сети. Пока всё работает,
@@ -151,17 +151,17 @@
     Цель работы — спроектировать такую сеть: построить топологию, подобрать модели и рассчитать бюджет.
 
     Шутка для разрядки: на фото — не наш офис, но духовно очень близко.
-  `,html:({img:e})=>`
+  `,html:({img:s})=>`
     ${m("«и так сойдёт» — старая сеть, 2019–2026","right:136px;top:150px",12,2)}
-    ${L(e("facepalm"),"пароль от Wi-Fi","знают все клиенты","left:540px;top:596px;width:340px;height:250px",9,-3)}
+    ${u(s("facepalm"),"пароль от Wi-Fi","знают все клиенты","left:540px;top:596px;width:340px;height:250px",9,-3)}
     <div class="gl-main">
       <p class="eyebrow" data-r style="--i:1"><b>Введение</b> почему это важно</p>
       <h2 class="h1" data-r style="--i:2">Актуальность и цель</h2>
-      ${S(Y,3)}
+      ${L(Y,3)}
     </div>
 
     <figure class="gl-photo photo photo--archive kb grain" data-r="mask" style="--i:2">
-      ${e("mess")}
+      ${s("mess")}
       <figcaption class="caption"><b>Так выглядит сеть без проекта</b><br>кабели без маркировки, всё в одном сегменте</figcaption>
     </figure>
 
@@ -176,7 +176,7 @@
     </dl>
 
     ${v("Практический вопрос","Хватит ли российского оборудования и сколько это стоит")}
-  `},g=(e,t)=>`<path class="draw tp-line" pathLength="1" d="${e}" style="--draw-delay:${700+t*90}ms;--draw-dur:700ms"/>`,k=(e,t,s)=>`<circle class="tp-node" cx="${e}" cy="${t}" r="9" style="--i:${s}"/>`,X=[{key:"bus",name:"Шина",svg:()=>{const e=[70,150,230,310];return g("M24 100 H356",0)+e.map((t,s)=>g(`M${t} 100 V${s%2?150:50}`,s+1)).join("")+e.map((t,s)=>k(t,s%2?150:50,s)).join("")},plus:"Мало кабеля, простой монтаж",minus:"Обрыв кабеля останавливает всю сеть"},{key:"ring",name:"Кольцо",svg:()=>{const e=Array.from({length:6},(t,s)=>{const a=Math.PI*2*s/6-Math.PI/2;return[Math.round(190+130*Math.cos(a)),Math.round(100+72*Math.sin(a))]});return e.map((t,s)=>g(`M${t[0]} ${t[1]} L${e[(s+1)%6][0]} ${e[(s+1)%6][1]}`,s)).join("")+e.map((t,s)=>k(t[0],t[1],s)).join("")},plus:"Предсказуемая задержка передачи",minus:"Отказ одного узла нарушает работу кольца"},{key:"star",name:"Звезда",svg:()=>{const e=Array.from({length:7},(t,s)=>{const a=Math.PI*2*s/7-Math.PI/2;return[Math.round(190+140*Math.cos(a)),Math.round(100+78*Math.sin(a))]});return e.map((t,s)=>g(`M190 100 L${t[0]} ${t[1]}`,s)).join("")+e.map((t,s)=>k(t[0],t[1],s)).join("")+'<rect class="tp-hub" x="172" y="86" width="36" height="28"/>'},plus:"Обрыв линии отключает один узел, легко расширять",minus:"Зависимость от центрального устройства",pick:!0},{key:"mesh",name:"Ячеистая",svg:()=>{const e=Array.from({length:5},(a,l)=>{const i=Math.PI*2*l/5-Math.PI/2;return[Math.round(190+120*Math.cos(i)),Math.round(104+82*Math.sin(i))]});let t="",s=0;for(let a=0;a<5;a++)for(let l=a+1;l<5;l++)t+=g(`M${e[a][0]} ${e[a][1]} L${e[l][0]} ${e[l][1]}`,s++*.6);return t+e.map((a,l)=>k(a[0],a[1],l)).join("")},plus:"Высокая отказоустойчивость",minus:"Дорого и сложно: магистрали и ЦОД"}],z={id:"theory",chapter:"Топология",title:"Выбор топологии сети",theme:"dark",notes:`
+  `},y=(s,t)=>`<path class="draw tp-line" pathLength="1" d="${s}" style="--draw-delay:${700+t*90}ms;--draw-dur:700ms"/>`,M=(s,t,e)=>`<circle class="tp-node" cx="${s}" cy="${t}" r="9" style="--i:${e}"/>`,X=[{key:"bus",name:"Шина",svg:()=>{const s=[70,150,230,310];return y("M24 100 H356",0)+s.map((t,e)=>y(`M${t} 100 V${e%2?150:50}`,e+1)).join("")+s.map((t,e)=>M(t,e%2?150:50,e)).join("")},plus:"Мало кабеля, простой монтаж",minus:"Обрыв кабеля останавливает всю сеть"},{key:"ring",name:"Кольцо",svg:()=>{const s=Array.from({length:6},(t,e)=>{const a=Math.PI*2*e/6-Math.PI/2;return[Math.round(190+130*Math.cos(a)),Math.round(100+72*Math.sin(a))]});return s.map((t,e)=>y(`M${t[0]} ${t[1]} L${s[(e+1)%6][0]} ${s[(e+1)%6][1]}`,e)).join("")+s.map((t,e)=>M(t[0],t[1],e)).join("")},plus:"Предсказуемая задержка передачи",minus:"Отказ одного узла нарушает работу кольца"},{key:"star",name:"Звезда",svg:()=>{const s=Array.from({length:7},(t,e)=>{const a=Math.PI*2*e/7-Math.PI/2;return[Math.round(190+140*Math.cos(a)),Math.round(100+78*Math.sin(a))]});return s.map((t,e)=>y(`M190 100 L${t[0]} ${t[1]}`,e)).join("")+s.map((t,e)=>M(t[0],t[1],e)).join("")+'<rect class="tp-hub" x="172" y="86" width="36" height="28"/>'},plus:"Обрыв линии отключает один узел, легко расширять",minus:"Зависимость от центрального устройства",pick:!0},{key:"mesh",name:"Ячеистая",svg:()=>{const s=Array.from({length:5},(a,l)=>{const i=Math.PI*2*l/5-Math.PI/2;return[Math.round(190+120*Math.cos(i)),Math.round(104+82*Math.sin(i))]});let t="",e=0;for(let a=0;a<5;a++)for(let l=a+1;l<5;l++)t+=y(`M${s[a][0]} ${s[a][1]} L${s[l][0]} ${s[l][1]}`,e++*.6);return t+s.map((a,l)=>M(a[0],a[1],l)).join("")},plus:"Высокая отказоустойчивость",minus:"Дорого и сложно: магистрали и ЦОД"}],z={id:"theory",chapter:"Топология",title:"Выбор топологии сети",theme:"dark",notes:`
     В теоретической части я сравнил основные топологии. В офисных сетях Ethernet фактически используется
     только «звезда»: обрыв линии отключает один узел, сеть легко расширять, неисправность легко найти.
 
@@ -200,12 +200,12 @@
     </div>
 
     <div class="th-grid">
-      ${X.map((e,t)=>`
-        <article class="th-cell${e.pick?" is-pick":""}" data-r style="--i:${t+4}">
-          <svg viewBox="0 0 380 200" aria-hidden="true">${e.svg()}</svg>
-          <h3 class="h3">${e.name}${e.pick?'<span class="th-tag">выбрана</span>':""}</h3>
-          <p><span class="label">плюс</span>${e.plus}</p>
-          <p><span class="label">минус</span>${e.minus}</p>
+      ${X.map((s,t)=>`
+        <article class="th-cell${s.pick?" is-pick":""}" data-r style="--i:${t+4}">
+          <svg viewBox="0 0 380 200" aria-hidden="true">${s.svg()}</svg>
+          <h3 class="h3">${s.name}${s.pick?'<span class="th-tag">выбрана</span>':""}</h3>
+          <p><span class="label">плюс</span>${s.plus}</p>
+          <p><span class="label">минус</span>${s.minus}</p>
         </article>`).join("")}
     </div>
 
@@ -222,27 +222,27 @@
     но выбирать нужно сравнением конкретных моделей, а не по бренду.
 
     На цене QTECH сделай паузу. Правильная реакция аудитории — «окак».
-  `,html:({img:e})=>`
-    ${L(e("grumpy"),"89 087 ₽ за коммутатор?","нет.","right:112px;top:112px;width:310px;height:200px",12,3)}
+  `,html:({img:s})=>`
+    ${u(s("grumpy"),"89 087 ₽ за коммутатор?","нет.","right:112px;top:112px;width:310px;height:200px",12,3)}
     <div class="frame">
       <p class="eyebrow" data-r style="--i:1"><b>Раздел 1.3</b> коммутатор на 24 порта — три цены</p>
       <h2 class="h1 mk-h" data-r style="--i:2">Три российских производителя</h2>
     </div>
 
     <div class="mk-grid">
-      ${Z.map((t,s)=>`
-        <article class="mk-col${t.pick?" is-pick":""}" data-r style="--i:${s*2+3}">
+      ${Z.map((t,e)=>`
+        <article class="mk-col${t.pick?" is-pick":""}" data-r style="--i:${e*2+3}">
           <span class="label">${t.city}</span>
           <h3 class="h3">${t.name}</h3>
-          <div class="num-l mk-price">${t.approx?"<small>≈</small>":""}<span data-count="${t.price}" data-duration="1500" data-delay="${500+s*200}">${t.price}</span><small>₽</small></div>
-          <div class="mk-bar"><i style="--w:${(t.price/J*100).toFixed(1)}%;--bd:${900+s*200}ms"></i></div>
+          <div class="num-l mk-price">${t.approx?"<small>≈</small>":""}<span data-count="${t.price}" data-duration="1500" data-delay="${500+e*200}">${t.price}</span><small>₽</small></div>
+          <div class="mk-bar"><i style="--w:${(t.price/J*100).toFixed(1)}%;--bd:${900+e*200}ms"></i></div>
           <p class="mk-model">${t.model}</p>
           ${t.rows.map(a=>`<p class="mk-row">${a}</p>`).join("")}
         </article>`).join("")}
     </div>
 
     ${v("Устройства одного назначения, цены отличаются в разы","Выбор — по характеристикам и цене",9)}
-  `},st=[["Интернет, 1С и МФУ для всех","канал 100 Мбит/с, база и общие папки на сервере"],["Гостевой Wi-Fi отдельно от офисной сети","клиенты не видят сервер и бухгалтерию"],["VPN для директора","удалённое подключение к серверу"],["Тихое и управляемое оборудование","шкаф стоит в бывшей кладовой, администратор приходящий"]],et=Array.from({length:24},(e,t)=>`<i class="${t<12?"on":""}${t===11?" up":""}" style="--p:${t}"></i>`).join(""),at={id:"company",chapter:"Постановка задачи",title:"ООО «Новый адрес»: постановка задачи",theme:"dark",notes:`
+  `},et=[["Интернет, 1С и МФУ для всех","канал 100 Мбит/с, база и общие папки на сервере"],["Гостевой Wi-Fi отдельно от офисной сети","клиенты не видят сервер и бухгалтерию"],["VPN для директора","удалённое подключение к серверу"],["Тихое и управляемое оборудование","шкаф стоит в бывшей кладовой, администратор приходящий"]],st=Array.from({length:24},(s,t)=>`<i class="${t<12?"on":""}${t===11?" up":""}" style="--p:${t}"></i>`).join(""),at={id:"company",chapter:"Постановка задачи",title:"ООО «Новый адрес»: постановка задачи",theme:"dark",notes:`
     Практическая часть выполнена на примере условной компании — агентства недвижимости «Новый адрес»
     в Новокузнецке. В штате восемь человек, к сети подключаются десять оконечных устройств:
     восемь компьютеров, сервер и МФУ.
@@ -254,10 +254,10 @@
     Бюджет вместе с материалами и работами — не более 200 тысяч рублей.
 
     Мем про «не сам себя отключил» — отсылка к Эпштейну: неуправляемый коммутатор без журналов событий никогда не расскажет, что с ним случилось.
-  `,html:({img:e})=>`
+  `,html:({img:s})=>`
     ${m("старый коммутатор не сам себя отключил","left:1080px;top:826px",16,-2)}
     <div class="cp-photo photo photo--archive kb grain" data-r="fade" style="--i:0">
-      ${e("oldnet")}
+      ${s("oldnet")}
     </div>
     <div class="cp-shade"></div>
     <p class="cp-photo-caption caption" data-r="fade" style="--i:9"><b>Было</b> · неуправляемый коммутатор, одна сеть на всех</p>
@@ -266,7 +266,7 @@
       <p class="eyebrow" data-r style="--i:1"><b>Раздел 2.1</b> агентство недвижимости · Новокузнецк</p>
       <h2 class="h1" data-r style="--i:2">ООО «Новый адрес»</h2>
       <p class="lead cp-lead" data-r style="--i:3">Компания переезжает в новый офис и строит сеть заново.</p>
-      ${S(st,4)}
+      ${L(et,4)}
     </div>
 
     <div class="cp-numbers">
@@ -283,12 +283,12 @@
     <div class="cp-ports" data-r style="--i:9">
       <span class="label accent">Расчёт портов коммутатора</span>
       <b>12 × 1,3 ≈ 16<span class="arr"></span>модель на 24 порта</b>
-      <div class="cp-portgrid" aria-hidden="true">${et}</div>
+      <div class="cp-portgrid" aria-hidden="true">${st}</div>
       <p>10 устройств, точка доступа и маршрутизатор. С запасом 30 % нужно 16 портов; у 24-портовой модели свободна половина.</p>
     </div>
 
     ${v("Было: бытовой роутер и одна сеть на всех","Бюджет — не более 200 000 ₽",10)}
-  `},_=[["ПК-01","Директор","pc"],["ПК-02","Бухгалтер","pc"],["ПК-03","Ресепшн","pc"],["ПК-04","Менеджер","pc"],["ПК-05","Менеджер","pc"],["ПК-06","Менеджер","pc"],["ПК-07","Менеджер","pc"],["ПК-08","Юрист","pc"],["SRV-01","1С, файлы","srv"],["MFP-01","МФУ","mfp"],["AP-01","WEP-30L","ap"]],y=e=>56+e*104,E=e=>323+e*22,it=(e,t)=>e==="pc"?`<rect x="${t-22}" y="500" width="44" height="30"/><path d="M${t} 530 v9 M${t-12} 539 h24"/>`:e==="srv"?`<rect x="${t-16}" y="496" width="32" height="44"/><path d="M${t-9} 508 h18 M${t-9} 518 h18 M${t-9} 528 h18"/>`:e==="mfp"?`<rect x="${t-22}" y="510" width="44" height="24"/><path d="M${t-13} 510 v-12 h26 v12 M${t-13} 534 v8 h26 v-8"/>`:`<circle cx="${t}" cy="524" r="5" class="tg-fill"/><path d="M${t-12} 512 a17 17 0 0 1 24 0 M${t-20} 504 a28 28 0 0 1 40 0"/><path d="M${t-20} 536 h40"/>`,lt=[["VLAN 10","STAFF","192.168.10.0/24 · 8 ПК сотрудников"],["VLAN 20","SERVERS","192.168.20.0/24 · сервер и МФУ"],["VLAN 30","GUEST","192.168.30.0/24 · гостевой Wi-Fi"],["VLAN 99","MGMT","192.168.99.0/24 · управление"]],ct={id:"topology",chapter:"Топология сети",title:"Топология и логическая структура сети",theme:"light",notes:`
+  `},_=[["ПК-01","Директор","pc"],["ПК-02","Бухгалтер","pc"],["ПК-03","Ресепшн","pc"],["ПК-04","Менеджер","pc"],["ПК-05","Менеджер","pc"],["ПК-06","Менеджер","pc"],["ПК-07","Менеджер","pc"],["ПК-08","Юрист","pc"],["SRV-01","1С, файлы","srv"],["MFP-01","МФУ","mfp"],["AP-01","WEP-30L","ap"]],$=s=>56+s*104,E=s=>323+s*22,it=(s,t)=>s==="pc"?`<rect x="${t-22}" y="500" width="44" height="30"/><path d="M${t} 530 v9 M${t-12} 539 h24"/>`:s==="srv"?`<rect x="${t-16}" y="496" width="32" height="44"/><path d="M${t-9} 508 h18 M${t-9} 518 h18 M${t-9} 528 h18"/>`:s==="mfp"?`<rect x="${t-22}" y="510" width="44" height="24"/><path d="M${t-13} 510 v-12 h26 v12 M${t-13} 534 v8 h26 v-8"/>`:`<circle cx="${t}" cy="524" r="5" class="tg-fill"/><path d="M${t-12} 512 a17 17 0 0 1 24 0 M${t-20} 504 a28 28 0 0 1 40 0"/><path d="M${t-20} 536 h40"/>`,lt=[["VLAN 10","STAFF","192.168.10.0/24 · 8 ПК сотрудников"],["VLAN 20","SERVERS","192.168.20.0/24 · сервер и МФУ"],["VLAN 30","GUEST","192.168.30.0/24 · гостевой Wi-Fi"],["VLAN 99","MGMT","192.168.99.0/24 · управление"]],rt={id:"topology",chapter:"Топология сети",title:"Топология и логическая структура сети",theme:"light",notes:`
     Физическая топология — «звезда». В центре коммутатор SW1, к нему отдельными линиями подключены
     все рабочие места, сервер, МФУ и точка доступа.
 
@@ -305,8 +305,8 @@
       <p class="eyebrow" data-r style="--i:1"><b>Раздел 2.2</b> «звезда»</p>
       <h2 class="h1" data-r style="--i:2">Топология сети</h2>
       <ul class="tg-vlans">
-        ${lt.map(([e,t,s],a)=>`
-          <li data-r style="--i:${a+3}"><b><em>${e}</em>${t}</b><span>${s}</span></li>`).join("")}
+        ${lt.map(([s,t,e],a)=>`
+          <li data-r style="--i:${a+3}"><b><em>${s}</em>${t}</b><span>${e}</span></li>`).join("")}
       </ul>
       <p class="tg-note" data-r style="--i:8">Маршрутизация между VLAN — на R1, по одному транку 802.1Q.</p>
     </div>
@@ -315,7 +315,7 @@
       <!-- lines -->
       <path class="draw tg-line" pathLength="1" d="M580 92 V150" style="--draw-delay:500ms;--draw-dur:500ms"/>
       <path class="draw tg-trunk" pathLength="1" d="M580 214 V300" style="--draw-delay:900ms;--draw-dur:600ms"/>
-      ${_.map((e,t)=>`<path class="draw ${e[2]==="ap"?"tg-trunk tg-trunk--thin":"tg-line"}" pathLength="1" d="M${E(t)} 364 C ${E(t)} 440, ${y(t)} 420, ${y(t)} 492" style="--draw-delay:${1400+t*70}ms;--draw-dur:800ms"/>`).join("")}
+      ${_.map((s,t)=>`<path class="draw ${s[2]==="ap"?"tg-trunk tg-trunk--thin":"tg-line"}" pathLength="1" d="M${E(t)} 364 C ${E(t)} 440, ${$(t)} 420, ${$(t)} 492" style="--draw-delay:${1400+t*70}ms;--draw-dur:800ms"/>`).join("")}
 
       <!-- internet -->
       <g class="tg-in" style="--t:300ms">
@@ -338,18 +338,18 @@
       <!-- switch with 24 ports -->
       <g class="tg-in" style="--t:1100ms">
         <rect x="290" y="300" width="580" height="64" class="tg-box"/>
-        ${Array.from({length:24},(e,t)=>`<rect x="${E(t)-7}" y="340" width="14" height="14" class="tg-port${t<11?" on":""}${t===23?" up":""}"/>`).join("")}
+        ${Array.from({length:24},(s,t)=>`<rect x="${E(t)-7}" y="340" width="14" height="14" class="tg-port${t<11?" on":""}${t===23?" up":""}"/>`).join("")}
         <text x="306" y="326" class="tg-name">SW1 · SNR-S2985G-24T-UPS</text>
         <text x="890" y="326" class="tg-cap">коммутатор L2 · 24 × 1G</text>
         <text x="890" y="346" class="tg-cap">порты 12–23 — резерв</text>
       </g>
 
       <!-- devices -->
-      ${_.map((e,t)=>`
-        <g class="tg-in tg-dev${e[2]==="ap"?" tg-dev--ap":""}" style="--t:${1900+t*70}ms">
-          ${it(e[2],y(t))}
-          <text x="${y(t)}" y="572" text-anchor="middle" class="tg-name tg-name--s">${e[0]}</text>
-          <text x="${y(t)}" y="592" text-anchor="middle" class="tg-cap">${e[1]}</text>
+      ${_.map((s,t)=>`
+        <g class="tg-in tg-dev${s[2]==="ap"?" tg-dev--ap":""}" style="--t:${1900+t*70}ms">
+          ${it(s[2],$(t))}
+          <text x="${$(t)}" y="572" text-anchor="middle" class="tg-name tg-name--s">${s[0]}</text>
+          <text x="${$(t)}" y="592" text-anchor="middle" class="tg-cap">${s[1]}</text>
         </g>`).join("")}
 
       <!-- VLAN brackets -->
@@ -373,7 +373,7 @@
         <text x="20" y="784" class="tg-cap">VLAN 99 · MGMT · 192.168.99.0/24 — управление: R1 .1, SW1 .2, AP-01 .3</text>
       </g>
     </svg>
-  `},n=e=>20+e*80,o=e=>20+e*80,h=(e,t,s,a)=>`<path class="cb-wall" d="M${n(e)} ${o(t)} L${n(s)} ${o(a)}"/>`,rt=[["Р1 · ПК-01",12.3,2.4,"l"],["Р2 · ПК-02",8.6,.3,"b"],["Р3 · ПК-03",12.3,5.7,"l"],["Р4 · ПК-04",.2,1.6,"r"],["Р5 · ПК-05",.2,3.1,"r"],["Р6 · ПК-06",.2,4.6,"r"],["Р7 · ПК-07",.2,6.1,"r"],["Р8 · ПК-08",3.2,.3,"b"],["Р9 · МФУ",8,4.7,"b"],["Р10",7.3,3.6,"t"],["Р11 · резерв",2.6,7.8,"t"],["Р12 · резерв",12.3,7.2,"l"]],nt=([e,t,s,a],l)=>{const i=n(t),c=o(s),r=a==="l"?`x="${i-16}" y="${c+4}" text-anchor="end"`:a==="r"?`x="${i+16}" y="${c+4}"`:a==="b"?`x="${i}" y="${c+28}" text-anchor="middle"`:`x="${i}" y="${c-16}" text-anchor="middle"`;return`<g class="cb-sock" style="--t:${2200+l*90}ms"><rect x="${i-7}" y="${c-7}" width="14" height="14"/><text ${r}>${e}</text></g>`},u=(e,t,s,a)=>`<text class="cb-room" x="${n(s)}" y="${o(a)}" text-anchor="middle">${e}</text><text class="cb-area" x="${n(s)}" y="${o(a)+22}" text-anchor="middle">${t}</text>`,ot={id:"cabling",chapter:"Кабельная система",title:"План офиса и кабельная система",theme:"dark",notes:`
+  `},n=s=>20+s*80,o=s=>20+s*80,h=(s,t,e,a)=>`<path class="cb-wall" d="M${n(s)} ${o(t)} L${n(e)} ${o(a)}"/>`,ct=[["Р1 · ПК-01",12.3,2.4,"l"],["Р2 · ПК-02",8.6,.3,"b"],["Р3 · ПК-03",12.3,5.7,"l"],["Р4 · ПК-04",.2,1.6,"r"],["Р5 · ПК-05",.2,3.1,"r"],["Р6 · ПК-06",.2,4.6,"r"],["Р7 · ПК-07",.2,6.1,"r"],["Р8 · ПК-08",3.2,.3,"b"],["Р9 · МФУ",8,4.7,"b"],["Р10",7.3,3.6,"t"],["Р11 · резерв",2.6,7.8,"t"],["Р12 · резерв",12.3,7.2,"l"]],nt=([s,t,e,a],l)=>{const i=n(t),r=o(e),c=a==="l"?`x="${i-16}" y="${r+4}" text-anchor="end"`:a==="r"?`x="${i+16}" y="${r+4}"`:a==="b"?`x="${i}" y="${r+28}" text-anchor="middle"`:`x="${i}" y="${r-16}" text-anchor="middle"`;return`<g class="cb-sock" style="--t:${2200+l*90}ms"><rect x="${i-7}" y="${r-7}" width="14" height="14"/><text ${c}>${s}</text></g>`},g=(s,t,e,a)=>`<text class="cb-room" x="${n(e)}" y="${o(a)}" text-anchor="middle">${s}</text><text class="cb-area" x="${n(e)}" y="${o(a)+22}" text-anchor="middle">${t}</text>`,ot={id:"cabling",chapter:"Кабельная система",title:"План офиса и кабельная система",theme:"dark",notes:`
     На плане показано размещение шкафа, розеток и трасс кабеля. Телекоммуникационный шкаф стоит
     в серверной — бывшей кладовой. От него расходятся три трассы в кабель-канале.
 
@@ -383,7 +383,8 @@
 
     Все линии значительно короче 90 метров, то есть требование стандарта выполняется с запасом.
     Оборудование в шкафу подключено к ИБП 1000 ВА.
-  `,html:()=>`
+  `,html:({img:s})=>`
+    ${u(s("friendWifi"),"когда упал Wi-Fi","а сделка горит","left:420px;top:790px;width:264px;height:178px",12,-3)}
     <div class="cb-main">
       <p class="eyebrow" data-r style="--i:1"><b>Раздел 2.2</b> план офиса</p>
       <h2 class="h1" data-r style="--i:2">Кабельная<br>система</h2>
@@ -403,12 +404,12 @@
         ${h(5.5,2,5.8,2)}${h(6.6,2,7.5,2)}
         ${h(7.5,0,7.5,4.5)}${h(10,0,10,4.5)}
         ${h(5.5,4.5,5.6,4.5)}${h(7.4,4.5,8.9,4.5)}${h(9.7,4.5,10.9,4.5)}${h(11.7,4.5,12.5,4.5)}
-        ${u("Общий зал","≈ 44 м²",2.9,3.9)}
-        ${u("Серверная","",6.4,1.78)}
-        ${u("Коридор","≈ 5 м²",6.4,2.85)}
-        ${u("Бухгалтерия","≈ 11 м²",8.75,2.3)}
-        ${u("Кабинет","директора · ≈ 11 м²",11.1,3.4)}
-        ${u("Приёмная","≈ 25 м²",9.6,6.3)}
+        ${g("Общий зал","≈ 44 м²",2.9,3.9)}
+        ${g("Серверная","",6.4,1.78)}
+        ${g("Коридор","≈ 5 м²",6.4,2.85)}
+        ${g("Бухгалтерия","≈ 11 м²",8.75,2.3)}
+        ${g("Кабинет","директора · ≈ 11 м²",11.1,3.4)}
+        ${g("Приёмная","≈ 25 м²",9.6,6.3)}
         <text class="cb-area" x="${n(11.2)}" y="690" text-anchor="middle">вход</text>
         <text class="cb-area" x="20" y="716">12,5 × 8 м · ≈ 100 м²</text>
       </g>
@@ -430,7 +431,7 @@
         <circle cx="${n(6.5)}" cy="${o(3.6)}" r="15"/>
         <text x="${n(6.5)}" y="${o(3.6)+36}" text-anchor="middle">AP-01</text>
       </g>
-      ${rt.map(nt).join("")}
+      ${ct.map(nt).join("")}
 
       <g class="cb-in" style="--t:3300ms">
         <path class="cb-route cb-route--legend" d="M330 711 h44"/>
@@ -450,27 +451,28 @@
     Знак «≈» — ориентировочная цена: дилеры называют её только по запросу.
 
     ESR-20 мощнее, но для восьми человек это оверкилл — «нас и тут неплохо кормят».
-  `,html:()=>`
-    ${m("ESR-20 за 95 000 ₽? нас и тут неплохо кормят","right:112px;top:212px",13,2)}
+  `,html:({img:s})=>`
+    ${m("ESR-20 за 95 000 ₽? нас и тут неплохо кормят","right:380px;top:236px",13,-2)}
+    ${u(s("friendAdmin"),"приходящий админ","выбор одобряет","right:112px;top:106px;width:236px;height:208px",11,3)}
     <div class="frame">
       <p class="eyebrow" data-r style="--i:1"><b>Раздел 2.3</b> по три модели на каждую позицию</p>
       <h2 class="h1 mk-h" data-r style="--i:2">Выбранное оборудование</h2>
     </div>
 
     <div class="mk-grid eq-grid">
-      ${dt.map((e,t)=>`
-        <article class="mk-col${e.pick?" is-pick":""}" data-r style="--i:${t*2+3}">
-          <span class="label">${e.role}</span>
-          <h3 class="h3">${e.model}</h3>
-          <div class="num-l mk-price">${e.approx?"<small>≈</small>":""}<span data-count="${e.price}" data-duration="1500" data-delay="${500+t*200}">${e.price}</span><small>₽</small></div>
-          <p class="eq-why">${e.why}</p>
+      ${dt.map((t,e)=>`
+        <article class="mk-col${t.pick?" is-pick":""}" data-r style="--i:${e*2+3}">
+          <span class="label">${t.role}</span>
+          <h3 class="h3">${t.model}</h3>
+          <div class="num-l mk-price">${t.approx?"<small>≈</small>":""}<span data-count="${t.price}" data-duration="1500" data-delay="${500+e*200}">${t.price}</span><small>₽</small></div>
+          <p class="eq-why">${t.why}</p>
           <span class="label eq-alt-h">Не выбраны</span>
-          ${e.alts.map(([s,a])=>`<p class="eq-alt"><span>${s}</span><span>${a}</span></p>`).join("")}
+          ${t.alts.map(([a,l])=>`<p class="eq-alt"><span>${a}</span><span>${l}</span></p>`).join("")}
         </article>`).join("")}
     </div>
 
     ${v("Маршрутизация — на ESR-15, порты 10G не нужны","Коммутатору достаточно уровня L2",9)}
-  `},A=e=>(e/2e5*80).toFixed(2),N=[["Активное оборудование",111338,"62 %","a"],["СКС и материалы",37440,"21 %","b"],["Работы",31600,"17 %","c"]],pt={id:"budget",chapter:"Бюджет",title:"Бюджет проекта",theme:"dark",notes:`
+  `},A=s=>(s/2e5*80).toFixed(2),N=[["Активное оборудование",111338,"62 %","a"],["СКС и материалы",37440,"21 %","b"],["Работы",31600,"17 %","c"]],pt={id:"budget",chapter:"Бюджет",title:"Бюджет проекта",theme:"dark",notes:`
     Общая стоимость проекта — 180 378 рублей. Активное оборудование — около 62 %, пассивное оборудование
     и материалы — 21 %, работы — 17 %. Сумма укладывается в бюджет 200 тысяч, почти 20 тысяч остаётся
     на непредвиденные расходы.
@@ -482,8 +484,8 @@
     Цены ориентировочные, на ноябрь 2026 года; компьютеры, сервер и МФУ в смету не входят.
 
     Уложиться в бюджет — rare W. А вариант с MES2324 — это L на 31 540 рублей.
-  `,html:({img:e})=>`
-    ${L(e("catpc"),"главбух проверяет смету","замечаний нет","right:112px;top:286px;width:330px;height:236px",10,2)}
+  `,html:({img:s})=>`
+    ${u(s("catpc"),"главбух проверяет смету","замечаний нет","right:112px;top:286px;width:330px;height:236px",10,2)}
     ${m("уложились в бюджет — rare W","right:470px;top:300px",13,-2)}
     <div class="frame">
       <p class="eyebrow" data-r style="--i:1"><b>Раздел 2.3</b> смета: оборудование, материалы, работы</p>
@@ -501,10 +503,10 @@
       <div class="bd-row" data-r="fade" style="--i:5">
         <span class="label">Проект</span>
         <div class="bd-bar">
-          ${N.map(([,t,,s],a)=>`<i class="bd-seg bd-seg--${s}" style="width:${A(t)}%;--bd:${900+a*350}ms"></i>`).join("")}
+          ${N.map(([,t,,e],a)=>`<i class="bd-seg bd-seg--${e}" style="width:${A(t)}%;--bd:${900+a*350}ms"></i>`).join("")}
         </div>
         <div class="bd-legend">
-          ${N.map(([t,s,a],l)=>`<div style="width:${A(s)}%"><span class="label">${t}</span><b>${s.toLocaleString("ru-RU").replace(/ /g," ")} ₽ · ${a}</b></div>`).join("")}
+          ${N.map(([t,e,a],l)=>`<div style="width:${A(e)}%"><span class="label">${t}</span><b>${e.toLocaleString("ru-RU").replace(/ /g," ")} ₽ · ${a}</b></div>`).join("")}
         </div>
       </div>
 
@@ -518,7 +520,7 @@
     </div>
 
     ${v("С Eltex MES2324 бюджет превышен на 31 540 ₽","Поэтому в сети два производителя",12)}
-  `},mt=[["«Звезда» со свёрнутым ядром","один маршрутизатор и один управляемый коммутатор"],["Четыре VLAN","гостевой Wi-Fi изолирован межсетевым экраном"],["Кабельная система из 12 линий","половина портов коммутатора свободна"],["180 378 ₽","в пределах бюджета 200 000 ₽"]],vt=[U,K,z,tt,at,ct,ot,ht,pt,{id:"conclusion",chapter:"Заключение",title:"Заключение",theme:"dark",notes:`
+  `},mt=[["«Звезда» со свёрнутым ядром","один маршрутизатор и один управляемый коммутатор"],["Четыре VLAN","гостевой Wi-Fi изолирован межсетевым экраном"],["Кабельная система из 12 линий","половина портов коммутатора свободна"],["180 378 ₽","в пределах бюджета 200 000 ₽"]],vt=[U,K,z,tt,at,rt,ot,ht,pt,{id:"conclusion",chapter:"Заключение",title:"Заключение",theme:"dark",notes:`
     Цель работы достигнута, все задачи решены. Спроектирована сеть с топологией «звезда», четырьмя VLAN
     и изолированной гостевой сетью, рассчитана кабельная система из 12 линий, подобраны модели оборудования,
     стоимость проекта укладывается в бюджет.
@@ -530,17 +532,18 @@
     Спасибо за внимание, готов ответить на вопросы.
 
     Закончи спокойно, как сигма: цель достигнута, бюджет цел, аура нафармлена.
-  `,html:({img:e})=>`
+  `,html:({img:s})=>`
     ${m("ауры нафармлено: 180 378","right:112px;top:150px",15,2)}
+    ${u(s("friendDark"),"свет отключили","ИБП держит сеть","right:112px;top:214px;width:270px;height:192px",12,2)}
     <figure class="fn-photo photo photo--archive kb grain" data-r="mask" style="--i:0">
-      ${e("patch")}
+      ${s("patch")}
       <figcaption class="caption"><b>Патч-панель</b><br>каждая линия приходит на свой порт</figcaption>
     </figure>
 
     <div class="fn-main">
       <p class="eyebrow" data-r style="--i:1"><b>Итоги</b> цель достигнута</p>
       <h2 class="h1" data-r style="--i:2">Заключение</h2>
-      ${S(mt,3,!0)}
+      ${L(mt,3,!0)}
       <div class="fn-next" data-r style="--i:8">
         <span class="label">Развитие без замены оборудования</span>
         <div class="chips">
@@ -552,4 +555,4 @@
       <p class="fn-final" data-r style="--i:10">Офисную сеть можно целиком собрать на&nbsp;российском оборудовании.</p>
       <p class="fn-thanks label" data-r="fade" style="--i:13"><i class="pulse"></i>Спасибо за внимание</p>
     </div>
-  `}],C={cover:{file:"images/rack-rear.jpg",alt:"Задняя сторона серверной стойки с кабелями",title:"Задняя сторона стойки в дата-центре NERSC",author:"Derrick Coetzee",license:"CC0",source:"https://commons.wikimedia.org/wiki/File:Rear_of_rack_at_NERSC_data_center_-_closeup.jpg",position:"50% 50%"},mess:{file:"images/cable-spaghetti.jpg",alt:"Серверная стойка с перепутанными сетевыми кабелями",title:"Стойка с «лапшой» из сетевых кабелей",author:"Kim Scarborough",license:"CC BY-SA 2.0",source:"https://commons.wikimedia.org/wiki/File:Server_Rack_with_Spaghetti-Like_Mass_of_Network_Cables.jpg",position:"50% 45%"},oldnet:{file:"images/unmanaged-switch.jpg",alt:"Небольшой неуправляемый коммутатор на пять портов с подключёнными кабелями",title:"Неуправляемый гигабитный коммутатор на 5 портов",author:"Simon A. Eugster",license:"CC BY-SA 3.0",source:"https://commons.wikimedia.org/wiki/File:Netgear_Gigabit_Switch_5-port.jpg",position:"50% 50%"},patch:{file:"images/patch-panel.jpg",alt:"Патч-панель Ethernet с подключёнными патч-кордами",title:"Патч-панель Ethernet",author:"Kbh3rd",license:"CC BY 4.0",source:"https://commons.wikimedia.org/wiki/File:Ethernet_Patch_Panel_20171121_130458.jpg",position:"50% 50%"},grumpy:{file:"images/grumpy-cat.jpg",alt:"Недовольная кошка Grumpy Cat",title:"Grumpy Cat",author:"Gage Skidmore",license:"CC BY-SA 2.0",source:"https://commons.wikimedia.org/wiki/File:Grumpy_Cat_(14351394877).jpg",position:"50% 60%"},catpc:{file:"images/cat-computer.jpg",alt:"Кошка сидит у компьютера",title:"Кошка и компьютер",author:"dougwoods",license:"CC BY 2.0",source:"https://commons.wikimedia.org/wiki/File:Midge_cat_and_computer.jpg",position:"50% 40%"},facepalm:{file:"images/facepalm.jpg",alt:"Статуя, закрывающая лицо рукой",title:"Статуя «Каин» в саду Тюильри («фейспалм»)",author:"Alex E. Proimos",license:"CC BY 2.0",source:"https://commons.wikimedia.org/wiki/File:Paris_Tuileries_Garden_Facepalm_statue.jpg",position:"50% 25%"}},ut=document.getElementById("app");function gt(){const e="./",t=Object.values(C).map(l=>new Promise(i=>{const c=new Image;c.onload=c.onerror=i,c.src=`${e}${l.file}`})),s=document.fonts?document.fonts.ready:Promise.resolve(),a=new Promise(l=>setTimeout(l,2500));return Promise.race([Promise.all([...t,s]),a])}gt().then(()=>{const e=new B(ut,vt,{images:C,base:"./"}).mount();window.__deck=e})})();
+  `}],C={cover:{file:"images/rack-rear.jpg",alt:"Задняя сторона серверной стойки с кабелями",title:"Задняя сторона стойки в дата-центре NERSC",author:"Derrick Coetzee",license:"CC0",source:"https://commons.wikimedia.org/wiki/File:Rear_of_rack_at_NERSC_data_center_-_closeup.jpg",position:"50% 50%"},mess:{file:"images/cable-spaghetti.jpg",alt:"Серверная стойка с перепутанными сетевыми кабелями",title:"Стойка с «лапшой» из сетевых кабелей",author:"Kim Scarborough",license:"CC BY-SA 2.0",source:"https://commons.wikimedia.org/wiki/File:Server_Rack_with_Spaghetti-Like_Mass_of_Network_Cables.jpg",position:"50% 45%"},oldnet:{file:"images/unmanaged-switch.jpg",alt:"Небольшой неуправляемый коммутатор на пять портов с подключёнными кабелями",title:"Неуправляемый гигабитный коммутатор на 5 портов",author:"Simon A. Eugster",license:"CC BY-SA 3.0",source:"https://commons.wikimedia.org/wiki/File:Netgear_Gigabit_Switch_5-port.jpg",position:"50% 50%"},patch:{file:"images/patch-panel.jpg",alt:"Патч-панель Ethernet с подключёнными патч-кордами",title:"Патч-панель Ethernet",author:"Kbh3rd",license:"CC BY 4.0",source:"https://commons.wikimedia.org/wiki/File:Ethernet_Patch_Panel_20171121_130458.jpg",position:"50% 50%"},grumpy:{file:"images/grumpy-cat.jpg",alt:"Недовольная кошка Grumpy Cat",title:"Grumpy Cat",author:"Gage Skidmore",license:"CC BY-SA 2.0",source:"https://commons.wikimedia.org/wiki/File:Grumpy_Cat_(14351394877).jpg",position:"50% 60%"},catpc:{file:"images/cat-computer.jpg",alt:"Кошка сидит у компьютера",title:"Кошка и компьютер",author:"dougwoods",license:"CC BY 2.0",source:"https://commons.wikimedia.org/wiki/File:Midge_cat_and_computer.jpg",position:"50% 40%"},facepalm:{file:"images/facepalm.jpg",alt:"Статуя, закрывающая лицо рукой",title:"Статуя «Каин» в саду Тюильри («фейспалм»)",author:"Alex E. Proimos",license:"CC BY 2.0",source:"https://commons.wikimedia.org/wiki/File:Paris_Tuileries_Garden_Facepalm_statue.jpg",position:"50% 25%"},friendAdmin:{file:"images/friend-admin.jpg",alt:"Парень в очках улыбается",title:"Мем-карточка «Приходящий админ»",author:"личное фото",license:"с согласия",source:""},friendWifi:{file:"images/friend-wifi.jpg",alt:"Парень кричит в камеру",title:"Мем-карточка «Когда упал Wi-Fi»",author:"личное фото",license:"с согласия",source:""},friendDark:{file:"images/friend-dark.jpg",alt:"Тёмное селфи с жестом «мир»",title:"Мем-карточка «Свет отключили»",author:"личное фото",license:"с согласия",source:""}},ut=document.getElementById("app");function gt(){const s="./",t=Object.values(C).map(l=>new Promise(i=>{const r=new Image;r.onload=r.onerror=i,r.src=`${s}${l.file}`})),e=document.fonts?document.fonts.ready:Promise.resolve(),a=new Promise(l=>setTimeout(l,2500));return Promise.race([Promise.all([...t,e]),a])}gt().then(()=>{const s=new B(ut,vt,{images:C,base:"./"}).mount();window.__deck=s})})();
